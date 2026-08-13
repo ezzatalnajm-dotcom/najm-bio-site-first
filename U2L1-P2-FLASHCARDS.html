@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فلاش كارت — الوحدة 2 الدرس 1 (الجزء 2) الدم واللمف | أ. عزت نجم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:       #0d9e6e;
+  --green-light: #e6f7f2;
+  --green-dark:  #07694a;
+  --gold:        #c8961a;
+  --gold-light:  #fdf6e3;
+  --navy:        #0f2744;
+  --navy-mid:    #1a3d6e;
+  --surface:     #ffffff;
+  --surface2:    #f7f9fc;
+  --border:      #e2e8f0;
+  --text:        #1a202c;
+  --text2:       #4a5568;
+  --text3:       #718096;
+  --shadow:      0 4px 24px rgba(15,39,68,.10);
+  --shadow-card: 0 8px 40px rgba(15,39,68,.13);
+  --radius:      16px;
+  --radius-sm:   10px;
+}
+body.dark-mode {
+  --surface:     #1a202c;
+  --surface2:    #171923;
+  --text:        #f7fafc;
+  --text2:       #e2e8f0;
+  --text3:       #a0aec0;
+  --border:      #2d3748;
+  --shadow:      0 4px 24px rgba(0,0,0,.3);
+  --shadow-card: 0 8px 40px rgba(0,0,0,.4);
+  --navy:        #0d1522;
+  --navy-mid:    #1a2a44;
+  --green-light: #1c3d31;
+  --gold-light:  #3a2e15;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  background: var(--surface2);
+  color: var(--text);
+  min-height: 100vh;
+  direction: rtl;
+  transition: background 0.3s, color 0.3s;
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e5799 100%);
+  padding: 2.5rem 1.5rem 3.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.hero::before {
+  content: '🩸';
+  position: absolute;
+  font-size: 120px;
+  opacity: 0.04;
+  top: -20px;
+  right: -20px;
+  animation: spin 8s linear infinite;
+}
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+body.dark-mode .hero { background: linear-gradient(135deg, #091220 0%, #112240 100%); }
+.hero-badge {
+  display: inline-block;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 16px;
+  border-radius: 99px;
+  margin-bottom: 1rem;
+}
+.hero h1 { font-size: clamp(22px, 5vw, 36px); font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: .5rem; }
+.hero h1 span { color: #5ee8b4; }
+.hero p { font-size: 15px; color: rgba(255,255,255,.7); margin-bottom: 1rem; }
+.hero-contact {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+.hero-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 13px;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 99px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+.hero-contact a:hover { background: rgba(255,255,255,0.25); transform: scale(1.03); }
+.hero-contact a.whatsapp { 
+  background: rgba(37, 211, 102, 0.2);
+  border-color: #25d366;
+}
+.hero-contact a.whatsapp:hover { background: #25d366; color: #fff; }
+.hero-contact a.call { 
+  background: rgba(52, 152, 219, 0.2);
+  border-color: #3498db;
+}
+.hero-contact a.call:hover { background: #3498db; color: #fff; }
+.hero-contact a.telegram { 
+  background: rgba(0, 136, 204, 0.2);
+  border-color: #0088cc;
+}
+.hero-contact a.telegram:hover { background: #0088cc; color: #fff; }
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: .5rem;
+}
+.hero-stat { text-align: center; }
+.hero-stat .num { font-size: 28px; font-weight: 900; color: #5ee8b4; display: block; }
+.hero-stat .lbl { font-size: 12px; color: rgba(255,255,255,.6); }
+.theme-btn {
+  position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; transition: 0.2s;
+}
+.theme-btn:hover { background: rgba(255,255,255,0.3); }
+
+.container { max-width: 780px; margin: -20px auto 0; padding: 0 1rem 3rem; position: relative; z-index: 10; }
+
+.tabs-wrap { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); transition: 0.3s; }
+.tabs-label { font-size: 12px; color: var(--text3); margin-bottom: .6rem; font-weight: 600; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text2); font-size: 13px; font-family: inherit; cursor: pointer; transition: 0.2s; font-weight: 500; }
+.tab:hover { border-color: var(--green); color: var(--green); }
+.tab.active { background: var(--green); border-color: var(--green); color: #fff; font-weight: 700; }
+.tab.fav-tab { border-color: var(--gold); color: var(--gold); }
+.tab.fav-tab.active { background: var(--gold); color: #fff; }
+
+.progress-wrap { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); transition: 0.3s; }
+.progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; }
+.progress-counter { font-size: 13px; color: var(--text2); font-weight: 600; }
+.progress-pct { font-size: 13px; color: var(--green); font-weight: 700; }
+.progress-bar-bg { background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; border: 1px solid var(--border); }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), #5ee8b4); border-radius: 99px; transition: width .5s ease; }
+.stats-row { display: flex; gap: 8px; margin-top: .75rem; flex-wrap: wrap; }
+.stat-pill { flex: 1; border-radius: var(--radius-sm); padding: 8px 4px; text-align: center; border: 1px solid; min-width: 60px; }
+.stat-pill.correct { background: var(--green-light); border-color: #a3d9bf; color: var(--green-dark); }
+.stat-pill.wrong   { background: rgba(239,68,68,0.1); border-color: #fca5a5; color: #ef4444; }
+.stat-pill.timer   { background: var(--surface2); border-color: var(--border); color: var(--text); }
+.stat-pill .num { font-size: 20px; font-weight: 900; display: block; }
+.stat-pill .lbl { font-size: 11px; font-weight: 600; }
+
+.card-scene { perspective: 1200px; margin: 0 auto 1.25rem; height: 260px; cursor: pointer; user-select: none; }
+.card-scene:active .card-inner { transform: scale(.985) rotateY(var(--flip,0deg)); }
+.card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.4,0,.2,1); --flip: 0deg; }
+.card-inner.flipped { --flip: 180deg; transform: rotateY(180deg); }
+.card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: var(--radius); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; box-shadow: var(--shadow-card); background: var(--surface); transition: 0.3s; }
+.card-back { background: var(--green-light); transform: rotateY(180deg); border-color: #a3d9bf; }
+.card-badge { position: absolute; top: 14px; right: 14px; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+.card-front .card-badge { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.card-back  .card-badge { background: rgba(255,255,255,0.5); color: var(--green-dark); border: 1px solid #a3d9bf; }
+
+.card-cat { 
+  position: absolute; 
+  top: 14px; 
+  left: 14px; 
+  font-size: 11px; 
+  font-weight: 700; 
+  color: var(--text3); 
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface2);
+  padding: 3px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  z-index: 5;
+}
+.card-cat .icon { font-size: 13px; }
+body.dark-mode .card-cat { background: var(--surface); }
+
+.fav-btn { 
+  position: absolute; 
+  bottom: 12px; 
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px; 
+  color: var(--border); 
+  cursor: pointer; 
+  transition: 0.2s; 
+  z-index: 20; 
+  padding: 3px 14px;
+  line-height: 1.4;
+  background: var(--surface2);
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  opacity: 0.5;
+  font-family: inherit;
+}
+.fav-btn:hover { transform: translateX(-50%) scale(1.1); opacity: 1; }
+.fav-btn.active { 
+  color: var(--gold); 
+  background: var(--gold-light);
+  border-color: var(--gold);
+  opacity: 1;
+  text-shadow: 0 0 10px rgba(200,150,26,0.3);
+  animation: starPulse 0.4s ease; 
+}
+@keyframes starPulse { 0%{transform:translateX(-50%) scale(1)} 50%{transform:translateX(-50%) scale(1.3)} 100%{transform:translateX(-50%) scale(1)} }
+
+.card-icon { display: none; }
+
+.card-q { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.65; max-width: 560px; margin-top: 8px; }
+.card-a { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.8; max-width: 560px; }
+.card-hint { margin-top: .75rem; font-size: 12px; color: var(--green-dark); background: rgba(13,158,110,.1); padding: 5px 12px; border-radius: 99px; border: 1px solid rgba(13,158,110,.2); max-width: 500px; }
+body.dark-mode .card-hint { color: #5ee8b4; }
+
+.flip-hint { 
+  text-align: center; 
+  font-size: 13px; 
+  color: var(--text2); 
+  margin-bottom: .75rem; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 8px; 
+  font-weight: 600;
+  background: var(--surface);
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1px dashed var(--border);
+}
+.flip-hint .icon { font-size: 18px; }
+.flip-hint .highlight { color: var(--green); font-weight: 700; }
+
+.feedback-row { 
+  display: flex; 
+  gap: 10px; 
+  justify-content: center; 
+  margin-bottom: 1rem; 
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.feedback-row.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.btn-feedback { flex: 1; max-width: 200px; padding: 12px; border-radius: var(--radius-sm); border: 2px solid; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: 0.2s; }
+.btn-correct { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+.btn-correct:hover { background: var(--green); color: #fff; }
+.btn-wrong { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
+.btn-wrong:hover { background: #ef4444; color: #fff; }
+
+.nav-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.btn { padding: 9px 18px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; }
+.btn:hover { border-color: var(--green); color: var(--green); }
+.btn-primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.btn-primary:hover { background: var(--navy-mid); }
+.btn-danger { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
+
+.done-screen { display: none; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-card); padding: 2.5rem 1.5rem; text-align: center; margin-bottom: 1.25rem; animation: fadeUp .5s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }
+.done-trophy { font-size: 56px; margin-bottom: .5rem; }
+.done-screen h2 { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: .25rem; }
+.done-screen .done-subtitle { font-size: 15px; color: var(--text3); font-weight: 600; margin-bottom: .5rem; }
+.done-score-wrap { display: inline-flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #5ee8b4); margin: 1rem auto; box-shadow: 0 8px 24px rgba(13,158,110,.25); }
+.done-score { font-size: 34px; font-weight: 900; color: #fff; }
+.done-detail { 
+  display: flex; 
+  gap: 8px; 
+  justify-content: center; 
+  margin-bottom: 1.5rem; 
+  flex-wrap: wrap; 
+  background: var(--surface2);
+  padding: 12px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.done-pill { 
+  padding: 6px 14px; 
+  border-radius: 99px; 
+  font-size: 13px; 
+  font-weight: 700; 
+  border: 1px solid;
+  background: var(--surface);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.done-pill .num { font-weight: 900; font-size: 15px; }
+.done-msg { font-size: 15px; color: var(--text2); margin-bottom: 0.5rem; font-weight: 600; }
+
+.done-signature {
+  margin: 0.5rem auto 0.5rem;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--gold-light);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gold);
+  line-height: 1.8;
+  direction: rtl;
+  display: inline-block;
+  width: 100%;
+  max-width: 400px;
+}
+body.dark-mode .done-signature {
+  background: var(--surface);
+  border-color: var(--gold);
+}
+
+@media (max-width: 500px) {
+  .card-q { font-size: 14px; }
+  .card-a { font-size: 13px; }
+  .hero h1 { font-size: 20px; }
+  .stat-pill .num { font-size: 18px; }
+  .fav-btn { bottom: 8px; font-size: 17px; padding: 2px 12px; }
+  .hero-contact a { font-size: 11px; padding: 4px 10px; }
+  .card-cat { font-size: 10px; padding: 2px 10px; top: 10px; left: 10px; }
+  .done-screen h2 { font-size: 18px; }
+  .done-pill { font-size: 11px; padding: 4px 10px; }
+  .done-score-wrap { width: 80px; height: 80px; }
+  .done-score { font-size: 26px; }
+  .done-signature { font-size: 13px; padding: 8px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <button class="theme-btn" onclick="toggleTheme()" title="الوضع الليلي">🌙</button>
+  <div class="hero-badge">⭐ أ. عزت نجم الأحياء — النجم لأسئلة ثانوية عامة</div>
+  <h1>فلاش كارت<br><span>الوحدة 2 الدرس 1 (الجزء 2) الدم واللمف</span></h1>
+  <p>فسيولوجيا الدم — أحياء ثانوية عامة</p>
+  
+  <div class="hero-contact">
+    <a href="tel:77107247" class="call">📞 اتصال</a>
+    <a href="https://wa.me/97177107247" target="_blank" class="whatsapp">💬 واتساب</a>
+    <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="telegram">✈️ تليجرام</a>
+  </div>
+  
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num" id="totalCardsNum">64</span><span class="lbl">بطاقة</span></div>
+    <div class="hero-stat"><span class="num">6</span><span class="lbl">أقسام</span></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs-wrap">
+    <div class="tabs-label">📂 اختر القسم</div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-counter" id="counter">السؤال 1 من 64</span>
+      <span class="progress-pct" id="pct">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="pbar" style="width:0%"></div></div>
+    <div class="stats-row">
+      <div class="stat-pill correct"><span class="num" id="sc">0</span><span class="lbl">✓ صحيح</span></div>
+      <div class="stat-pill wrong"><span class="num" id="sw">0</span><span class="lbl">✗ خطأ</span></div>
+      <div class="stat-pill timer"><span class="num" id="timerDisp">00:00</span><span class="lbl">⏱️ الوقت</span></div>
+      <div class="stat-pill timer"><span class="num" id="st">64</span><span class="lbl">متبقي</span></div>
+    </div>
+  </div>
+
+  <div class="card-scene" id="cardScene" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front">
+        <span class="card-cat" id="cardCat">
+          <span class="icon">🩸</span>
+          <span id="catText"></span>
+        </span>
+        <span class="card-badge">❓ سؤال</span>
+        <button class="fav-btn" id="favBtn1" onclick="toggleFav(event)" title="أضف للمفضلة">⭐</button>
+        <div class="card-q" id="qText"></div>
+      </div>
+      <div class="card-face card-back">
+        <span class="card-cat" id="cardCat2">
+          <span class="icon">🩸</span>
+          <span id="catText2"></span>
+        </span>
+        <span class="card-badge">✅ إجابة</span>
+        <button class="fav-btn" id="favBtn2" onclick="toggleFav(event)" title="أضف للمفضلة">⭐</button>
+        <div class="card-a" id="aText"></div>
+        <div class="card-hint" id="hText"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip-hint">
+    <span class="icon">🗣️</span>
+    <span>أجب <span class="highlight">شفهياً</span> أولاً، ثم اضغط على البطاقة</span>
+    <span style="color:var(--text3);font-weight:400;">|</span>
+    <span style="font-size:12px;color:var(--text3);font-weight:400;">⬅️ اضغط للقلب</span>
+  </div>
+
+  <div class="feedback-row" id="fbRow">
+    <button class="btn-feedback btn-correct" onclick="mark(true)">✓ أعرفها</button>
+    <button class="btn-feedback btn-wrong" onclick="mark(false)">✗ لا أعرفها</button>
+  </div>
+
+  <div class="nav-row" style="margin-bottom:1rem">
+    <button class="btn" onclick="next()">→ التالي</button>
+    <button class="btn" onclick="shuffle()">🔀 ترتيب عشوائي</button>
+    <button class="btn" onclick="prev()">← السابق</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-primary" onclick="resetAll()">🔁 إعادة البدء</button>
+    <button class="btn btn-danger" onclick="clearProgress()">🗑️ مسح التقدم</button>
+    <button class="btn btn-danger" id="reviewWrongBtn" onclick="reviewWrong()" style="display:none">🔴 راجع أخطاءك</button>
+  </div>
+
+  <div class="done-screen" id="doneScreen">
+    <div class="done-trophy">🏆</div>
+    <h2>أحسنت! انتهيت من جميع البطاقات</h2>
+    <div class="done-subtitle" id="doneTitle">الوحدة 2 الدرس 1 (الجزء 2) الدم واللمف - جميع الأقسام</div>
+    
+    <div class="done-score-wrap"><div class="done-score" id="dScore">0%</div></div>
+    
+    <div class="done-detail">
+      <div class="done-pill" style="border-color:var(--text3);color:var(--text)">
+        📊 الإجمالي: <span class="num" id="dTotal">0</span>
+      </div>
+      <div class="done-pill" style="border-color:var(--green);color:var(--green)">
+        ✅ صحيح: <span class="num" id="dC">0</span>
+      </div>
+      <div class="done-pill" style="border-color:#ef4444;color:#ef4444">
+        ❌ خطأ: <span class="num" id="dW">0</span>
+      </div>
+      <div class="done-pill" style="border-color:var(--gold);color:var(--gold)">
+        ⭐ المفضلة: <span class="num" id="dFav">0</span>
+      </div>
+      <div class="done-pill" style="border-color:var(--text3);color:var(--text)">
+        ⏱️ الوقت: <span class="num" id="dT">00:00</span>
+      </div>
+    </div>
+    
+    <div class="done-msg" id="dMsg"></div>
+    
+    <div class="done-signature">
+      ✨ تمنياتي بالسداد والتوفيق ✨<br>
+      أ. عزت نجم الأحياء 💫💫
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:0.5rem;">
+      <button class="btn btn-primary" onclick="resetAll()">🔁 أعد التدريب</button>
+      <button class="btn btn-danger" id="reviewWrongBtnDone" onclick="reviewWrong()" style="display:none">🔴 راجع ما لم تعرفه</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ALL = [
+// ─── منحنى تفكك الهيموجلوبين ─── 12 بطاقة
+{cat:"منحنى التفكك", q:"ما هو شكل منحنى تفكك الهيموجلوبين؟", a:"شكل سيني (ميله ليس ثابتاً).", h:"شكل سيني."},
+{cat:"منحنى التفكك", q:"ماذا يحدث في الجزء الأول من منحنى التفكك (PO₂ < 10 mmHg)؟", a:"الميل صغير، ومعدل ارتباط Hb بالأكسجين بطيء.", h:"ميل صغير."},
+{cat:"منحنى التفكك", q:"ماذا يحدث في الجزء الثاني من منحنى التفكك (PO₂ < 50 mmHg)؟", a:"يزداد الميل، وارتباط Hb بـ O₂ يزداد بشدة.", h:"ارتباط شديد."},
+{cat:"منحنى التفكك", q:"ماذا يحدث في الجزء الأخير من منحنى التفكك (PO₂ > 50 mmHg)؟", a:"نسبة إشباع Hb مرتفعة، ومعدل الارتباط يبقى ثابتاً تقريباً.", h:"إشباع مرتفع."},
+{cat:"منحنى التفكك", q:"ما هو الارتباط التعاوني (Cooperative binding)؟", a:"ارتباط جزيء الأكسجين الأول بالهيموجلوبين يكشف مواقع ربط إضافية ويسرع ربط الجزيئات الأخرى.", h:"ارتباط يكشف مواقع أخرى."},
+{cat:"منحنى التفكك", q:"ماذا يحدث للهيموجلوبين عندما يكون PO₂ مرتفعاً (كما في الرئتين)؟", a:"تزيد قابلية ارتباط الهيموجلوبين بالأكسجين (انجذاب عالي).", h:"ارتباط عالي."},
+{cat:"منحنى التفكك", q:"ماذا يحدث للهيموجلوبين عندما يكون PO₂ منخفضاً (في أنسجة الجسم)؟", a:"تنخفض قابلية ارتباط الهيموجلوبين بالأكسجين، فيتحرر الأكسجين.", h:"إطلاق الأكسجين."},
+{cat:"منحنى التفكك", q:"كيف تؤثر زيادة PO₂ على ارتباط الهيموجلوبين بالأكسجين؟", a:"تزيد الارتباط بالأكسجين.", h:"زيادة الارتباط."},
+{cat:"منحنى التفكك", q:"كيف يؤثر انخفاض PO₂ على ارتباط الهيموجلوبين بالأكسجين؟", a:"يزيد إطلاق الأكسجين.", h:"زيادة الإطلاق."},
+{cat:"منحنى التفكك", q:"ما هو الانجذاب العالي (High affinity) للهيموجلوبين؟", a:"قدرة الهيموجلوبين على الارتباط بالأكسجين عند PO₂ المرتفع.", h:"ارتباط عند PO₂ مرتفع."},
+{cat:"منحنى التفكك", q:"ماذا يسبب ارتباط الأكسجين الأول بالهيموجلوبين؟", a:"تغييرات في بنية الهيموجلوبين تكشف مواقع ربط إضافية.", h:"تغيير بنيوي."},
+{cat:"منحنى التفكك", q:"ما هي العلاقة بين PO₂ وإشباع الهيموجلوبين بالأكسجين؟", a:"علاقة طردية: كلما زاد PO₂ زاد الإشباع.", h:"طردية."},
+
+// ─── تأثير بور (Bohr Effect) ─── 14 بطاقة
+{cat:"تأثير بور", q:"ما هو تأثير بور (Bohr effect)؟", a:"ظاهرة تحرك منحنى الإشباع لأسفل ولليمين بسبب انخفاض pH (زيادة الحموضة).", h:"تحرك المنحنى لأسفل ولليمين."},
+{cat:"تأثير بور", q:"كيف يستخدم الجسم درجة حموضة الدم كإشارة كيميائية؟", a:"لإطلاق المزيد من O₂ من الهيموجلوبين أثناء التمارين الرياضية.", h:"إطلاق الأكسجين."},
+{cat:"تأثير بور", q:"ما هي درجة حموضة الدم الطبيعية؟", a:"pH = 7.4.", h:"7.4."},
+{cat:"تأثير بور", q:"عند pH = 7.4 و PO₂ = 40 mmHg، ما هي نسبة إشباع الهيموجلوبين بالأكسجين؟", a:"70%.", h:"70%."},
+{cat:"تأثير بور", q:"ماذا ينتج عن التمارين الرياضية من حيث حموضة الدم؟", a:"تنتج CO₂ الذي يتحول إلى حمض الكربونيك، فتزيد حموضة الدم ويقل pH إلى 7.2.", h:"انخفاض pH إلى 7.2."},
+{cat:"تأثير بور", q:"عند pH = 7.2 و PO₂ = 40 mmHg، ما هي نسبة إشباع الهيموجلوبين بالأكسجين؟", a:"40%.", h:"40%."},
+{cat:"تأثير بور", q:"كم تزيد كمية الأكسجين المتحررة في الأنسجة بسبب تأثير بور؟", a:"30% (من 70% إلى 40%).", h:"30%."},
+{cat:"تأثير بور", q:"ما هي أهمية تأثير بور؟", a:"يزيد بشكل كبير من كفاءة نقل الأكسجين أثناء ممارسة التمارين الرياضية.", h:"كفاءة نقل الأكسجين."},
+{cat:"تأثير بور", q:"ما هي العوامل التي تسبب تأثير بور (اختصار CADET)؟", a:"CO₂ (ثاني أكسيد الكربون)، Acidity (الحموضة)، 2,3-DPG، Exercise (التمارين)، Temperature (الحرارة).", h:"CADET."},
+{cat:"تأثير بور", q:"ما هو 2,3-DPG؟", a:"مركب (2,3-diphosphoglycerate) يمتاز بانجذاب عالي نحو الهيموجلوبين غير المؤكسج.", h:"مركب 2,3-DPG."},
+{cat:"تأثير بور", q:"كيف يؤثر 2,3-DPG على الهيموجلوبين؟", a:"يقلل انجذاب الهيموجلوبين للأكسجين، مما يؤدي إلى تحرير مزيد من الأكسجين.", h:"يقلل الانجذاب للأكسجين."},
+{cat:"تأثير بور", q:"من أين تنتج سلائف 2,3-DPG؟", a:"عن طريق تحلل السكر.", h:"تحلل السكر."},
+{cat:"تأثير بور", q:"ما هي الاستجابة التكيفية للهيموجلوبين في حالات انخفاض PO₂ (مثل العيش على المرتفعات)؟", a:"ينقص PO₂ من 100 إلى 70 mmHg، لكن تشبع الهيموجلوبين ينخفض بنسبة 3% فقط ليصبح 97%.", h:"تكيف مع انخفاض الأكسجين."},
+{cat:"تأثير بور", q:"لماذا يعتبر تأثير بور ضرورة فسيولوجية للحياة؟", a:"لأنه يساعد في إطلاق الأكسجين عند الحاجة أثناء النشاط الخلوي المرتفع.", h:"إطلاق الأكسجين عند الحاجة."},
+
+// ─── نقل ثاني أكسيد الكربون ─── 16 بطاقة
+{cat:"نقل CO₂", q:"ما هي خصائص غاز CO₂؟", a:"غاز صغير الحجم، قليل الذوبان في الماء، سام، يجب التخلص منه باستمرار.", h:"صغير - قليل الذوبان - سام."},
+{cat:"نقل CO₂", q:"كيف ينتقل CO₂ في الجسم؟", a:"وفق منحدر تركيزه من ضغط جزئي عالٍ في الأنسجة إلى منخفض في الرئتين.", h:"منحدر تركيز."},
+{cat:"نقل CO₂", q:"لماذا طور الجسم آليات مختلفة لنقل CO₂؟", a:"لقلة ذائبيته في الماء، مما يحد من انتشاره في بلازما الدم.", h:"قلة الذوبان."},
+{cat:"نقل CO₂", q:"ما هي الطرائق الثلاث لنقل CO₂ في الدم؟", a:"1. 5% ذائب في البلازما. 2. 10% مرتبط بالهيموجلوبين. 3. 85% على شكل أيونات البايكربونات.", h:"5% - 10% - 85%."},
+{cat:"نقل CO₂", q:"أين ينتشر CO₂ أولاً في الجسم؟", a:"من خلايا الجسم إلى البلازما ثم إلى داخل خلايا الدم الحمراء.", h:"خلايا الجسم ← بلازما ← خلايا الدم الحمراء."},
+{cat:"نقل CO₂", q:"ما هو إنزيم الكربونيك انهايدريز (Carbonic Anhydrase)؟", a:"إنزيم يوجد داخل خلايا الدم الحمراء، يعمل على تسريع التفاعل بين CO₂ والماء لتكوين حمض الكربونيك.", h:"إنزيم في خلايا الدم الحمراء."},
+{cat:"نقل CO₂", q:"ما هو التفاعل الذي يحفزه إنزيم الكربونيك انهايدريز؟", a:"CO₂ + H₂O → H₂CO₃ → H⁺ + HCO₃⁻.", h:"CO₂ + H₂O → H⁺ + HCO₃⁻."},
+{cat:"نقل CO₂", q:"ما هي أيونات البايكربونات (HCO₃⁻)؟", a:"أيونات سالبة تتكون من تفكك حمض الكربونيك، وتغادر خلايا الدم الحمراء بالانتشار.", h:"أيونات سالبة."},
+{cat:"نقل CO₂", q:"ما هي ظاهرة إزاحة الكلوريد (Chloride shift)؟", a:"انتقال أيونات Cl⁻ إلى داخل خلايا الدم الحمراء لتعويض فقدان HCO₃⁻ والحفاظ على التوازن الكهربي.", h:"دخول Cl⁻ لتعويض HCO₃⁻."},
+{cat:"نقل CO₂", q:"لماذا لا تستطيع أيونات H⁺ البقاء في البلازما؟", a:"لأن ذلك سيزيد حموضة الدم،所以她 ترتبط بالهيموجلوبين.", h:"ترتبط بالهيموجلوبين."},
+{cat:"نقل CO₂", q:"ماذا يحدث في الرئتين لثاني أكسيد الكربون؟", a:"ينعكس التفاعل: H⁺ + HCO₃⁻ → H₂CO₃ → CO₂ + H₂O، فيخرج CO₂ مع الزفير.", h:"عكس التفاعل."},
+{cat:"نقل CO₂", q:"ما هو دور إنزيم الكربونيك انهايدريز في الرئتين؟", a:"يكسر حمض الكربونيك إلى CO₂ و H₂O.", h:"يكسر حمض الكربونيك."},
+{cat:"نقل CO₂", q:"كيف ينتقل CO₂ من خلايا الدم الحمراء إلى الحويصلات الهوائية؟", a:"ينتقل مع فرق التركيز من خلايا الدم الحمراء إلى البلازما ثم إلى الهواء في الحويصلات الهوائية.", h:"فرق التركيز."},
+{cat:"نقل CO₂", q:"ما هو الكاربامينوهيموجلوبين (Carbaminohemoglobin)؟", a:"مركب معقد يتكون من ارتباط الهيموجلوبين بثاني أكسيد الكربون، وهو المسؤول عن حمل 10% من CO₂.", h:"Hb + CO₂."},
+{cat:"نقل CO₂", q:"ما هو تأثير هالدين (Haldane effect)؟", a:"ظاهرة ارتباط الهيموجلوبين بثاني أكسيد الكربون بعد ارتباط H⁺، مما يقلل انجذابه للأكسجين.", h:"ارتباط Hb بـ CO₂."},
+{cat:"نقل CO₂", q:"كيف يرتبط نقل CO₂ بتأثير بور؟", a:"زيادة CO₂ تزيد H⁺، مما يخفض pH ويسبب تأثير بور، فيزيد إطلاق الأكسجين.", h:"CO₂ → H⁺ → تأثير بور."},
+
+// ─── أسئلة موضوعية ─── 8 بطاقات
+{cat:"أسئلة موضوعية", q:"ما هو شكل منحنى تفكك الهيموجلوبين؟\nأ. خطي\nب. سيني\nج. دائري\nد. قطعي", a:"ب. سيني ✓", h:"شكل سيني."},
+{cat:"أسئلة موضوعية", q:"ما هي قيمة pH الطبيعية للدم؟\nأ. 7.0\nب. 7.2\nج. 7.4\nد. 7.6", a:"ج. 7.4 ✓", h:"7.4."},
+{cat:"أسئلة موضوعية", q:"ما هو تأثير بور (Bohr effect)؟\nأ. زيادة ارتباط الأكسجين بالهيموجلوبين\nب. تحرك منحنى الإشباع لأسفل ولليمين\nج. زيادة إنتاج خلايا الدم\nد. انخفاض CO₂", a:"ب. تحرك منحنى الإشباع لأسفل ولليمين ✓", h:"تحرك المنحنى."},
+{cat:"أسئلة موضوعية", q:"ما هي النسبة المئوية لـ CO₂ المنقول على شكل أيونات البايكربونات؟\nأ. 5%\nب. 10%\nج. 85%\nد. 95%", a:"ج. 85% ✓", h:"85%."},
+{cat:"أسئلة موضوعية", q:"أين يوجد إنزيم الكربونيك انهايدريز؟\nأ. في البلازما\nب. في خلايا الدم الحمراء\nج. في خلايا الدم البيضاء\nد. في الصفائح الدموية", a:"ب. في خلايا الدم الحمراء ✓", h:"خلايا الدم الحمراء."},
+{cat:"أسئلة موضوعية", q:"ما هي ظاهرة إزاحة الكلوريد (Chloride shift)؟\nأ. خروج Cl⁻ من الخلية\nب. دخول Cl⁻ إلى خلايا الدم الحمراء\nج. خروج HCO₃⁻\nد. دخول H⁺", a:"ب. دخول Cl⁻ إلى خلايا الدم الحمراء ✓", h:"دخول Cl⁻."},
+{cat:"أسئلة موضوعية", q:"ما هو المركب المسؤول عن حمل 10% من CO₂؟\nأ. البايكربونات\nب. الكاربامينوهيموجلوبين\nج. حمض الكربونيك\nد. فوسفات الكرياتين", a:"ب. الكاربامينوهيموجلوبين ✓", h:"كاربامينوهيموجلوبين."},
+{cat:"أسئلة موضوعية", q:"ما هي العوامل التي تسبب تأثير بور (CADET)؟\nأ. CO₂, Acidity, 2,3-DPG, Exercise, Temperature\nب. CO₂, ATP, DNA, Exercise, Temperature\nج. Ca²⁺, Acidity, 2,3-DPG, Exercise, Temperature\nد. CO₂, Acidity, ATP, Exercise, Temperature", a:"أ. CO₂, Acidity, 2,3-DPG, Exercise, Temperature ✓", h:"CADET."},
+];
+
+const CATS = ["الكل", "المفضلة", ...Array.from(new Set(ALL.map(c => c.cat)))];
+
+let activeCat = "الكل";
+let cards = [];
+let idx = 0;
+let flipped = false;
+
+let correct = 0;
+let wrong = 0;
+let answered = new Set();
+let wrongCards = [];
+let favs = new Set();
+let seconds = 0;
+let timerInt = null;
+
+const STORAGE_KEY = 'bio_u2l1p2';
+
+function getStorageKey() {
+  if (activeCat === "الكل") return STORAGE_KEY + '_all';
+  if (activeCat === "المفضلة") return STORAGE_KEY + '_fav';
+  return STORAGE_KEY + '_cat_' + activeCat;
+}
+
+document.getElementById('totalCardsNum').textContent = ALL.length;
+
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function playTone(freq, type, duration, vol = 0.1) {
+  try {
+    if (!audioCtx) audioCtx = new AudioContext();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch(e) {}
+}
+function playCorrect() { playTone(600, 'sine', 0.1); setTimeout(() => playTone(800, 'sine', 0.15), 100); }
+function playWrong() { playTone(300, 'triangle', 0.2); setTimeout(() => playTone(250, 'triangle', 0.3), 150); }
+function playDone() { playTone(400, 'sine', 0.1); setTimeout(() => playTone(500, 'sine', 0.1), 100); setTimeout(() => playTone(600, 'sine', 0.3), 200); }
+
+function toggleTheme() {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('bio_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+}
+
+function formatTime(s) {
+  const m = String(Math.floor(s / 60)).padStart(2, '0');
+  const sec = String(s % 60).padStart(2, '0');
+  return m + ':' + sec;
+}
+function startTimer() {
+  if (!timerInt) {
+    timerInt = setInterval(() => {
+      seconds++;
+      document.getElementById('timerDisp').textContent = formatTime(seconds);
+      saveState();
+    }, 1000);
+  }
+}
+function stopTimer() { clearInterval(timerInt); timerInt = null; }
+
+function saveState() {
+  const key = getStorageKey();
+  const state = {
+    c: correct,
+    w: wrong,
+    ans: Array.from(answered),
+    wCards: wrongCards.map(c => ALL.indexOf(c)),
+    sec: seconds,
+    favs: Array.from(favs)
+  };
+  localStorage.setItem(key, JSON.stringify(state));
+}
+
+function loadState() {
+  const theme = localStorage.getItem('bio_theme');
+  if (theme === 'dark') document.body.classList.add('dark-mode');
+  
+  const key = getStorageKey();
+  const saved = JSON.parse(localStorage.getItem(key));
+  if (saved) {
+    correct = saved.c || 0;
+    wrong = saved.w || 0;
+    answered = new Set(saved.ans || []);
+    favs = new Set(saved.favs || []);
+    wrongCards = (saved.wCards || []).map(i => ALL[i]);
+    seconds = saved.sec || 0;
+    document.getElementById('timerDisp').textContent = formatTime(seconds);
+  } else {
+    correct = 0;
+    wrong = 0;
+    answered = new Set();
+    wrongCards = [];
+    favs = new Set();
+    seconds = 0;
+    document.getElementById('timerDisp').textContent = "00:00";
+  }
+}
+
+function clearProgress() {
+  if (confirm("هل أنت متأكد من مسح تقدمك في هذا القسم؟")) {
+    const key = getStorageKey();
+    localStorage.removeItem(key);
+    correct = 0;
+    wrong = 0;
+    answered = new Set();
+    wrongCards = [];
+    seconds = 0;
+    stopTimer();
+    document.getElementById('timerDisp').textContent = "00:00";
+    resetAll();
+    saveState();
+  }
+}
+
+function getCards() {
+  if (activeCat === "المفضلة") return ALL.filter((_, i) => favs.has(i));
+  if (activeCat === "الكل") return [...ALL];
+  return ALL.filter(c => c.cat === activeCat);
+}
+
+function buildTabs() {
+  document.getElementById("tabs").innerHTML = CATS.map(c => {
+    let count;
+    if (c === "الكل") count = ALL.length;
+    else if (c === "المفضلة") count = favs.size;
+    else count = ALL.filter(x => x.cat === c).length;
+    const cls = c === "المفضلة" ? "tab fav-tab" : "tab";
+    return `<button class="${cls}${c === activeCat ? " active" : ""}" onclick="setCat('${c}')">${c} (${count})</button>`;
+  }).join("");
+}
+
+function setCat(cat) {
+  saveState();
+  activeCat = cat;
+  if (activeCat === "المفضلة" && favs.size === 0) {
+    alert("لا توجد بطاقات في المفضلة بعد. اضغط على أيقونة النجمة لحفظ البطاقات.");
+    activeCat = "الكل";
+  }
+  loadState();
+  buildTabs();
+  resetAll();
+}
+
+function resetAll() {
+  cards = getCards();
+  idx = 0;
+  flipped = false;
+  document.getElementById("doneScreen").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("reviewWrongBtn").style.display = "none";
+  document.getElementById("reviewWrongBtnDone").style.display = "none";
+  
+  const answeredInCards = cards.filter(c => answered.has(ALL.indexOf(c))).length;
+  document.getElementById("st").textContent = cards.length - answeredInCards;
+  showCard();
+  updateStats();
+  startTimer();
+}
+
+function shuffle() {
+  cards = getCards().sort(() => Math.random() - 0.5);
+  idx = 0;
+  flipped = false;
+  showCard();
+}
+
+function showCard() {
+  if (idx >= cards.length) { showDone(); return; }
+  const c = cards[idx];
+  const globalIdx = ALL.indexOf(c);
+  document.getElementById("qText").textContent = c.q;
+  document.getElementById("aText").innerHTML = c.a.replace(/\n/g, "<br>");
+  document.getElementById("hText").textContent = c.h ? "💡 " + c.h : "";
+  document.getElementById("catText").textContent = c.cat;
+  document.getElementById("catText2").textContent = c.cat;
+  
+  const f1 = document.getElementById("favBtn1"), f2 = document.getElementById("favBtn2");
+  if (favs.has(globalIdx)) { f1.classList.add("active"); f2.classList.add("active"); }
+  else { f1.classList.remove("active"); f2.classList.remove("active"); }
+  
+  document.getElementById("cardInner").classList.remove("flipped");
+  document.getElementById("fbRow").classList.remove("active");
+  flipped = false;
+  
+  const p = Math.round((idx / cards.length) * 100);
+  document.getElementById("counter").textContent = `السؤال ${idx + 1} من ${cards.length}`;
+  document.getElementById("pct").textContent = p + "%";
+  document.getElementById("pbar").style.width = p + "%";
+  startTimer();
+}
+
+function flipCard() {
+  if (idx >= cards.length) return;
+  flipped = !flipped;
+  document.getElementById("cardInner").classList.toggle("flipped", flipped);
+  if (flipped) {
+    document.getElementById("fbRow").classList.add("active");
+  } else {
+    document.getElementById("fbRow").classList.remove("active");
+  }
+}
+
+function toggleFav(e) {
+  e.stopPropagation();
+  const globalIdx = ALL.indexOf(cards[idx]);
+  if (favs.has(globalIdx)) favs.delete(globalIdx);
+  else favs.add(globalIdx);
+  const f1 = document.getElementById("favBtn1"), f2 = document.getElementById("favBtn2");
+  f1.classList.toggle("active");
+  f2.classList.toggle("active");
+  saveState();
+  buildTabs();
+}
+
+function mark(ok) {
+  if (ok) { correct++; playCorrect(); }
+  else { wrong++; wrongCards.push(cards[idx]); playWrong(); }
+  answered.add(ALL.indexOf(cards[idx]));
+  updateStats();
+  saveState();
+  idx++;
+  flipped = false;
+  if (idx >= cards.length) showDone();
+  else showCard();
+}
+
+function next() { if (idx < cards.length - 1) { idx++; flipped = false; showCard(); } }
+function prev() { if (idx > 0) { idx--; flipped = false; showCard(); } }
+
+function updateStats() {
+  document.getElementById("sc").textContent = correct;
+  document.getElementById("sw").textContent = wrong;
+  const answeredInCards = cards.filter(c => answered.has(ALL.indexOf(c))).length;
+  const remain = cards.length - answeredInCards;
+  document.getElementById("st").textContent = remain < 0 ? 0 : remain;
+}
+
+function showDone() {
+  stopTimer();
+  playDone();
+  document.getElementById("cardScene").style.display = "none";
+  document.getElementById("fbRow").classList.remove("active");
+  
+  const totalCards = cards.length;
+  const p = Math.round((correct / totalCards) * 100);
+  
+  let favCount = 0;
+  if (activeCat === "الكل") {
+    favCount = favs.size;
+  } else if (activeCat === "المفضلة") {
+    favCount = cards.length;
+  } else {
+    favCount = cards.filter(c => favs.has(ALL.indexOf(c))).length;
+  }
+  
+  document.getElementById("dScore").textContent = p + "%";
+  document.getElementById("dTotal").textContent = totalCards;
+  document.getElementById("dC").textContent = correct;
+  document.getElementById("dW").textContent = wrong;
+  document.getElementById("dFav").textContent = favCount;
+  document.getElementById("dT").textContent = formatTime(seconds);
+  
+  let titleText = "الوحدة 2 الدرس 1 (الجزء 2) الدم واللمف";
+  if (activeCat === "الكل") {
+    titleText += " - جميع الأقسام";
+  } else if (activeCat === "المفضلة") {
+    titleText += " - المفضلات";
+  } else {
+    titleText += " - " + activeCat;
+  }
+  document.getElementById("doneTitle").textContent = titleText;
+  
+  const msgs = [
+    "تحتاج مراجعة أكثر — أعد التدريب.",
+    "جيد! ركز على أخطائك وأعد المحاولة.",
+    "أداء رائع!",
+    "ممتاز! أتقنت جميع البطاقات 🎉"
+  ];
+  document.getElementById("dMsg").textContent = p < 60 ? msgs[0] : p < 80 ? msgs[1] : p < 100 ? msgs[2] : msgs[3];
+  
+  document.getElementById("doneScreen").style.display = "block";
+  document.getElementById("pbar").style.width = "100%";
+  document.getElementById("pct").textContent = "100%";
+  
+  const btn1 = document.getElementById("reviewWrongBtn");
+  const btn2 = document.getElementById("reviewWrongBtnDone");
+  if (wrongCards.length > 0) {
+    btn1.style.display = "flex";
+    btn2.style.display = "flex";
+  } else {
+    btn1.style.display = "none";
+    btn2.style.display = "none";
+  }
+  
+  saveState();
+}
+
+function reviewWrong() {
+  if (wrongCards.length === 0) return;
+  const uniqueWrong = [...new Set(wrongCards)];
+  cards = uniqueWrong;
+  wrongCards = [];
+  idx = 0;
+  flipped = false;
+  document.getElementById("doneScreen").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("reviewWrongBtn").style.display = "none";
+  document.getElementById("reviewWrongBtnDone").style.display = "none";
+  const answeredInCards = cards.filter(c => answered.has(ALL.indexOf(c))).length;
+  document.getElementById("st").textContent = cards.length - answeredInCards;
+  showCard();
+  updateStats();
+  startTimer();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") { e.preventDefault(); flipCard(); }
+  else if (e.key === "ArrowLeft") next();
+  else if (e.key === "ArrowRight") prev();
+  else if (e.key === "1" && flipped) mark(true);
+  else if (e.key === "2" && flipped) mark(false);
+});
+
+loadState();
+buildTabs();
+resetAll();
+</script>
+</body>
+</html>
