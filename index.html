@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#0f2b3d">
+    <title>منصة أ. عزت شعبان - الأحياء</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi2YXYr9ix2LPYqSDYp9mE2LnYsdio2Kog2KfZhNit2LHZiNmG2YrYpyIsInNob3J0X25hbWUiOiLYp9mE2LnYsdio2Kog2KfZhNit2LHZiNmG2YrYpyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjBmNGY4IiwidGhlbWVfY29sb3IiOiIjMGYyYjNkIn0=">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Cairo', sans-serif; background: #f0f4f8; padding: 15px; direction: rtl; min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .top-bar, .bottom-bar {
+            background: linear-gradient(135deg, #0f2b3d, #1b4f6e);
+            border-radius: 30px;
+            padding: 8px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .contact-info, .bottom-contact {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.12);
+            padding: 6px 16px;
+            border-radius: 40px;
+        }
+        .contact-info span, .bottom-contact span { color: white; font-size: 16px; font-weight: 600; }
+        .telegram-link, .bottom-telegram {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #0088cc;
+            padding: 6px 16px;
+            border-radius: 40px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 18px;
+            background: linear-gradient(135deg, #0f2b3d, #1b4f6e);
+            border-radius: 20px;
+            color: white;
+        }
+        .header h1 { font-size: 26px; }
+        .header h1 span { color: #ffd966; }
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 8px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background: #e2e8f0;
+            transition: 0.3s;
+            font-family: 'Cairo', sans-serif;
+            color: #4a5568;
+        }
+        .tab-btn.active { background: #1b5e7a; color: white; box-shadow: 0 4px 12px rgba(27,94,122,0.3); }
+        .tab-btn:hover:not(.active) { background: #cbd5e0; }
+
+        .panel { display: none; animation: fadeIn 0.3s ease; }
+        .panel.active-panel { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .unit-card {
+            background: white;
+            border-radius: 18px;
+            margin-bottom: 18px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .unit-header {
+            background: #1e5a7a;
+            color: white;
+            padding: 12px 18px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .unit-header .arrow { transition: 0.3s; font-size: 12px; }
+        .unit-header.open .arrow { transform: rotate(180deg); }
+        .unit-content { display: none; padding: 16px; background: #fafcff; }
+        .unit-content.open { display: block; }
+
+        .lesson-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            color: #2d3748;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .resource-link:hover { background: #eef2ff; border-color: #1e5a7a; transform: translateY(-1px); }
+        .coming-soon {
+            opacity: 0.7;
+            background: #fef9e6;
+            border-color: #fbd38d;
+            pointer-events: none;
+        }
+        .coming-soon .resource-title::after { content: " (قريباً)"; font-size: 11px; color: #b7791f; font-weight: normal; }
+
+        .revision-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 12px;
+        }
+        .revision-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 12px;
+        }
+        .revision-col {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .revision-col h4 {
+            background: #1e5a7a;
+            color: white;
+            padding: 8px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        .revision-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 9px;
+            margin-bottom: 6px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            text-decoration: none;
+            color: #2d3748;
+            transition: 0.2s;
+            font-size: 13px;
+        }
+        .revision-item:hover { background: #eef2ff; border-color: #1e5a7a; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .modal-box h3 { text-align: center; color: #1e5a7a; margin-bottom: 20px; font-size: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #2d3748; font-size: 14px; }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        .form-group input:focus { outline: none; border-color: #1e5a7a; }
+        .form-hint { font-size: 12px; color: #718096; margin-top: 4px; }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #1b5e7a, #0f2b3d);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-secondary {
+            width: 100%;
+            padding: 10px;
+            background: #e2e8f0;
+            color: #4a5568;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+        .btn-secondary:hover { background: #cbd5e0; }
+        .login-error { color: #e53e3e; text-align: center; margin-top: 10px; font-size: 14px; display: none; }
+
+        .user-badge {
+            background: #e6f7f0;
+            padding: 10px 16px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            border: 1px solid #c6f6d5;
+        }
+        .user-badge span { color: #22543d; font-weight: 600; font-size: 14px; }
+        .logout-btn { background: #e53e3e; color: white; border: none; padding: 5px 14px; border-radius: 20px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 13px; }
+
+        .about-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .about-img {
+            width: 160px;
+            height: 160px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 3px solid #1e5a7a;
+            flex-shrink: 0;
+        }
+        .about-text h3 { color: #1e5a7a; margin-bottom: 12px; font-size: 22px; }
+        .about-text p { color: #4a5568; line-height: 1.8; font-size: 15px; }
+
+        .top-students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .student-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .student-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .student-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 3px solid #1e5a7a;
+        }
+        .student-info { padding: 15px; }
+        .student-info h4 { color: #1e5a7a; margin-bottom: 6px; font-size: 16px; }
+        .student-info p { color: #718096; font-size: 13px; }
+
+        .admin-form {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px dashed #cbd5e0;
+        }
+        .admin-form h4 { color: #1e5a7a; margin-bottom: 15px; text-align: center; }
+        .admin-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .admin-row input, .admin-row textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+        }
+        .admin-row textarea { grid-column: 1 / -1; resize: vertical; min-height: 60px; }
+        .admin-row input:focus, .admin-row textarea:focus { outline: none; border-color: #1e5a7a; }
+        .file-input-wrapper {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 15px;
+            border: 2px dashed #a0aec0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+        .file-input-wrapper:hover { border-color: #1e5a7a; background: #eef2ff; }
+        .file-input-wrapper input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .file-input-wrapper span { color: #718096; font-size: 14px; }
+
+        .install-bar {
+            display: none;
+            background: linear-gradient(135deg, #1b5e7a, #0f2b3d);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            margin-bottom: 15px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .install-bar.show { display: flex; }
+        .install-bar p { font-size: 14px; font-weight: 600; }
+        .install-btn {
+            background: #ffd966;
+            color: #1a202c;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .install-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+
+        .ios-hint {
+            display: none;
+            background: #fffbeb;
+            border: 1px solid #fbd38d;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #975a16;
+            text-align: center;
+        }
+        .ios-hint.show { display: block; }
+
+        .loading-box {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #1e5a7a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .footer-note { text-align: center; margin-top: 20px; padding: 15px; color: #718096; font-size: 12px; }
+
+        @media (max-width: 900px) {
+            .revision-grid-3, .revision-grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .about-card { flex-direction: column; align-items: center; text-align: center; }
+        }
+        @media (max-width: 600px) {
+            .lesson-grid { grid-template-columns: 1fr; }
+            .revision-grid-3, .revision-grid-4 { grid-template-columns: 1fr; }
+            .top-bar, .bottom-bar { justify-content: center; }
+            .header h1 { font-size: 20px; }
+            .admin-row { grid-template-columns: 1fr; }
+            .tabs { gap: 5px; }
+            .tab-btn { padding: 6px 12px; font-size: 12px; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+<div class="container">
+    <!-- Install Bar -->
+    <div class="install-bar" id="installBar">
+        <p>📲 ثبّت الموقع على جوالك للوصول السريع!</p>
+        <button class="install-btn" id="installBtn">تثبيت</button>
+        <button class="install-close" onclick="document.getElementById('installBar').classList.remove('show')">×</button>
+    </div>
+    <div class="ios-hint" id="iosHint">
+        📱 <strong>للتثبيت على iPhone:</strong> اضغط على زر المشاركة <span style="font-size:18px">⎋</span> ثم "إضافة إلى الشاشة الرئيسية"
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="contact-info"><span>📞 77107247</span></div>
+        <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="telegram-link">✈️ قناة التليجرام</a>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>أ. <span>عزت شعبان</span></h1>
+        <div class="badge">⭐ النجم في الأحياء — ثانوية عامة</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('public')">📖 عام</button>
+        <button class="tab-btn" onclick="switchTab('shared')">🔓 مشترك</button>
+        <button class="tab-btn" onclick="switchTab('premium')">⭐ مميز</button>
+        <button class="tab-btn" onclick="switchTab('about')">👨‍🏫 لمحة عني</button>
+        <button class="tab-btn" onclick="switchTab('topstudents')">🏆 المتفوقون</button>
+    </div>
+
+    <!-- Panels -->
+    <div id="publicPanel" class="panel active-panel"></div>
+    <div id="sharedPanel" class="panel"></div>
+    <div id="premiumPanel" class="panel"></div>
+
+    <!-- About Me Panel -->
+    <div id="aboutPanel" class="panel">
+        <div class="about-card">
+            <img src="https://via.placeholder.com/160x160/1e5a7a/ffffff?text=أ.+عزت" alt="أ. عزت شعبان" class="about-img" id="aboutImg">
+            <div class="about-text">
+                <h3>👨‍🏫 أ. عزت شعبان</h3>
+                <p>
+                    مدرس الأحياء للثانوية العامة بخبرة تمتد لسنوات في تبسيط العلوم الحيوية وإيصالها للطلاب بأسلوب ممتع ومبسط.
+                    <br><br>
+                    🎯 هدفي: أن يكون مادة الأحياء سهلة ومفهومة لكل طالب، وأن يحصل الطالب على أعلى الدرجات بأقل جهد.
+                    <br><br>
+                    📚 أقدم: ملازم منظمة، فلاش كروت، بنوك أسئلة، فيديوهات شرح، وأطالس تفاعلية.
+                    <br>
+                    📞 للتواصل: 77107247
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Students Panel -->
+    <div id="topstudentsPanel" class="panel">
+        <div class="admin-form" id="adminForm">
+            <h4>➕ إضافة متفوق جديد</h4>
+            <div class="admin-row">
+                <input type="text" id="stuName" placeholder="اسم الطالب">
+                <input type="text" id="stuDesc" placeholder="الكلية / الإنجاز (مثال: كلية الطب)">
+            </div>
+            <div class="file-input-wrapper">
+                <input type="file" id="stuImg" accept="image/*" onchange="previewImage(this)">
+                <span id="fileLabel">📷 اضغط هنا لرفع صورة الطالب</span>
+            </div>
+            <div class="admin-row" id="imgPreviewRow" style="display:none; justify-content:center;">
+                <img id="imgPreview" style="max-width:150px; max-height:150px; border-radius:10px; border:2px solid #1e5a7a;">
+            </div>
+            <button class="btn-primary" onclick="addStudent()" style="margin-top:10px;">إضافة المتفوق</button>
+        </div>
+        <div class="top-students-grid" id="studentsGrid"></div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+        <div class="bottom-contact"><span>📞 77107247</span></div>
+        <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="bottom-telegram">✈️ قناة التليجرام</a>
+    </div>
+    <div class="footer-note">للاستفسار والتواصل: 77107247</div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+        <h3>🔐 تسجيل الدخول - المحتوى المشترك</h3>
+        <div class="form-group">
+            <label>اسم الطالب</label>
+            <input type="text" id="loginName" placeholder="اكتب اسمك الثلاثي">
+        </div>
+        <div class="form-group">
+            <label>هاتف الطالب</label>
+            <input type="tel" id="loginPhone" placeholder="مثال: 97450123456" oninput="validatePhone(this)">
+            <div class="form-hint">يجب أن يبدأ الرقم بـ 974 ويتبعه 8 أرقام</div>
+        </div>
+        <div class="form-group">
+            <label>هاتف ولي الأمر</label>
+            <input type="tel" id="loginParent" placeholder="مثال: 97450123456" oninput="validatePhone(this)">
+            <div class="form-hint">يجب أن يبدأ الرقم بـ 974 ويتبعه 8 أرقام</div>
+        </div>
+        <button class="btn-primary" onclick="doLogin()">دخول</button>
+        <button class="btn-secondary" onclick="closeLogin()">إلغاء</button>
+        <div class="login-error" id="loginError"></div>
+    </div>
+</div>
+
+<script>
+    // ═══════════════════════════════════════════════════════════
+    // ║  ضع هنا رابط Google Apps Script الخاص بك               ║
+    // ║  مثال: https://script.google.com/macros/s/XXXX/exec    ║
+    // ║  ترتيب الأعمدة في الشيت: A=هاتف الطالب B=الحالة C=ولي الأمر D=الاسم ║
+    // ║  الحالة = 2 → مسموح | 0 أو 1 → مرفوض                      ║
+    // ═══════════════════════════════════════════════════════════
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCRz8OMEAsgp7nz0XbqTg6nXR8b3FxOk3yl1Z-1QDtXcr5alKPRvha6J1URKw6Wbqceg/exec";
+    // ═══════════════════════════════════════════════════════════
+
+    const UNITS = [
+        { id: 1, name: "الوحدة 1 - العضلات والحركة" },
+        { id: 2, name: "الوحدة 2 - الجهاز الدوراني" },
+        { id: 3, name: "الوحدة 3 - النقل في النباتات" },
+        { id: 4, name: "الوحدة 4 - التنظيم الهرموني في النباتات" },
+        { id: 5, name: "الوحدة 5 - التحكم والتنظيم" },
+        { id: 6, name: "الوحدة 6 - الاتزان الداخلي في الثدييات" },
+        { id: 7, name: "الوحدة 7 - المناعة" }
+    ];
+
+    const publicData = {
+        1: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 2", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 3", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        2: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 4", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 5", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        3: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 9", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 10", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        4: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        5: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 4", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 5", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 6", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 7", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        6: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 8", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 9", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 10", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        7: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 2", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 3", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ]
+    };
+
+    const sharedData = {
+        1: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 1", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 2", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 2", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 2", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 3", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 3", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 3", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        2: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 4", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 4", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 4", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 5", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 5", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 5", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        3: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 9", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 9", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 9", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 10", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 10", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 10", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        4: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 1", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        5: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 4", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 4", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 4", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 5", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 5", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 5", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 6", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 6", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 6", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 7", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 7", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 7", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        6: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 8", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 8", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 8", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 9", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 9", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 9", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 10", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 10", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 10", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ],
+        7: [
+            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 1", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 2", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 2", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 2", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 3", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 3", link: "#" },
+            { icon: "🎨", title: "رسومات ملزمة 3", link: "#" },
+            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
+            { icon: "📘", title: "ملزمة النجم", link: "#" }
+        ]
+    };
+
+    const premiumData = {};
+
+    const REVISION_FIRST = [
+        { unit: 1, name: "الوحدة 1 - العضلات والحركة",
+          items: [
+              { icon: "📘", title: "ملخص شرح الوحدة 1", link: "#" },
+              { icon: "📊", title: "بوربوينت مراجعة الوحدة 1", link: "#" },
+              { icon: "▶️", title: "فيديو شرح الوحدة 1", link: "#" },
+              { icon: "🎨", title: "انفوجرافيك الوحدة 1", link: "#" }
+          ] },
+        { unit: 2, name: "الوحدة 2 - الجهاز الدوراني",
+          items: [
+              { icon: "📘", title: "ملخص شرح الوحدة 2", link: "#" },
+              { icon: "📊", title: "بوربوينت مراجعة الوحدة 2", link: "#" },
+              { icon: "▶️", title: "فيديو شرح الوحدة 2", link: "#" },
+              { icon: "🎨", title: "انفوجرافيك الوحدة 2", link: "#" }
+          ] },
+        { unit: 3, name: "الوحدة 3 - النقل في النباتات",
+          items: [
+              { icon: "📘", title: "ملخص شرح الوحدة 3", link: "#" },
+              { icon: "📊", title: "بوربوينت مراجعة الوحدة 3", link: "#" },
+              { icon: "▶️", title: "فيديو شرح الوحدة 3", link: "#" },
+              { icon: "🎨", title: "انفوجرافيك الوحدة 3", link: "#" }
+          ] }
+    ];
+
+    const REVISION_SECOND = [
+        { unit: 4, name: "الوحدة 4 - التنظيم الهرموني في النباتات",
+          items: [
+              { icon: "📘", title: "ملخص شرح الوحدة 4", link: "#" },
+              { icon: "📊", title: "بوربوينت مراجعة الوحدة 4", link: "#" },
+              { icon: "▶️", title: "فيديو شرح الوحدة 4", link: "#" },
+              { icon: "🎨", title: "انفوجرافيك الوحدة 4", link: "#" }
+          ] },
+        { unit: 5, name: "الوحدة 5 - التحكم والتنظيم",
+          items: [
+              { icon: "📘", title: "ملخص شرح الوحدة 5", link: "#" },
+              { icon: "📊", title: "بوربوينت مراجعة الوحدة 5", link: "#" },
+              { icon: "▶️", title: "فيديو شرح الوحدة 5", link: "#" },
+              { icon: "🎨", title: "انفوجرافيك الوحدة 5", link: "#" }
+          ] },
+        { unit: 6, name: "الوحدة 6 - الاتزان الداخلي في الثدييات",
+          items: [
+              { icon: "📘", title: "ملخص شرح الوحدة 6", link: "#" },
+              { icon: "📊", title: "بوربوينت مراجعة الوحدة 6", link: "#" },
+              { icon: "▶️", title: "فيديو شرح الوحدة 6", link: "#" },
+              { icon: "🎨", title: "انفوجرافيك الوحدة 6", link: "#" }
+          ] },
+        { unit: 7, name: "الوحدة 7 - المناعة",
+          items: [
+              { icon: "📘", title: "ملخص شرح الوحدة 7", link: "#" },
+              { icon: "📊", title: "بوربوينت مراجعة الوحدة 7", link: "#" },
+              { icon: "▶️", title: "فيديو شرح الوحدة 7", link: "#" },
+              { icon: "🎨", title: "انفوجرافيك الوحدة 7", link: "#" }
+          ] }
+    ];
+
+    // ======================== LOGIN SYSTEM (GOOGLE SHEETS) ========================
+    let currentUser = null;
+    let allowedUsers = [];
+    let isLoading = false;
+
+    function validatePhone(input) {
+        let val = input.value.replace(/\D/g, '');
+        if (!val.startsWith('974')) val = '974' + val.replace(/^974/, '');
+        input.value = val;
+    }
+
+    function isValidQatarPhone(phone) {
+        return /^974\d{8}$/.test(phone);
+    }
+
+    async function loadAllowedUsers() {
+        if (GOOGLE_SCRIPT_URL.includes('XXXXXXXX')) {
+            console.warn('لم يتم تعيين رابط Google Script بعد!');
+            return [];
+        }
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + '?t=' + Date.now());
+            const data = await res.json();
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error('خطأ في تحميل البيانات:', e);
+            return [];
+        }
+    }
+
+    function showLogin() {
+        document.getElementById('loginModal').classList.add('show');
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    function closeLogin() {
+        document.getElementById('loginModal').classList.remove('show');
+        if (!currentUser) {
+            switchTab('public');
+        }
+    }
+
+    async function doLogin() {
+        const name = document.getElementById('loginName').value.trim();
+        const phone = document.getElementById('loginPhone').value.trim();
+        const parent = document.getElementById('loginParent').value.trim();
+        const err = document.getElementById('loginError');
+
+        if (!name) { err.textContent = "❌ من فضلك أدخل اسم الطالب"; err.style.display = 'block'; return; }
+        if (!isValidQatarPhone(phone)) { err.textContent = "❌ هاتف الطالب غير صحيح (يجب 974 + 8 أرقام)"; err.style.display = 'block'; return; }
+        if (!isValidQatarPhone(parent)) { err.textContent = "❌ هاتف ولي الأمر غير صحيح (يجب 974 + 8 أرقام)"; err.style.display = 'block'; return; }
+
+        err.textContent = "⏳ جاري التحقق...";
+        err.style.color = "#1e5a7a";
+        err.style.display = 'block';
+
+        // Load users from Google Sheet
+        allowedUsers = await loadAllowedUsers();
+
+        // Check if phone exists in sheet and status == 2
+        const match = allowedUsers.find(u => {
+            const uPhone = String(u.phone || u['هاتف الطالب'] || '').trim();
+            const uParent = String(u.parent || u['هاتف ولي الأمر'] || '').trim();
+            const uStatus = parseInt(u.status || u['الحالة'] || 0);
+            const cleanPhone = phone.replace(/^974/, '');
+            const cleanParent = parent.replace(/^974/, '');
+            const cleanUPhone = uPhone.replace(/^974/, '');
+            const cleanUParent = uParent.replace(/^974/, '');
+            return (cleanUPhone === cleanPhone) && (cleanUParent === cleanParent) && (uStatus === 2);
+        });
+
+        if (!match) {
+            err.textContent = "❌ هذا الطالب غير مسجل أو غير مفعل. تواصل مع الأستاذ.";
+            err.style.color = "#e53e3e";
+            err.style.display = 'block';
+            return;
+        }
+
+        currentUser = { name: match.name || match['الاسم'] || name, phone, parent };
+        closeLogin();
+        renderSharedPanel();
+    }
+
+    function logout() {
+        currentUser = null;
+        switchTab('public');
+    }
+
+    // ======================== RENDER FUNCTIONS ========================
+    function renderRevision(panelId, revisionData, title, isFirstRevision) {
+        let gridClass = isFirstRevision ? "revision-grid-3" : "revision-grid-4";
+        let html = `<div class="unit-card">
+            <div class="unit-header" onclick="toggleUnit('${panelId}_revision')">
+                📚 ${title}
+                <span class="arrow">▼</span>
+            </div>
+            <div class="unit-content" id="content-${panelId}_revision">
+                <div class="${gridClass}">`;
+        revisionData.forEach(unit => {
+            html += `<div class="revision-col">
+                <h4>📘 ${unit.name}</h4>`;
+            unit.items.forEach(item => {
+                let isActive = item.link !== "#";
+                let extraClass = isActive ? "" : "coming-soon";
+                html += `<a href="${item.link}" class="revision-item ${extraClass}" target="_blank">
+                    <span>${item.icon}</span>
+                    <span>${item.title}</span>
+                </a>`;
+            });
+            html += `</div>`;
+        });
+        html += `</div></div></div>`;
+        return html;
+    }
+
+    function renderUnits(panelId, data, showFirstRevision, showSecondRevision) {
+        let html = '';
+        UNITS.forEach(unit => {
+            let items = data[unit.id] || [];
+            if (items.length === 0) return;
+            html += `<div class="unit-card">
+                <div class="unit-header" onclick="toggleUnit('${panelId}_${unit.id}')">
+                    📘 ${unit.name} <span class="arrow">▼</span>
+                </div>
+                <div class="unit-content" id="content-${panelId}_${unit.id}">
+                    <div class="lesson-grid">`;
+            items.forEach(item => {
+                let isActive = item.link !== "#";
+                let extraClass = isActive ? "" : "coming-soon";
+                html += `<a href="${item.link}" class="resource-link ${extraClass}" target="_blank">
+                    <span>${item.icon}</span>
+                    <div>${item.title}</div>
+                </a>`;
+            });
+            html += `</div></div></div>`;
+
+            if (showFirstRevision && unit.id === 3) {
+                html += renderRevision(panelId, REVISION_FIRST, "مراجعة الفصل الأول (الوحدات 1-3)", true);
+            }
+            if (showSecondRevision && unit.id === 7) {
+                html += renderRevision(panelId, REVISION_SECOND, "مراجعة الفصل الثاني (الوحدات 4-7)", false);
+            }
+        });
+        return html;
+    }
+
+    function renderPublicPanel() {
+        let html = renderUnits('public', publicData, true, true);
+        document.getElementById('publicPanel').innerHTML = html || "<div style='text-align:center;padding:40px'>📭 لا توجد محتويات</div>";
+        setTimeout(() => {
+            let first = document.querySelector('#publicPanel .unit-header');
+            if (first) first.click();
+        }, 100);
+    }
+
+    function renderSharedPanel() {
+        const panel = document.getElementById('sharedPanel');
+        if (!currentUser) {
+            panel.innerHTML = `<div style="text-align:center;padding:60px 20px;">
+                <div style="font-size:48px;margin-bottom:15px;">🔒</div>
+                <h3 style="color:#1e5a7a;margin-bottom:10px;">المحتوى المشترك</h3>
+                <p style="color:#718096;margin-bottom:20px;">يجب تسجيل الدخول للوصول إلى المحتوى المشترك</p>
+                <button class="btn-primary" style="width:auto;padding:10px 30px;" onclick="showLogin()">تسجيل الدخول</button>
+            </div>`;
+            return;
+        }
+        let html = `<div class="user-badge">
+            <span>👤 مرحباً، ${currentUser.name}</span>
+            <button class="logout-btn" onclick="logout()">خروج</button>
+        </div>`;
+        html += renderUnits('shared', sharedData, true, true);
+        panel.innerHTML = html;
+        setTimeout(() => {
+            let first = document.querySelector('#sharedPanel .unit-header');
+            if (first) first.click();
+        }, 100);
+    }
+
+    function renderPremiumPanel() {
+        const panel = document.getElementById('premiumPanel');
+        panel.innerHTML = `<div style="text-align:center;padding:60px 20px;">
+            <div style="font-size:48px;margin-bottom:15px;">⭐</div>
+            <h3 style="color:#1e5a7a;margin-bottom:10px;">المحتوى المميز</h3>
+            <p style="color:#718096;">قريباً... سيتم إضافة المحتوى المميز</p>
+        </div>`;
+    }
+
+    // ======================== TOP STUDENTS ========================
+    let topStudents = JSON.parse(localStorage.getItem('bio_students') || '[]');
+    let tempImageBase64 = '';
+
+    function previewImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            tempImageBase64 = e.target.result;
+            document.getElementById('imgPreview').src = tempImageBase64;
+            document.getElementById('imgPreviewRow').style.display = 'flex';
+            document.getElementById('fileLabel').textContent = '✅ تم اختيار الصورة: ' + file.name;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function addStudent() {
+        const name = document.getElementById('stuName').value.trim();
+        const desc = document.getElementById('stuDesc').value.trim();
+        if (!name) { alert('من فضلك أدخل اسم الطالب'); return; }
+        if (!tempImageBase64) { alert('من فضلك اختر صورة'); return; }
+        topStudents.push({ name, desc, img: tempImageBase64, date: new Date().toISOString() });
+        localStorage.setItem('bio_students', JSON.stringify(topStudents));
+        document.getElementById('stuName').value = '';
+        document.getElementById('stuDesc').value = '';
+        document.getElementById('stuImg').value = '';
+        document.getElementById('imgPreviewRow').style.display = 'none';
+        document.getElementById('fileLabel').textContent = '📷 اضغط هنا لرفع صورة الطالب';
+        tempImageBase64 = '';
+        renderStudents();
+    }
+
+    function renderStudents() {
+        const grid = document.getElementById('studentsGrid');
+        if (topStudents.length === 0) {
+            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#718096;">🏆 لم يتم إضافة متفوقين بعد</div>`;
+            return;
+        }
+        grid.innerHTML = topStudents.map((s, i) => `
+            <div class="student-card">
+                <img src="${s.img}" alt="${s.name}" class="student-img">
+                <div class="student-info">
+                    <h4>${s.name}</h4>
+                    <p>${s.desc || 'متفوق متميز'}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ======================== TABS ========================
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active-panel'));
+        const tabMap = { public: 0, shared: 1, premium: 2, about: 3, topstudents: 4 };
+        document.querySelectorAll('.tab-btn')[tabMap[tab]].classList.add('active');
+
+        if (tab === 'public') {
+            document.getElementById('publicPanel').classList.add('active-panel');
+            renderPublicPanel();
+        } else if (tab === 'shared') {
+            document.getElementById('sharedPanel').classList.add('active-panel');
+            if (!currentUser) {
+                showLogin();
+            } else {
+                renderSharedPanel();
+            }
+        } else if (tab === 'premium') {
+            document.getElementById('premiumPanel').classList.add('active-panel');
+            renderPremiumPanel();
+        } else if (tab === 'about') {
+            document.getElementById('aboutPanel').classList.add('active-panel');
+        } else if (tab === 'topstudents') {
+            document.getElementById('topstudentsPanel').classList.add('active-panel');
+            renderStudents();
+        }
+    };
+
+    window.toggleUnit = function(id) {
+        let content = document.getElementById('content-' + id);
+        let header = content.previousElementSibling;
+        if (!content) return;
+        if (content.classList.contains('open')) {
+            content.classList.remove('open');
+            header.classList.remove('open');
+        } else {
+            content.classList.add('open');
+            header.classList.add('open');
+        }
+    };
+
+    // ======================== PWA INSTALL ========================
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBar').classList.add('show');
+    });
+    document.getElementById('installBtn').addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            document.getElementById('installBar').classList.remove('show');
+        }
+        deferredPrompt = null;
+    });
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+        if (!navigator.standalone) {
+            document.getElementById('iosHint').classList.add('show');
+        }
+    }
+
+    // ======================== INIT ========================
+    renderPublicPanel();
+    renderStudents();
+</script>
+</body>
+</html>
