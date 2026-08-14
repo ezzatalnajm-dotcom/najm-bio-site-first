@@ -32,7 +32,7 @@
             border-radius: 40px;
         }
         .contact-info span, .bottom-contact span { color: white; font-size: 16px; font-weight: 600; }
-        .telegram-link, .bottom-telegram, .whatsapp-link, .bottom-whatsapp {
+        .telegram-link, .bottom-telegram, .whatsapp-link, .bottom-whatsapp, .call-link, .bottom-call {
             display: flex;
             align-items: center;
             gap: 6px;
@@ -45,6 +45,7 @@
             font-size: 14px;
         }
         .whatsapp-link, .bottom-whatsapp { background: #25D366; }
+        .call-link, .bottom-call { background: #1e5a7a; }
         .icon-actions { display: flex; gap: 10px; }
         .icon-stack { display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .icon-label { color: white; font-size: 10px; font-weight: 600; white-space: nowrap; }
@@ -61,6 +62,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            text-decoration: none;
         }
         .notif-badge {
             position: absolute;
@@ -78,7 +80,7 @@
             justify-content: center;
             padding: 0 3px;
         }
-        .notif-dropdown, .contact-dropdown {
+        .notif-dropdown {
             display: none;
             position: fixed;
             top: 56px;
@@ -93,32 +95,10 @@
             max-height: 320px;
             overflow-y: auto;
         }
-        .notif-dropdown.show, .contact-dropdown.show { display: block; }
+        .notif-dropdown.show { display: block; }
         .notif-item { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 14px; color: #1e5a7a; }
         .notif-item:last-child { border-bottom: none; }
         .notif-empty { color: #a0aec0; text-align: center; padding: 20px; }
-        .contact-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 16px;
-            border-bottom: 1px solid #eee;
-            font-size: 15px;
-            font-weight: 600;
-            color: #1e5a7a;
-            text-decoration: none;
-        }
-        .contact-option:last-child { border-bottom: none; }
-        .bottom-contact-btn {
-            background: #1e5a7a;
-            color: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-        }
 
         .header {
             text-align: center;
@@ -215,7 +195,8 @@
             border-color: #fbd38d;
             pointer-events: none;
         }
-        .coming-soon .resource-title::after { content: " (قريباً)"; font-size: 11px; color: #b7791f; font-weight: normal; }
+        .coming-soon .resource-title::after,
+        .coming-soon .revision-title::after { content: " (قريباً)"; font-size: 11px; color: #b7791f; font-weight: normal; }
 
         .revision-grid-3 {
             display: grid;
@@ -530,17 +511,17 @@
                 <span class="icon-label">شارك التطبيق</span>
             </div>
             <div class="icon-stack">
-                <button class="icon-action-btn" id="contactBtn" onclick="toggleContactDropdown()">📞</button>
-                <span class="icon-label">تواصل معنا</span>
+                <a class="icon-action-btn" href="tel:+97477107247">📞</a>
+                <span class="icon-label">اتصال</span>
+            </div>
+            <div class="icon-stack">
+                <a class="icon-action-btn" href="https://wa.me/97477107247?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B9%D8%B2%D8%AA%D8%8C%20%D8%B9%D9%86%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" target="_blank">💬</a>
+                <span class="icon-label">واتساب</span>
             </div>
         </div>
         <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="telegram-link">✈️ قناة التليجرام</a>
     </div>
     <div class="notif-dropdown" id="notifDropdown"></div>
-    <div class="contact-dropdown" id="contactDropdown">
-        <a href="tel:+97477107247" class="contact-option">📞 اتصال مباشر</a>
-        <a href="https://wa.me/97477107247?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B9%D8%B2%D8%AA%D8%8C%20%D8%B9%D9%86%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" target="_blank" class="contact-option">💬 واتساب</a>
-    </div>
 
     <!-- Header -->
     <div class="header">
@@ -603,7 +584,8 @@
 
     <!-- Bottom Bar -->
     <div class="bottom-bar">
-        <button class="bottom-contact-btn" onclick="toggleContactDropdown()">📞 تواصل معنا</button>
+        <a href="tel:+97477107247" class="bottom-call">📞 اتصال</a>
+        <a href="https://wa.me/97477107247?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B9%D8%B2%D8%AA%D8%8C%20%D8%B9%D9%86%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" target="_blank" class="bottom-whatsapp">💬 واتساب</a>
         <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="bottom-telegram">✈️ قناة التليجرام</a>
     </div>
     <div class="footer-note">للاستفسار والتواصل: 77107247</div>
@@ -793,12 +775,13 @@
     // ======================== تحميل المحتوى من شيت "المحتوى" ========================
     // بدل ما تعدّل الكود لكل رابط جديد، ضيف صف في شيت "المحتوى" بنفس ملف الإكسيل:
     // الأعمدة: الأيقونة | ظهور | الرابط | العنوان | الوحدة
-    // ظهور = 0  → مخفية تمامًا، متظهرش في أي تبويب (عام / مشترك / مميز)
-    // ظهور = 1  → تظهر في عام + مشترك
-    // ظهور = 2  → تظهر في مشترك + مميز (مش في عام) — ده المفروض تحطه لأي "بنك أسئلة"
-    // ظهور = 3  → تظهر في مميز فقط
+    // ظهور = 00 (صفرين)  → مخفية تمامًا، متظهرش في أي تبويب خالص (عام / مشترك / مميز)
+    // ظهور = 0  (صفر واحد) → تظهر في عام + مشترك لكنها غير فعالة، ومكتوب عليها "(قريباً)"
+    // ظهور = 1  → تظهر فعالة في عام + مشترك
+    // ظهور = 2  (أو 002) → تظهر فعالة في مشترك فقط، ومتظهرش في عام خالص — ده المفروض تحطه لأي "بنك أسئلة"
+    // ظهور = 3  → تظهر فعالة في مميز فقط
     // الرابط ممكن يكون رابط صفحة HTML أو رابط ملف PDF مباشرة، بروتوكول https:// هيتضاف تلقائي لو ناقص
-    // أي خانة رابطها فاضي أو "#" هتظهر تلقائيًا بعلامة "قريباً" في أي تبويب بتظهر فيه
+    // أي خانة رابطها فاضي أو "#" هتظهر تلقائيًا بعلامة "(قريباً)" في أي تبويب بتظهر فيه
     let publicData = FALLBACK_publicData;
     let sharedData = FALLBACK_sharedData;
 
@@ -817,8 +800,14 @@
         UNITS.forEach(u => { pub[u.id] = []; shr[u.id] = []; prem[u.id] = []; });
         const revItems = {}; // 1..7 -> items[]
         rows.forEach(row => {
-            let level = parseInt(row['ظهور'] ?? row.level, 10);
+            const rawLevel = String(row['ظهور'] ?? row.level ?? '').trim();
+
+            // ظهور = 00 (صفرين بالظبط) → مخفية تمامًا، متتضافش لأي تبويب خالص
+            if (rawLevel === '00') return;
+
+            let level = parseInt(rawLevel, 10);
             if (isNaN(level)) level = 1;
+
             const rawLink = String(row['الرابط'] ?? row.link ?? '').trim();
             const title = String(row['العنوان'] ?? row.title ?? '').trim();
             const unitText = String(row['الوحدة'] ?? row.unit ?? '').trim();
@@ -832,8 +821,8 @@
             const icon = String(row['الأيقونة'] ?? row.icon ?? '').trim() || guessIcon(title);
             const item = { icon, title, link };
 
-            // ظهور = 0 → مخفية تمامًا، متتضافش لأي تبويب خالص
-            if (level === 0) return;
+            // ظهور = 0 (صفر واحد) → يظهر الصندوق لكنه غير فعال ومكتوب عليه "(قريباً)"، بغض النظر عن الرابط
+            if (level === 0) item.link = '#';
 
             // "مراجعة الوحدة X" في عمود الوحدة → يروح لقسم المراجعات بدل الوحدة العادية
             if (unitText.includes('مراجعة')) {
@@ -845,12 +834,11 @@
 
             if (!pub[num]) return;
             const unitId = num;
-            if (level === 1) {
+            if (level === 1 || level === 0) {
                 pub[unitId].push(item);
                 shr[unitId].push(item);
             } else if (level === 2) {
                 shr[unitId].push(item);
-                prem[unitId].push(item);
             } else if (level === 3) {
                 prem[unitId].push(item);
             }
@@ -1093,7 +1081,7 @@
                 let extraClass = isActive ? "" : "coming-soon";
                 html += `<a href="${item.link}" class="revision-item ${extraClass}" target="_blank">
                     <span>${item.icon}</span>
-                    <span>${item.title}</span>
+                    <span class="revision-title">${item.title}</span>
                 </a>`;
             });
             html += `</div>`;
@@ -1118,7 +1106,7 @@
                 let extraClass = isActive ? "" : "coming-soon";
                 html += `<a href="${item.link}" class="resource-link ${extraClass}" target="_blank">
                     <span>${item.icon}</span>
-                    <div>${item.title}</div>
+                    <div class="resource-title">${item.title}</div>
                 </a>`;
             });
             html += `</div></div></div>`;
@@ -1356,7 +1344,6 @@
 
     function toggleNotifDropdown() {
         const dd = document.getElementById('notifDropdown');
-        document.getElementById('contactDropdown').classList.remove('show');
         const isOpen = dd.classList.toggle('show');
         if (isOpen) {
             dd.innerHTML = newItemsList.length
@@ -1366,11 +1353,6 @@
             localStorage.setItem('bio_seen_titles', JSON.stringify(getAllTitles()));
             updateNotifBadge(0);
         }
-    }
-
-    function toggleContactDropdown() {
-        document.getElementById('contactDropdown').classList.toggle('show');
-        document.getElementById('notifDropdown').classList.remove('show');
     }
 
     // ======================== INIT ========================
