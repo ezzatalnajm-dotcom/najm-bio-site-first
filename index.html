@@ -32,7 +32,7 @@
             border-radius: 40px;
         }
         .contact-info span, .bottom-contact span { color: white; font-size: 16px; font-weight: 600; }
-        .telegram-link, .bottom-telegram {
+        .telegram-link, .bottom-telegram, .whatsapp-link, .bottom-whatsapp {
             display: flex;
             align-items: center;
             gap: 6px;
@@ -44,6 +44,57 @@
             font-weight: 600;
             font-size: 14px;
         }
+        .whatsapp-link, .bottom-whatsapp { background: #25D366; }
+        .icon-actions { display: flex; gap: 4px; }
+        .icon-action-btn {
+            position: relative;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            font-size: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notif-badge {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            background: #e53e3e;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+        }
+        .notif-dropdown {
+            display: none;
+            position: fixed;
+            top: 46px;
+            left: 10px;
+            right: 10px;
+            max-width: 340px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.25);
+            z-index: 999;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        .notif-dropdown.show { display: block; }
+        .notif-item { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 14px; color: #1e5a7a; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-empty { color: #a0aec0; text-align: center; padding: 20px; }
 
         .header {
             text-align: center;
@@ -441,9 +492,16 @@
 
     <!-- Top Bar -->
     <div class="top-bar">
+        <div class="icon-actions">
+            <button class="icon-action-btn" id="notifBtn" onclick="toggleNotifDropdown()" title="الإشعارات">🔔<span class="notif-badge" id="notifBadge"></span></button>
+            <button class="icon-action-btn" onclick="triggerInstall()" title="تثبيت التطبيق">📲</button>
+            <button class="icon-action-btn" onclick="shareApp()" title="مشاركة التطبيق">🔗</button>
+        </div>
         <div class="contact-info"><span>📞 77107247</span></div>
+        <a href="https://wa.me/97477107247?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B9%D8%B2%D8%AA%D8%8C%20%D8%B9%D9%86%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" target="_blank" class="whatsapp-link">💬 واتساب</a>
         <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="telegram-link">✈️ قناة التليجرام</a>
     </div>
+    <div class="notif-dropdown" id="notifDropdown"></div>
 
     <!-- Header -->
     <div class="header">
@@ -468,7 +526,7 @@
     <!-- About Me Panel -->
     <div id="aboutPanel" class="panel">
         <div class="about-card">
-            <img src="https://via.placeholder.com/160x160/1e5a7a/ffffff?text=أ.+عزت" alt="أ. عزت شعبان" class="about-img" id="aboutImg">
+            <img src="https://lh3.googleusercontent.com/d/1T3xcJ_h1rEn-iJWEji6yS4mEd-3nSVNY" alt="أ. عزت شعبان" class="about-img" id="aboutImg">
             <div class="about-text">
                 <h3>👨‍🏫 أ. عزت شعبان</h3>
                 <p>
@@ -507,6 +565,7 @@
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <div class="bottom-contact"><span>📞 77107247</span></div>
+        <a href="https://wa.me/97477107247?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B9%D8%B2%D8%AA%D8%8C%20%D8%B9%D9%86%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" target="_blank" class="bottom-whatsapp">💬 واتساب</a>
         <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="bottom-telegram">✈️ قناة التليجرام</a>
     </div>
     <div class="footer-note">للاستفسار والتواصل: 77107247</div>
@@ -543,7 +602,7 @@
     // ║  ترتيب الأعمدة في الشيت: A=هاتف الطالب B=الحالة C=ولي الأمر D=الاسم ║
     // ║  الحالة = 2 → مسموح | 0 أو 1 → مرفوض                      ║
     // ═══════════════════════════════════════════════════════════
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCRz8OMEAsgp7nz0XbqTg6nXR8b3FxOk3yl1Z-1QDtXcr5alKPRvha6J1URKw6Wbqceg/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWKumz4um9FgWFWsDhg4DqEBY20PPg_uwVJjuoNuSUFs3KxoyqkL6LzYUAg8-m-Pijdg/exec";
     // ═══════════════════════════════════════════════════════════
 
     const UNITS = [
@@ -556,32 +615,29 @@
         { id: 7, name: "الوحدة 7 - المناعة" }
     ];
 
-    const publicData = {
+    // بيانات احتياطية تُستخدم فقط إذا تعذر الوصول لشيت "المحتوى" (لا إنترنت أو أول مرة) — ونفس القالب المتفق عليه لكل الوحدات
+    const FALLBACK_publicData = {
         1: [
-            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "https://najm-bio-site-first.vercel.app" },
             { icon: "⚡", title: "فلاش كارت ملزمة 2", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 3", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         2: [
             { icon: "⚡", title: "فلاش كارت ملزمة 4", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 5", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         3: [
             { icon: "⚡", title: "فلاش كارت ملزمة 9", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 10", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         4: [
             { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
@@ -590,7 +646,6 @@
             { icon: "⚡", title: "فلاش كارت ملزمة 5", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 6", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 7", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
@@ -598,7 +653,6 @@
             { icon: "⚡", title: "فلاش كارت ملزمة 8", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 9", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 10", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
@@ -606,122 +660,252 @@
             { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 2", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 3", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ]
     };
 
-    const sharedData = {
+    const FALLBACK_sharedData = {
         1: [
-            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 1", link: "#" },
+            { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "https://najm-bio-site-first.vercel.app" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 2", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 2", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 2", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 2A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 2B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 3", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 3", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 3", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 3A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 3B", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         2: [
             { icon: "⚡", title: "فلاش كارت ملزمة 4", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 4", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 4", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 4A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 4B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 5", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 5", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 5", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 5A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 5B", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         3: [
             { icon: "⚡", title: "فلاش كارت ملزمة 9", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 9", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 9", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 9A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 9B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 10", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 10", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 10", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 10A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 10B", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         4: [
             { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 1", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1B", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         5: [
             { icon: "⚡", title: "فلاش كارت ملزمة 4", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 4", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 4", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 4A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 4B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 5", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 5", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 5", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 5A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 5B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 6", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 6", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 6", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 6A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 6B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 7", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 7", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 7", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 7A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 7B", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         6: [
             { icon: "⚡", title: "فلاش كارت ملزمة 8", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 8", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 8", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 8A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 8B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 9", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 9", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 9", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 9A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 9B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 10", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 10", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 10", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 10A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 10B", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ],
         7: [
             { icon: "⚡", title: "فلاش كارت ملزمة 1", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 1", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 1B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 2", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 2", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 2", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 2A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 2B", link: "#" },
             { icon: "⚡", title: "فلاش كارت ملزمة 3", link: "#" },
-            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 3", link: "#" },
-            { icon: "🎨", title: "رسومات ملزمة 3", link: "#" },
-            { icon: "⚡", title: "فلاش كارت الوحدة", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 3A", link: "#" },
+            { icon: "📝", title: "بنك أسئلة مبسط ملزمة 3B", link: "#" },
             { icon: "🗺️", title: "الأطلس التفاعلي", link: "#" },
             { icon: "📘", title: "ملزمة النجم", link: "#" }
         ]
     };
 
-    const premiumData = {};
+    let premiumData = {};
 
-    const REVISION_FIRST = [
-        { unit: 1, name: "الوحدة 1 - العضلات والحركة",
+    // ======================== تحميل المحتوى من شيت "المحتوى" ========================
+    // بدل ما تعدّل الكود لكل رابط جديد، ضيف صف في شيت "المحتوى" بنفس ملف الإكسيل:
+    // الأعمدة: الأيقونة | ظهور | الرابط | العنوان | الوحدة
+    // ظهور = 0  → مخفية تمامًا، متظهرش في أي تبويب (عام / مشترك / مميز)
+    // ظهور = 1  → تظهر في عام + مشترك
+    // ظهور = 2  → تظهر في مشترك + مميز (مش في عام) — ده المفروض تحطه لأي "بنك أسئلة"
+    // ظهور = 3  → تظهر في مميز فقط
+    // الرابط ممكن يكون رابط صفحة HTML أو رابط ملف PDF مباشرة، بروتوكول https:// هيتضاف تلقائي لو ناقص
+    // أي خانة رابطها فاضي أو "#" هتظهر تلقائيًا بعلامة "قريباً" في أي تبويب بتظهر فيه
+    let publicData = FALLBACK_publicData;
+    let sharedData = FALLBACK_sharedData;
+
+    function guessIcon(title) {
+        if (title.includes('فلاش')) return '⚡';
+        if (title.includes('بنك أسئلة') || title.includes('اسئلة')) return '📝';
+        if (title.includes('رسومات') || title.includes('انفوجرافيك')) return '🎨';
+        if (title.includes('فيديو')) return '▶️';
+        if (title.includes('بوربوينت')) return '📊';
+        if (title.includes('أطلس')) return '🗺️';
+        return '📘';
+    }
+
+    function applyContentRows(rows) {
+        const pub = {}, shr = {}, prem = {};
+        UNITS.forEach(u => { pub[u.id] = []; shr[u.id] = []; prem[u.id] = []; });
+        const revItems = {}; // 1..7 -> items[]
+        rows.forEach(row => {
+            let level = parseInt(row['ظهور'] ?? row.level, 10);
+            if (isNaN(level)) level = 1;
+            const rawLink = String(row['الرابط'] ?? row.link ?? '').trim();
+            const title = String(row['العنوان'] ?? row.title ?? '').trim();
+            const unitText = String(row['الوحدة'] ?? row.unit ?? '').trim();
+            if (!title || !unitText) return;
+            const m = unitText.match(/\d+/);
+            if (!m) return;
+            const num = parseInt(m[0]);
+            let link = rawLink;
+            if (link && link !== '#' && !/^https?:\/\//i.test(link)) link = 'https://' + link;
+            if (!link) link = '#';
+            const icon = String(row['الأيقونة'] ?? row.icon ?? '').trim() || guessIcon(title);
+            const item = { icon, title, link };
+
+            // ظهور = 0 → مخفية تمامًا، متتضافش لأي تبويب خالص
+            if (level === 0) return;
+
+            // "مراجعة الوحدة X" في عمود الوحدة → يروح لقسم المراجعات بدل الوحدة العادية
+            if (unitText.includes('مراجعة')) {
+                if (num < 1 || num > 7) return;
+                if (!revItems[num]) revItems[num] = [];
+                revItems[num].push(item);
+                return;
+            }
+
+            if (!pub[num]) return;
+            const unitId = num;
+            if (level === 1) {
+                pub[unitId].push(item);
+                shr[unitId].push(item);
+            } else if (level === 2) {
+                shr[unitId].push(item);
+                prem[unitId].push(item);
+            } else if (level === 3) {
+                prem[unitId].push(item);
+            }
+        });
+        // لو وحدة معينة لسه ماخدتش صفوف كفاية في الشيت، اعرض القالب المتفق عليه بدل ما تفضل فاضية
+        UNITS.forEach(u => {
+            if (pub[u.id].length === 0 && shr[u.id].length === 0) {
+                pub[u.id] = FALLBACK_publicData[u.id] || [];
+                shr[u.id] = FALLBACK_sharedData[u.id] || [];
+                // في القالب الاحتياطي، عناصر "مميز" هي بس اللي موجودة في المشترك ومش موجودة في العام (زي بنك الأسئلة)
+                const pubTitles = new Set((FALLBACK_publicData[u.id] || []).map(x => x.title));
+                prem[u.id] = (FALLBACK_sharedData[u.id] || []).filter(x => !pubTitles.has(x.title));
+            }
+        });
+        // ابني قسمي المراجعة (أول: وحدات 1-3، ثاني: وحدات 4-7) — لو وحدة مراجعة فاضية، استخدم الاحتياطي
+        const revFirst = [1, 2, 3].map(n => ({
+            unit: n, name: REVISION_UNIT_NAMES[n],
+            items: (revItems[n] && revItems[n].length) ? revItems[n]
+                : (FALLBACK_REVISION_FIRST.find(x => x.unit === n) || {}).items || []
+        }));
+        const revSecond = [4, 5, 6, 7].map(n => ({
+            unit: n, name: REVISION_UNIT_NAMES[n],
+            items: (revItems[n] && revItems[n].length) ? revItems[n]
+                : (FALLBACK_REVISION_SECOND.find(x => x.unit === n) || {}).items || []
+        }));
+        return { pub, shr, prem, revFirst, revSecond };
+    }
+
+    async function loadContentRows() {
+        if (GOOGLE_SCRIPT_URL.includes('XXXXXXXX')) return null;
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + '?sheet=content&t=' + Date.now());
+            const data = await res.json();
+            return Array.isArray(data) ? data : null;
+        } catch (e) {
+            console.error('تعذر تحميل المحتوى من الشيت، سيتم استخدام آخر نسخة محفوظة', e);
+            return null;
+        }
+    }
+
+    async function initContentData() {
+        // اعرض فورًا من آخر نسخة محفوظة على الجهاز (لو موجودة) عشان الموقع يفتح بسرعة
+        const cached = localStorage.getItem('bio_content_cache');
+        if (cached) {
+            try {
+                const { pub, shr, prem, revFirst, revSecond } = applyContentRows(JSON.parse(cached));
+                publicData = pub; sharedData = shr; premiumData = prem;
+                REVISION_FIRST = revFirst; REVISION_SECOND = revSecond;
+            } catch (e) { /* تجاهل وارجع للاحتياطي */ }
+        }
+        renderPublicPanel();
+
+        // هات آخر تحديث من الشيت في الخلفية، وحدّث العرض لو اتغير حاجة
+        const rows = await loadContentRows();
+        if (rows && rows.length) {
+            localStorage.setItem('bio_content_cache', JSON.stringify(rows));
+            const { pub, shr, prem, revFirst, revSecond } = applyContentRows(rows);
+            publicData = pub; sharedData = shr; premiumData = prem;
+            REVISION_FIRST = revFirst; REVISION_SECOND = revSecond;
+            renderPublicPanel();
+            if (currentUser) renderSharedPanel();
+            const activePanel = document.querySelector('.panel.active-panel');
+            if (activePanel && activePanel.id === 'premiumPanel') renderPremiumPanel();
+            checkForNewItems();
+        }
+    }
+
+    const REVISION_UNIT_NAMES = {
+        1: "الوحدة 1 - العضلات والحركة",
+        2: "الوحدة 2 - الجهاز الدوراني",
+        3: "الوحدة 3 - النقل في النباتات",
+        4: "الوحدة 4 - التنظيم الهرموني في النباتات",
+        5: "الوحدة 5 - التحكم والتنظيم",
+        6: "الوحدة 6 - الاتزان الداخلي في الثدييات",
+        7: "الوحدة 7 - المناعة"
+    };
+
+    const FALLBACK_REVISION_FIRST = [
+        { unit: 1, name: REVISION_UNIT_NAMES[1],
           items: [
               { icon: "📘", title: "ملخص شرح الوحدة 1", link: "#" },
               { icon: "📊", title: "بوربوينت مراجعة الوحدة 1", link: "#" },
               { icon: "▶️", title: "فيديو شرح الوحدة 1", link: "#" },
               { icon: "🎨", title: "انفوجرافيك الوحدة 1", link: "#" }
           ] },
-        { unit: 2, name: "الوحدة 2 - الجهاز الدوراني",
+        { unit: 2, name: REVISION_UNIT_NAMES[2],
           items: [
               { icon: "📘", title: "ملخص شرح الوحدة 2", link: "#" },
               { icon: "📊", title: "بوربوينت مراجعة الوحدة 2", link: "#" },
               { icon: "▶️", title: "فيديو شرح الوحدة 2", link: "#" },
               { icon: "🎨", title: "انفوجرافيك الوحدة 2", link: "#" }
           ] },
-        { unit: 3, name: "الوحدة 3 - النقل في النباتات",
+        { unit: 3, name: REVISION_UNIT_NAMES[3],
           items: [
               { icon: "📘", title: "ملخص شرح الوحدة 3", link: "#" },
               { icon: "📊", title: "بوربوينت مراجعة الوحدة 3", link: "#" },
@@ -730,29 +914,29 @@
           ] }
     ];
 
-    const REVISION_SECOND = [
-        { unit: 4, name: "الوحدة 4 - التنظيم الهرموني في النباتات",
+    const FALLBACK_REVISION_SECOND = [
+        { unit: 4, name: REVISION_UNIT_NAMES[4],
           items: [
               { icon: "📘", title: "ملخص شرح الوحدة 4", link: "#" },
               { icon: "📊", title: "بوربوينت مراجعة الوحدة 4", link: "#" },
               { icon: "▶️", title: "فيديو شرح الوحدة 4", link: "#" },
               { icon: "🎨", title: "انفوجرافيك الوحدة 4", link: "#" }
           ] },
-        { unit: 5, name: "الوحدة 5 - التحكم والتنظيم",
+        { unit: 5, name: REVISION_UNIT_NAMES[5],
           items: [
               { icon: "📘", title: "ملخص شرح الوحدة 5", link: "#" },
               { icon: "📊", title: "بوربوينت مراجعة الوحدة 5", link: "#" },
               { icon: "▶️", title: "فيديو شرح الوحدة 5", link: "#" },
               { icon: "🎨", title: "انفوجرافيك الوحدة 5", link: "#" }
           ] },
-        { unit: 6, name: "الوحدة 6 - الاتزان الداخلي في الثدييات",
+        { unit: 6, name: REVISION_UNIT_NAMES[6],
           items: [
               { icon: "📘", title: "ملخص شرح الوحدة 6", link: "#" },
               { icon: "📊", title: "بوربوينت مراجعة الوحدة 6", link: "#" },
               { icon: "▶️", title: "فيديو شرح الوحدة 6", link: "#" },
               { icon: "🎨", title: "انفوجرافيك الوحدة 6", link: "#" }
           ] },
-        { unit: 7, name: "الوحدة 7 - المناعة",
+        { unit: 7, name: REVISION_UNIT_NAMES[7],
           items: [
               { icon: "📘", title: "ملخص شرح الوحدة 7", link: "#" },
               { icon: "📊", title: "بوربوينت مراجعة الوحدة 7", link: "#" },
@@ -760,6 +944,10 @@
               { icon: "🎨", title: "انفوجرافيك الوحدة 7", link: "#" }
           ] }
     ];
+
+    // نسخة قابلة للتحديث من الشيت — تبدأ بالاحتياطي وتتغير بعد تحميل البيانات
+    let REVISION_FIRST = FALLBACK_REVISION_FIRST;
+    let REVISION_SECOND = FALLBACK_REVISION_SECOND;
 
     // ======================== LOGIN SYSTEM (GOOGLE SHEETS) ========================
     let currentUser = null;
@@ -782,7 +970,7 @@
             return [];
         }
         try {
-            const res = await fetch(GOOGLE_SCRIPT_URL + '?t=' + Date.now());
+            const res = await fetch(GOOGLE_SCRIPT_URL + '?sheet=users&t=' + Date.now());
             const data = await res.json();
             return Array.isArray(data) ? data : [];
         } catch (e) {
@@ -941,11 +1129,16 @@
 
     function renderPremiumPanel() {
         const panel = document.getElementById('premiumPanel');
-        panel.innerHTML = `<div style="text-align:center;padding:60px 20px;">
+        let html = renderUnits('premium', premiumData, false, false);
+        panel.innerHTML = html || `<div style="text-align:center;padding:60px 20px;">
             <div style="font-size:48px;margin-bottom:15px;">⭐</div>
             <h3 style="color:#1e5a7a;margin-bottom:10px;">المحتوى المميز</h3>
             <p style="color:#718096;">قريباً... سيتم إضافة المحتوى المميز</p>
         </div>`;
+        setTimeout(() => {
+            let first = document.querySelector('#premiumPanel .unit-header');
+            if (first) first.click();
+        }, 100);
     }
 
     // ======================== TOP STUDENTS ========================
@@ -1061,8 +1254,83 @@
         }
     }
 
+    function triggerInstall() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+        } else if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+            document.getElementById('iosHint').classList.add('show');
+        } else {
+            alert('لتثبيت الموقع كتطبيق:\nافتح قائمة المتصفح (⋮ أو زر المشاركة) واختر "إضافة إلى الشاشة الرئيسية" أو "Install app".');
+        }
+    }
+
+    // ======================== مشاركة التطبيق ========================
+    function shareApp() {
+        const shareData = { title: document.title, text: 'موقع أ. عزت شعبان للأحياء 🧬', url: location.href };
+        if (navigator.share) {
+            navigator.share(shareData).catch(() => {});
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(location.href).then(() => alert('تم نسخ رابط الموقع ✅'));
+        } else {
+            prompt('انسخ رابط الموقع:', location.href);
+        }
+    }
+
+    // ======================== إشعارات المحتوى الجديد ========================
+    function getAllTitles() {
+        const all = [];
+        Object.values(publicData).forEach(arr => arr.forEach(i => all.push(i.title)));
+        Object.values(sharedData).forEach(arr => arr.forEach(i => all.push(i.title)));
+        Object.values(premiumData).forEach(arr => arr.forEach(i => all.push(i.title)));
+        REVISION_FIRST.forEach(u => u.items.forEach(i => all.push(i.title)));
+        REVISION_SECOND.forEach(u => u.items.forEach(i => all.push(i.title)));
+        return all;
+    }
+
+    function updateNotifBadge(count) {
+        const badge = document.getElementById('notifBadge');
+        if (!badge) return;
+        if (count > 0) {
+            badge.textContent = count > 9 ? '9+' : count;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    let newItemsList = [];
+    function checkForNewItems() {
+        const current = getAllTitles();
+        let seen;
+        try { seen = JSON.parse(localStorage.getItem('bio_seen_titles') || '[]'); } catch (e) { seen = []; }
+        // أول مرة يفتح فيها أي حد الموقع، منعتبرش كل المحتوى الموجود وقتها "جديد"
+        if (seen.length === 0) {
+            localStorage.setItem('bio_seen_titles', JSON.stringify(current));
+            newItemsList = [];
+            updateNotifBadge(0);
+            return;
+        }
+        const seenSet = new Set(seen);
+        newItemsList = current.filter(t => !seenSet.has(t));
+        updateNotifBadge(newItemsList.length);
+    }
+
+    function toggleNotifDropdown() {
+        const dd = document.getElementById('notifDropdown');
+        const isOpen = dd.classList.toggle('show');
+        if (isOpen) {
+            dd.innerHTML = newItemsList.length
+                ? newItemsList.map(t => `<div class="notif-item">🆕 ${t}</div>`).join('')
+                : `<div class="notif-item notif-empty">مفيش إشعارات جديدة حاليًا</div>`;
+            // بمجرد ما يفتحها ويشوفها، اعتبرها بقت مقروءة
+            localStorage.setItem('bio_seen_titles', JSON.stringify(getAllTitles()));
+            updateNotifBadge(0);
+        }
+    }
+
     // ======================== INIT ========================
-    renderPublicPanel();
+    initContentData();
     renderStudents();
 </script>
 </body>
