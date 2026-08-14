@@ -545,13 +545,13 @@
     <!-- About Me Panel -->
     <div id="aboutPanel" class="panel">
         <div class="about-card">
-            <img src="https://lh3.googleusercontent.com/d/1T3xcJ_h1rEn-iJWEji6yS4mEd-3nSVNY" alt="أ. عزت شعبان" class="about-img" id="aboutImg">
+            <img src="https://drive.google.com/thumbnail?id=1T3xcJ_h1rEn-iJWEji6yS4mEd-3nSVNY&sz=w1000" alt="أ. عزت شعبان" class="about-img" id="aboutImg">
             <div class="about-text">
                 <h3>👨‍🏫 أ. عزت شعبان</h3>
                 <p>
-                    🧬 معلم أحياء ثانوية عامة – حاصل على الرخصة المهنية في قطر
+                    🫀 معلم أحياء ثانوية عامة
                     <br><br>
-                    أدرّس الأحياء بالعربية والإنجليزية | بكالوريوس علوم وتربية – جامعة حلوان (1999) | من أوائل المنسقين الحاصلين على الرخصة المهنية للتعليم بدولة قطر.
+                    أدرّس الأحياء بالعربية والإنجليزية | بكالوريوس علوم وتربية | من أوائل المنسقين الحاصلين على الرخصة المهنية للتعليم بدولة قطر.
                     <br><br>
                     🎯 هدفي: تبسيط الأحياء، ربطها بالحياة، وتحقيق أعلى الدرجات بأقل جهد.
                     <br><br>
@@ -982,9 +982,7 @@
     let isLoading = false;
 
     function validatePhone(input) {
-        let val = input.value.replace(/\D/g, '');
-        if (!val.startsWith('974')) val = '974' + val.replace(/^974/, '');
-        input.value = val;
+        input.value = input.value.replace(/\D/g, '');
     }
 
     function isValidQatarPhone(phone) {
