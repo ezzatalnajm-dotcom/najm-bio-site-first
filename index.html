@@ -533,7 +533,6 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('public')">📖 عام</button>
         <button class="tab-btn" onclick="switchTab('shared')">🔓 مشترك</button>
-        <button class="tab-btn" onclick="switchTab('premium')">⭐ مميز</button>
         <button class="tab-btn" onclick="switchTab('about')">👨‍🏫 لمحة عني</button>
         <button class="tab-btn" onclick="switchTab('topstudents')">🏆 المتفوقون</button>
     </div>
@@ -550,12 +549,16 @@
             <div class="about-text">
                 <h3>👨‍🏫 أ. عزت شعبان</h3>
                 <p>
-                    مدرس الأحياء للثانوية العامة بخبرة تمتد لسنوات في تبسيط العلوم الحيوية وإيصالها للطلاب بأسلوب ممتع ومبسط.
+                    🧬 معلم أحياء ثانوية عامة – حاصل على الرخصة المهنية في قطر
                     <br><br>
-                    🎯 هدفي: أن يكون مادة الأحياء سهلة ومفهومة لكل طالب، وأن يحصل الطالب على أعلى الدرجات بأقل جهد.
+                    أدرّس الأحياء بالعربية والإنجليزية | بكالوريوس علوم وتربية – جامعة حلوان (1999) | من أوائل المنسقين الحاصلين على الرخصة المهنية للتعليم بدولة قطر.
                     <br><br>
-                    📚 أقدم: ملازم منظمة، فلاش كروت، بنوك أسئلة، فيديوهات شرح، وأطالس تفاعلية.
-                    <br>
+                    🎯 هدفي: تبسيط الأحياء، ربطها بالحياة، وتحقيق أعلى الدرجات بأقل جهد.
+                    <br><br>
+                    📚 أقدم: ملازم منظمة، فلاش كروت، بنوك أسئلة، فيديوهات شرح، أطالس تفاعلية.
+                    <br><br>
+                    ⚙️ نهجي: تعلم نشط يراعي الفروق الفردية، مناقشات وتحديات، تقويم شامل، تغذية راجعة، بيئة صفية أسرية، وتواصل مستمر مع أولياء الأمور.
+                    <br><br>
                     📞 للتواصل: 77107247
                 </p>
             </div>
@@ -595,10 +598,6 @@
 <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
         <h3>🔐 تسجيل الدخول - المحتوى المشترك</h3>
-        <div class="form-group">
-            <label>اسم الطالب</label>
-            <input type="text" id="loginName" placeholder="اكتب اسمك الثلاثي">
-        </div>
         <div class="form-group">
             <label>هاتف الطالب</label>
             <input type="tel" id="loginPhone" placeholder="مثال: 97450123456" oninput="validatePhone(this)">
@@ -1020,12 +1019,10 @@
     }
 
     async function doLogin() {
-        const name = document.getElementById('loginName').value.trim();
         const phone = document.getElementById('loginPhone').value.trim();
         const parent = document.getElementById('loginParent').value.trim();
         const err = document.getElementById('loginError');
 
-        if (!name) { err.textContent = "❌ من فضلك أدخل اسم الطالب"; err.style.display = 'block'; return; }
         if (!isValidQatarPhone(phone)) { err.textContent = "❌ هاتف الطالب غير صحيح (يجب 974 + 8 أرقام)"; err.style.display = 'block'; return; }
         if (!isValidQatarPhone(parent)) { err.textContent = "❌ هاتف ولي الأمر غير صحيح (يجب 974 + 8 أرقام)"; err.style.display = 'block'; return; }
 
@@ -1054,7 +1051,7 @@
             return;
         }
 
-        currentUser = { name: match.name || match['اسم الطالب'] || match['الاسم'] || name, phone, parent };
+        currentUser = { name: match.name || match['اسم الطالب'] || match['الاسم'] || 'طالب', phone, parent };
         closeLogin();
         renderSharedPanel();
     }
@@ -1222,7 +1219,7 @@
     window.switchTab = function(tab) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active-panel'));
-        const tabMap = { public: 0, shared: 1, premium: 2, about: 3, topstudents: 4 };
+        const tabMap = { public: 0, shared: 1, about: 2, topstudents: 3 };
         document.querySelectorAll('.tab-btn')[tabMap[tab]].classList.add('active');
 
         if (tab === 'public') {
@@ -1294,7 +1291,7 @@
 
     // ======================== مشاركة التطبيق ========================
     function shareApp() {
-        const shareData = { title: document.title, text: 'موقع أ. عزت شعبان للأحياء 🧬', url: location.href };
+        const shareData = { title: document.title, text: 'موقع أ. عزت شعبان للأحياء 🫀', url: location.href };
         if (navigator.share) {
             navigator.share(shareData).catch(() => {});
         } else if (navigator.clipboard) {
