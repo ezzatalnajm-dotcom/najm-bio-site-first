@@ -619,7 +619,9 @@
     // ═══════════════════════════════════════════════════════════
     // ║  ضع هنا رابط Google Apps Script الخاص بك               ║
     // ║  مثال: https://script.google.com/macros/s/XXXX/exec    ║
-    // ║  ترتيب الأعمدة في الشيت: A=هاتف الطالب B=الحالة C=ولي الأمر D=الاسم ║
+    // ║  ورقة "الطلاب" — الأعمدة بيتقرأوا بالاسم مش بالترتيب، فترتيبهم في الشيت غير مهم  ║
+    // ║  المطلوب فعليًا لتسجيل الدخول: هاتف الطالب + هاتف ولي الأمر يتطابقوا مع صف في الشيت ║
+    // ║  عمود "الحالة" بقى للاستخدام الشخصي بس، مبقاش بيأثر على الدخول                    ║
     // ║  الحالة = 2 → مسموح | 0 أو 1 → مرفوض                      ║
     // ═══════════════════════════════════════════════════════════
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWKumz4um9FgWFWsDhg4DqEBY20PPg_uwVJjuoNuSUFs3KxoyqkL6LzYUAg8-m-Pijdg/exec";
@@ -1034,16 +1036,15 @@
         // Load users from Google Sheet
         allowedUsers = await loadAllowedUsers();
 
-        // Check if phone exists in sheet and status == 2
+        // Check if phone + parent phone match a row in the sheet (من غير شرط "الحالة")
         const match = allowedUsers.find(u => {
             const uPhone = String(u.phone || u['هاتف الطالب'] || '').trim();
             const uParent = String(u.parent || u['هاتف ولي الأمر'] || '').trim();
-            const uStatus = parseInt(u.status || u['الحالة'] || 0);
             const cleanPhone = phone.replace(/^974/, '');
             const cleanParent = parent.replace(/^974/, '');
             const cleanUPhone = uPhone.replace(/^974/, '');
             const cleanUParent = uParent.replace(/^974/, '');
-            return (cleanUPhone === cleanPhone) && (cleanUParent === cleanParent) && (uStatus === 2);
+            return (cleanUPhone === cleanPhone) && (cleanUParent === cleanParent);
         });
 
         if (!match) {
@@ -1053,7 +1054,7 @@
             return;
         }
 
-        currentUser = { name: match.name || match['الاسم'] || name, phone, parent };
+        currentUser = { name: match.name || match['اسم الطالب'] || match['الاسم'] || name, phone, parent };
         closeLogin();
         renderSharedPanel();
     }
