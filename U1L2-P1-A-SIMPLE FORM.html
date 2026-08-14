@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار النجم في الأحياء — الدرس 1-2 (الجزء 1): الخصائص الوظيفية للعضلات (A)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Amiri:wght@700&display=swap');
+
+:root{
+  --bg:#0d0a1f; --bg2:#160f33; --gold:#d4af37; --gold-soft:#e8c766;
+  --teal:#12b8ac; --panel:#1a1440; --panel2:#221a52;
+  --ink:#f3f0ff; --muted:#a79fd1; --danger:#e35d5d; --ok:#3ecf8e;
+  --note-bg: rgba(18,184,172,.08); --note-border: rgba(18,184,172,.35);
+}
+body.light{
+  --bg:#f4f1ea; --bg2:#ece7d8; --gold:#b8892e; --gold-soft:#8a651f;
+  --teal:#0a8f86; --panel:#ffffff; --panel2:#fbf9f3;
+  --ink:#2a2416; --muted:#766f56; --danger:#c73e3e; --ok:#2e8f5e;
+  --note-bg: rgba(10,143,134,.07); --note-border: rgba(10,143,134,.3);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+body{
+  margin:0; min-height:100vh; font-family:'Cairo',sans-serif; color:var(--ink);
+  background:
+    radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--panel2) 60%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 90% 85%, color-mix(in srgb, var(--panel2) 60%, transparent) 0%, transparent 45%),
+    linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%);
+  min-height:100vh; padding:18px; transition:background .3s, color .3s;
+}
+.screen{display:none; max-width:640px; margin:0 auto;}
+.screen.active{display:block; animation:fadeIn .35s ease;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+.theme-toggle{position:fixed; top:14px; left:14px; z-index:50; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); color:var(--ink); width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:18px;}
+.group-badge{position:fixed; top:14px; right:14px; z-index:50; background:rgba(212,175,55,.18); border:1px solid var(--gold); color:var(--gold-soft); font-weight:800; font-size:13px; padding:8px 14px; border-radius:20px;}
+
+.brand{text-align:center; margin-bottom:18px;}
+.brand .star{font-size:30px;}
+.brand h1{font-family:'Amiri',serif; font-size:24px; color:var(--gold-soft); margin:6px 0 2px; text-shadow:0 0 18px rgba(212,175,55,.35);}
+.brand p{color:var(--muted); font-size:12.5px; margin:0;}
+
+.card{background:linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%); border:1px solid rgba(212,175,55,.35); border-radius:18px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.15); position:relative;}
+.note-banner{background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.4); border-radius:12px; padding:10px 14px; font-size:12.5px; color:var(--gold-soft); margin-bottom:16px; text-align:center; line-height:1.6;}
+.note-banner a{color:var(--teal); font-weight:700; text-decoration:none;}
+
+label{display:block; font-size:13px; color:var(--muted); margin:14px 0 6px;}
+input[type=text], input[type=tel], input[type=password]{
+  width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(128,128,128,.25);
+  background:rgba(128,128,128,.08); color:var(--ink); font-family:inherit; font-size:15px; outline:none; transition:.2s;
+}
+input:focus{border-color:var(--teal); box-shadow:0 0 0 3px rgba(18,184,172,.15);}
+input::placeholder{color:#8b83a8; opacity:.85;}
+
+.btn{display:block; width:100%; text-align:center; padding:13px 16px; border-radius:12px; border:none;
+  font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; margin-top:12px; transition:.15s; text-decoration:none;}
+.btn-gold{background:linear-gradient(135deg, var(--gold), #b8892e); color:#26190a;}
+.btn-gold:hover{filter:brightness(1.08);}
+.btn-teal{background:linear-gradient(135deg, var(--teal), #0a8f86); color:#04241f;}
+.btn-ghost{background:rgba(128,128,128,.1); color:var(--ink); border:1px solid rgba(128,128,128,.25);}
+.btn-danger{background:rgba(227,93,93,.15); color:var(--danger); border:1px solid rgba(227,93,93,.4);}
+.btn-wa{background:linear-gradient(135deg,#25D366,#128C4A); color:#04241a;}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+.btn-row{display:flex; gap:10px; flex-wrap:wrap;}
+.btn-row .btn{margin-top:0; flex:1; min-width:120px;}
+
+.err{color:var(--danger); font-size:12.5px; margin-top:8px; min-height:16px;}
+
+.exam-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px;}
+.pill{background:rgba(128,128,128,.12); border:1px solid rgba(128,128,128,.2); border-radius:20px; padding:6px 14px; font-size:13px; font-weight:700;}
+.timer{color:var(--gold-soft);}
+.timer.low{color:var(--danger); animation:pulse 1s infinite;}
+@keyframes pulse{50%{opacity:.4;}}
+.icon-btn{background:rgba(128,128,128,.1); border:1px solid rgba(128,128,128,.2); width:38px; height:38px; border-radius:10px; color:var(--ink); cursor:pointer; font-size:16px;}
+.icon-btn.active{background:rgba(212,175,55,.25); border-color:var(--gold);}
+
+.progress-wrap{background:rgba(128,128,128,.15); border-radius:20px; height:8px; overflow:hidden; margin-bottom:18px;}
+.progress-bar{height:100%; background:linear-gradient(90deg, var(--teal), var(--gold)); border-radius:20px; transition:width .3s;}
+
+.qhead-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+.qnum-tag{display:inline-block; background:rgba(18,184,172,.15); color:var(--teal); border:1px solid rgba(18,184,172,.4); border-radius:20px; padding:3px 12px; font-size:12px; font-weight:700;}
+.star-btn{background:none; border:none; font-size:22px; cursor:pointer; opacity:.4; transition:.15s;}
+.star-btn.active{opacity:1; filter:drop-shadow(0 0 4px rgba(212,175,55,.6));}
+.star-btn.glow{animation:starGlow .5s ease;}
+@keyframes starGlow{
+  0%{transform:scale(1); filter:drop-shadow(0 0 0 rgba(212,175,55,0));}
+  40%{transform:scale(1.5); filter:drop-shadow(0 0 14px rgba(212,175,55,1));}
+  100%{transform:scale(1); filter:drop-shadow(0 0 4px rgba(212,175,55,.6));}
+}
+.qtext{font-size:17px; font-weight:700; line-height:1.7; margin-bottom:16px;}
+.options{display:grid; gap:10px;}
+.opt-btn{display:flex; align-items:center; gap:12px; text-align:right; width:100%;
+  background:rgba(128,128,128,.06); border:1.5px solid rgba(128,128,128,.2);
+  border-radius:12px; padding:12px 14px; color:var(--ink); font-family:inherit; font-size:14.5px; cursor:pointer; transition:.15s;}
+.opt-btn:hover:not(.locked){border-color:rgba(212,175,55,.5); background:rgba(212,175,55,.06);}
+.opt-btn.selected{border-color:var(--teal); background:rgba(18,184,172,.14);}
+.opt-btn.correct-answer{border-color:var(--ok); background:rgba(62,207,142,.16); color:var(--ok); font-weight:700;}
+.opt-btn.wrong-answer{border-color:var(--danger); background:rgba(227,93,93,.14); color:var(--danger); font-weight:700;}
+.opt-letter{width:26px; height:26px; border-radius:50%; background:rgba(128,128,128,.15); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0;}
+.opt-btn.selected .opt-letter{background:var(--teal); color:#04241f;}
+.opt-btn.correct-answer .opt-letter{background:var(--ok); color:#04241f;}
+.opt-btn.wrong-answer .opt-letter{background:var(--danger); color:#fff;}
+
+.explain-box{background:var(--note-bg); border:1px solid var(--note-border); border-radius:12px; padding:12px 14px; margin-top:14px; font-size:13px; line-height:1.7; color:var(--ink); display:none;}
+.explain-box.show{display:block;}
+.explain-box b{color:var(--teal);}
+
+.nav-row{display:flex; gap:10px; margin-top:20px;}
+.nav-row .btn{margin-top:0; flex:1;}
+
+.review-legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-bottom:10px;}
+.review-legend span{display:inline-flex; align-items:center; gap:5px;}
+.dot-sample{width:12px; height:12px; border-radius:4px; display:inline-block;}
+.review-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:10px 0 16px;}
+.review-dot{aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; cursor:pointer; border:1.5px solid rgba(128,128,128,.2); background:rgba(128,128,128,.06); color:var(--muted);}
+.review-dot.answered{background:rgba(62,207,142,.15); border-color:var(--ok); color:var(--ok);}
+.review-dot.unanswered{background:rgba(227,93,93,.16); border-color:var(--danger); color:var(--danger); animation:blinkDot 1.4s infinite;}
+@keyframes blinkDot{50%{opacity:.55;}}
+
+.result-score{text-align:center; margin:14px 0 6px;}
+.result-score .big{font-size:44px; font-weight:800; color:var(--gold-soft); text-shadow:0 0 24px rgba(212,175,55,.4);}
+.result-score .lbl{color:var(--muted); font-size:14px;}
+.card-canvas-wrap{text-align:center; margin:16px 0;}
+#resultCanvas{display:block; width:100%; height:auto; max-width:460px; margin:0 auto; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.25);}
+
+.log-item{background:rgba(128,128,128,.06); border:1px solid rgba(128,128,128,.15); border-radius:12px; padding:12px 14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;}
+.log-item .meta{font-size:12.5px; color:var(--muted);}
+.log-item .score{font-weight:800; color:var(--gold-soft); font-size:16px;}
+.log-actions{display:flex; gap:6px;}
+.small-btn{background:rgba(128,128,128,.12); border:none; color:var(--ink); border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer;}
+
+.qa-card{background:rgba(128,128,128,.05); border:1px solid rgba(128,128,128,.15); border-radius:12px; padding:14px 16px; margin-bottom:12px;}
+.qa-card .qtxt{font-weight:700; margin-bottom:10px; font-size:15px;}
+.qa-opt{padding:7px 10px; border-radius:8px; font-size:13.5px; margin-bottom:5px; background:rgba(128,128,128,.06);}
+.qa-opt.correct{background:rgba(62,207,142,.16); color:var(--ok); font-weight:700;}
+.qa-opt.chosen-wrong{background:rgba(227,93,93,.14); color:var(--danger); font-weight:700;}
+
+.center-txt{text-align:center;}
+.top-link{display:block; text-align:center; color:var(--teal); font-size:13px; margin-top:14px; text-decoration:none;}
+.muted{color:var(--muted); font-size:13px;}
+.hint{font-size:11.5px; color:var(--muted); margin-top:4px;}
+.section-title{font-size:15px; font-weight:800; margin:18px 0 8px; color:var(--gold-soft);}
+
+@media (max-width:420px){
+  .review-grid{grid-template-columns:repeat(5,1fr);}
+  .result-score .big{font-size:34px;}
+}
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="btnTheme" title="الوضع الليلي/النهاري">🌙</button>
+<div class="group-badge">A</div>
+
+<!-- ===== LOGIN ===== -->
+<div id="screen-login" class="screen active">
+  <div class="brand"><div class="star">⭐</div><h1>النجم في الأحياء</h1><p>أ. عزت شعبان</p></div>
+  <div class="card">
+    <div class="note-banner">
+      📘 بنك أسئلة اختياري (A) — بدون رسوم<br>
+      لحل النسخة الكاملة (بالرسوم) حل الفورم على قناة التليجرام:
+      <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank">انضم من هنا</a>
+    </div>
+    <div class="center-txt" style="font-weight:800; font-size:16px; margin-bottom:6px;">الدرس 1-2 (الجزء 1): الخصائص الوظيفية للعضلات <span style="color:var(--gold-soft);">(A)</span></div>
+    <div class="center-txt muted" id="resumeNotice" style="display:none; color:var(--teal); margin-bottom:8px;">🔄 عندك اختبار محفوظ لسه ماخلصتوش</div>
+
+    <label>كلمة السر</label>
+    <input type="password" id="inPassword" placeholder="أدخل كلمة السر">
+
+    <label>اسم الطالب</label>
+    <input type="text" id="inName" placeholder="الاسم بالكامل">
+
+    <label>رقم هاتف الطالب <span style="color:var(--danger)">*</span></label>
+    <input type="tel" id="inPhone" placeholder="مثال: 97455xxxxxx">
+    <div class="hint">اكتب الرقم المسجل مسبوقاً بمفتاح الدولة</div>
+
+    <label>رقم هاتف ولي الأمر المسجل <span style="color:var(--danger)">*</span></label>
+    <input type="tel" id="inParentPhone" placeholder="مثال: 97433xxxxxx">
+    <div class="hint">اكتب الرقم المسجل مسبوقاً بمفتاح الدولة</div>
+
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-gold" id="btnStart">بدء الاختبار</button>
+    <a class="top-link" id="btnGoLog" href="#">📥 سجل نتائجي السابقة</a>
+  </div>
+</div>
+
+<!-- ===== EXAM ===== -->
+<div id="screen-exam" class="screen">
+  <div class="exam-top">
+    <button class="icon-btn" id="btnMute" title="كتم/تشغيل الصوت">🔊</button>
+    <div class="pill timer" id="timerPill">00:00</div>
+    <div class="pill" id="qCounterPill">1 / 30</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="card">
+    <div class="qhead-row">
+      <span class="qnum-tag" id="qTag">سؤال 1</span>
+      <button class="star-btn" id="btnStar" title="أضف للمفضلة">☆</button>
+    </div>
+    <div class="qtext" id="qText">...</div>
+    <div class="options" id="optsWrap"></div>
+    <div class="explain-box" id="explainBox"><b>💡 توضيح: </b><span id="explainText"></span></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" id="btnPrev">◀ السابق</button>
+    <button class="btn btn-teal" id="btnNext">التالي ▶</button>
+  </div>
+  <button class="btn btn-ghost" id="btnSaveExit">💾 حفظ وتكملة لاحقاً</button>
+</div>
+
+<!-- ===== REVIEW ===== -->
+<div id="screen-review" class="screen">
+  <div class="brand"><h1 style="font-size:19px;">مراجعة قبل التسليم</h1></div>
+  <div class="card">
+    <div class="review-legend">
+      <span><span class="dot-sample" style="background:rgba(62,207,142,.5); border:1px solid var(--ok);"></span> تم الحل</span>
+      <span><span class="dot-sample" style="background:rgba(227,93,93,.5); border:1px solid var(--danger);"></span> ❗ لسه محلولش</span>
+    </div>
+    <p class="muted">دوس على أي رقم عشان ترجعله وتعدل إجابتك</p>
+    <div class="review-grid" id="reviewGrid"></div>
+    <div class="muted" id="reviewSummary"></div>
+    <button class="btn btn-gold" id="btnFinalSubmit">✅ تسليم نهائي</button>
+    <button class="btn btn-ghost" id="btnBackToExam">◀ رجوع للاختبار</button>
+  </div>
+</div>
+
+<!-- ===== RESULT ===== -->
+<div id="screen-result" class="screen">
+  <div class="brand"><div class="star">🎉</div><h1 style="font-size:20px;">نتيجتك جاهزة</h1></div>
+  <div class="card">
+    <div class="result-score"><div class="big" id="scoreBig">0/0</div><div class="lbl" id="scorePct">0%</div></div>
+    <div class="card-canvas-wrap"><canvas id="resultCanvas" width="900" height="1060"></canvas></div>
+
+    <label>إرسال لولي الأمر على واتساب (نفس الرقم اللي كتبته بالدخول)</label>
+    <input type="tel" id="parentFullPhone" placeholder="974xxxxxxxx" readonly>
+    <button class="btn btn-wa" id="btnSendParent">📤 إرسال لولي الأمر (واتساب)</button>
+
+    <div class="section-title">🔄 ماذا تحب أن تفعل الآن؟</div>
+    <div class="btn-row">
+      <button class="btn btn-gold" id="btnRetryFull">🔄 إعادة الاختبار</button>
+      <button class="btn btn-danger" id="btnRetryErrors">❌ أعد أخطائي</button>
+    </div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-ghost" id="btnReviewMistakes">📋 مراجعة الأخطاء</button>
+      <button class="btn btn-ghost" id="btnReviewFavs">⭐ مراجعة المفضلة</button>
+    </div>
+    <button class="btn btn-ghost" id="btnToLog">📥 سجل النتائج</button>
+
+    <div class="note-banner" style="margin-top:16px;">
+      📘 ده بنك أسئلة اختياري (A) بدون رسوم — لحل النسخة الكاملة بالرسوم حل الفورم على قناة التليجرام:
+      <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank">انضم من هنا</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOG ===== -->
+<div id="screen-log" class="screen">
+  <div class="brand"><h1 style="font-size:19px;">📥 سجل نتائجي</h1></div>
+  <div class="card" id="logList"><p class="muted center-txt">لسه معملتش أي اختبار</p></div>
+  <button class="btn btn-ghost" id="btnLogBack">◀ رجوع لتسجيل الدخول</button>
+</div>
+
+<!-- ===== VIEW CARD ===== -->
+<div id="screen-viewcard" class="screen">
+  <div class="card center-txt">
+    <canvas id="viewCanvas" width="900" height="1060" style="display:block; width:100%; height:auto; max-width:460px; margin:0 auto; border-radius:14px;"></canvas>
+    <label style="text-align:right;">رقم واتساب ولي الأمر</label>
+    <input type="tel" id="viewParentPhone" placeholder="974xxxxxxxx" readonly>
+    <button class="btn btn-wa" id="btnViewSend">📤 إرسال لولي الأمر</button>
+    <button class="btn btn-ghost" id="btnViewBack">◀ رجوع للسجل</button>
+  </div>
+</div>
+
+<!-- ===== GENERIC Q&A LIST ===== -->
+<div id="screen-qlist" class="screen">
+  <div class="brand"><h1 style="font-size:19px;" id="qlistTitle">مراجعة</h1></div>
+  <div class="card" id="qlistBody"></div>
+  <button class="btn btn-ghost" id="btnQlistBack">◀ رجوع</button>
+</div>
+
+<script>
+/* =================== CONFIG =================== */
+const CONFIG = {
+  LESSON: "الدرس 1-2 (الجزء 1): الخصائص الوظيفية للعضلات", LESSON_SLUG: "u1l2p1a",
+  GROUP: "A",
+  PASSWORD: "نجم الأحياء",
+  QUESTIONS_COUNT: 30, DURATION_MINUTES: 999, // تم تعديل المدة لتصبح مفتوحة
+  TELEGRAM: "https://t.me/thanwiaqatarbioadvanced", TEACHER_NAME: "أ. عزت شعبان",
+  VERIFY_URL: "https://script.google.com/macros/s/AKfycbyVTT07MONeOaqMQM1OCyqsyVF0KPUhOXwIkkjBvL9R5euCKKPvM8pQv94rywwD72C_/exec"
+};
+const QUESTION_BANK = [
+{"num": 3, "q": "مم تتكون الخيوط الرفيعة في الألياف العضلية بشكل عام؟", "options": ["أكتين", "ميوسين", "ATP", "ATP synthase"], "answer": 0, "note": "الخيوط الرفيعة تتكون من بروتين الأكتين."},
+{"num": 5, "q": "تتكوّن الخيوط الرفيعة في الخيط العضلي من خيطين لولبيين طويلين من الأكتين وبوليمر آخر منظم يسمى ...", "options": ["الفيبرين", "الكيراتين", "الميوسين", "تروبوميوسين"], "answer": 3, "note": "التروبوميوسين هو البروتين المنظم في الخيوط الرفيعة."},
+{"num": 9, "q": "أي الأجزاء التالية تشكل نقاط ارتباط الكالسيوم؟", "options": ["تروبونين", "تروبوميوسين", "الأكتوميوسين", "الجسور العرضية"], "answer": 0, "note": "التروبونين يشكل نقاط ارتباط الكالسيوم."},
+{"num": 11, "q": "أي المركبات التالية لا تتكون عند انبساط العضلة؟", "options": ["أكتين", "ميوسين", "أكتوميوسين", "تروبوميوسين"], "answer": 2, "note": "الأكتوميوسين (جسر مستعرض) لا يتكون عند انبساط العضلة."},
+{"num": 13, "q": "أي مما يلي يقصر عندما تنقبض الليفة العضلية؟", "options": ["الخط M", "خيوط الأكتين", "خيوط الميوسين", "القطعة العضلية"], "answer": 3, "note": "القطعة العضلية تقصر أثناء انقباض العضلة."},
+{"num": 15, "q": "ماذا يطلق على الوحدات المتكررة لخيوط الأكتين والميوسين المتصلة بخطي Z؟", "options": ["عضلات", "قطع عضلية", "لييفات عضلية", "عضلات باسطة"], "answer": 1, "note": "القطع العضلية هي الوحدات المتكررة بين خطي Z."},
+{"num": 17, "q": "كم عدد الخطوط Z في لُييفة تحتوي 20 قطعة عضلية؟", "options": ["19", "20", "21", "40"], "answer": 2, "note": "عدد خطوط Z = عدد القطع العضلية + 1 = 21."},
+{"num": 19, "q": "لييفة عضلية تتكون من 5 مناطق داكنة A و 6 خطوط Z، فكم عدد القطع العضلية في هذه اللييفة العضلية؟", "options": ["4", "5", "6", "7"], "answer": 1, "note": "عدد القطع العضلية = عدد مناطق A = 5."},
+{"num": 21, "q": "أي البروتينات التالية تكون الخيوط الرفيعة وترتبط بنهايات الخلايا العضلية عند الخط Z؟", "options": ["الأكتين", "الميوسين", "التروبونين", "الخط M"], "answer": 0, "note": "خيوط الأكتين هي الخيوط الرفيعة التي ترتبط بالخط Z."},
+{"num": 25, "q": "ماذا يطلق على المناطق على كل جانب من الخط Z في اللييف العضلي؟", "options": ["A", "H", "I", "Z"], "answer": 2, "note": "المناطق I هي المناطق الفاتحة على جانبي الخط Z."},
+{"num": 27, "q": "أي مما يلي يوجد في المناطق المضيئة بالعضلة؟", "options": ["الخط M", "الأكتين", "الميوسين", "الأكتين والميوسين"], "answer": 1, "note": "المناطق المضيئة (I) تحتوي على خيوط الأكتين فقط."},
+{"num": 29, "q": "أي مناطق العضلة تحتوي على خيوط الميوسين وتبدو داكنة؟", "options": ["التروبوميوسين", "القطع A", "القطع I", "الخط Z"], "answer": 1, "note": "القطع A تحتوي على خيوط الميوسين وتبدو داكنة."},
+{"num": 31, "q": "ماذا يحدث للعضلات عندما تنكمش القطع I؟", "options": ["تتمدد", "تنبسط", "تنقبض", "لا تتأثر"], "answer": 2, "note": "عندما تنكمش القطع I، تنقبض العضلة."},
+{"num": 33, "q": "ماذا يحدث للعضلات عندما تتمدد القطع I؟", "options": ["تقصر", "تنبسط", "تنقبض", "لا تتأثر"], "answer": 1, "note": "عندما تتمدد القطع I، تنبسط العضلة."},
+{"num": 35, "q": "أي مما يلي لا يتغير أثناء انقباض العضلات أو انبساطها؟", "options": ["مساحة القطع I، وموقع الخط M يبقى مركّزاً في وسط القطعة العضلية", "أطوال الخيوط البروتينية (الأكتين والميوسين)، والمسافة بين الخطين Z", "موقع الخط M يبقى مركّزاً في وسط القطعة العضلية، والمسافة بين الخطين Z", "أطوال الخيوط البروتينية (الأكتين والميوسين) وموقع الخط M يبقى مركّزاً في وسط القطعة العضلية"], "answer": 3, "note": "أطوال الخيوط البروتينية وموقع الخط M لا يتغيران."},
+{"num": 40, "q": "ما اسم المنطقة التي تنكمش وتصبح ضيقة عند الانقباض العضلي؟", "options": ["A", "H", "I", "Z"], "answer": 2, "note": "المنطقة I تنكمش وتصبح ضيقة عند الانقباض."},
+{"num": 42, "q": "ماذا يحدث أثناء انقباض العضلات؟", "options": ["عدد القطع المضيئة يقل", "أطوال القطع العضلية يقل", "عرض المناطق المظلمة يقل", "خيوط التروبوميوسين تلتف حول الأكتين"], "answer": 1, "note": "أطوال القطع العضلية تقل أثناء الانقباض."},
+{"num": 46, "q": "أين توجد الأنيبيبات المستعرضة؟", "options": ["خلايا العضلات الملساء فقط", "خلايا عضلة القلب وخلايا العضلات الهيكلية", "خلايا عضلة القلب وخلايا العضلات الملساء", "خلايا العضلات الهيكلية وخلايا العضلات الملساء"], "answer": 1, "note": "الأنيبيبات المستعرضة توجد في خلايا عضلة القلب وخلايا العضلات الهيكلية."},
+{"num": 48, "q": "ما الدور الأساسي التي تقوم به إشارة الانقباض التي يرسلها الدماغ لعضلات الإنسان؟", "options": ["إطلاق أيونات الكالسيوم", "تخزين أيونات الكالسيوم", "منع تكوين الأكتوميوسين", "منع تكوين الجسور المستعرضة"], "answer": 0, "note": "إشارة الدماغ تؤدي إلى إطلاق أيونات الكالسيوم."},
+{"num": 50, "q": "أين يتم تخزين أيونات الكالسيوم في الخلية العضلية؟", "options": ["النواة", "السيتوسول", "رؤوس الميوسين", "الشبكة البلازمية العضلية"], "answer": 3, "note": "أيونات الكالسيوم تخزن في الشبكة البلازمية العضلية."},
+{"num": 53, "q": "ما التركيب الذي يضمن انقباض الخلية العضلية كلها في نفس الوقت؟", "options": ["التروبونين", "خيوط الأكتين", "خيوط الميوسين", "الشبكة البلازمية العضلية"], "answer": 3, "note": "الشبكة البلازمية العضلية تضمن انقباض الخلية كلها في نفس الوقت."},
+{"num": 56, "q": "ما تأثير الإشارة الكهربائية في انقباض الليف العضلي؟", "options": ["تحفز إطلاق أيونات Ca2+ إلى مخازن الكالسيوم في الشبكة البلازمية العضلية", "تحفز إطلاق أيونات Ca2+ من مخازن الكالسيوم في الشبكة البلازمية العضلية", "تحفز إطلاق أيونات Na+ إلى مخازن الكالسيوم في الشبكة البلازمية العضلية", "تحفز إطلاق أيونات Na+ من مخازن الكالسيوم في الشبكة البلازمية العضلية"], "answer": 1, "note": "الإشارة الكهربائية تحفز إطلاق أيونات الكالسيوم من مخازنها."},
+{"num": 58, "q": "ما سبب حدوث انبساط العضلة الهيكلية؟", "options": ["تنبيه الجهاز العصبي للعضلة", "ضخ أيونات الكالسيوم إلى مخازنها", "خروج أيونات الكالسيوم من مخازنها", "استهلاك ATP وتكون الجسور العرضية"], "answer": 1, "note": "انبساط العضلة يحدث عند ضخ أيونات الكالسيوم إلى مخازنها."}
+];
+const BANK_BY_NUM = {}; QUESTION_BANK.forEach(q=>BANK_BY_NUM[q.num]=q);
+
+/* =================== STORAGE KEYS =================== */
+const LS_STATE_KEY   = () => `najm_state_${CONFIG.LESSON_SLUG}_${state.studentPhone}`;
+const LS_HISTORY_KEY = `najm_history`;
+const LS_MUTE_KEY    = `najm_muted`;
+const LS_THEME_KEY   = `najm_theme`;
+const LS_PARENTPHONE_KEY = () => `najm_parentphone_${state.studentPhone}`;
+const LS_FAVS_KEY = () => `najm_favs_${CONFIG.LESSON_SLUG}_${state.studentPhone}`;
+const LS_ATTEMPTS_KEY = () => `najm_attempts_${CONFIG.LESSON_SLUG}_${state.studentPhone}`;
+
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(LS_HISTORY_KEY)) || []; }catch(e){ return []; } }
+function saveHistory(list){ localStorage.setItem(LS_HISTORY_KEY, JSON.stringify(list)); }
+function loadFavs(){ try{ return JSON.parse(localStorage.getItem(LS_FAVS_KEY())) || []; }catch(e){ return []; } }
+function saveFavs(list){ localStorage.setItem(LS_FAVS_KEY(), JSON.stringify(list)); }
+function nextAttemptNumber(){
+  let n = parseInt(localStorage.getItem(LS_ATTEMPTS_KEY())||'0',10) + 1;
+  localStorage.setItem(LS_ATTEMPTS_KEY(), String(n));
+  return n;
+}
+
+/* =================== STATE =================== */
+let state = {
+  studentName:"", studentPhone:"", parentPhone:"",
+  selected: [], answers: {}, currentIndex: 0, elapsedSeconds: 0,
+  submitted:false, attemptType:'full', lockedCorrect:{}
+};
+let timerInterval=null, autosaveInterval=null;
+let cameFromReview=false;
+let muted = localStorage.getItem(LS_MUTE_KEY) === "1";
+
+/* =================== UTIL =================== */
+function toWesternDigits(s){
+  const ar='٠١٢٣٤٥٦٧٨٩', fa='۰۱۲۳۴۵۶۷۸۹';
+  return (s||"").replace(/[٠-٩]/g,d=>String(ar.indexOf(d))).replace(/[۰-۹]/g,d=>String(fa.indexOf(d)));
+}
+function cleanPhone(s){ return toWesternDigits(s||"").replace(/[^\d]/g,''); }
+function normalizeAr(s){
+  return (s||"")
+    .replace(/[​-‏﻿]/g,'')
+    .replace(/[إأآا]/g,'ا')
+    .replace(/ة/g,'ه')
+    .replace(/[ىي]/g,'ي')
+    .replace(/ؤ/g,'و')
+    .replace(/ئ/g,'ي')
+    .replace(/[ً-ٰٟ]/g,'')
+    .replace(/[^؀-ۿ]/g,'')
+    .toLowerCase();
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function fmtTime(sec){ sec=Math.max(0,sec); const m=Math.floor(sec/60), s=sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+function maskPhone(p){
+  if(!p) return '—';
+  if(p.length<=5) return p;
+  return p.slice(0,3)+'•••'+p.slice(-2);
+}
+function beep(type){
+  if(muted) return;
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const notes = type==='good'?[523.25,659.25,783.99]:type==='select'?[440]:type==='wrong'?[311,247]:[392,330];
+    notes.forEach((f,i)=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type='sine'; o.frequency.value=f; o.connect(g); g.connect(ctx.destination);
+      const t0=ctx.currentTime+i*0.12;
+      g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.18,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.28);
+      o.start(t0); o.stop(t0+0.3);
+    });
+  }catch(e){}
+}
+function updateMuteBtn(){ document.getElementById('btnMute').textContent = muted?'🔇':'🔊'; document.getElementById('btnMute').classList.toggle('active', !muted); }
+
+/* Theme */
+function applyTheme(t){ document.body.classList.toggle('light', t==='light'); document.getElementById('btnTheme').textContent = t==='light' ? '☀️' : '🌙'; }
+applyTheme(localStorage.getItem(LS_THEME_KEY) || 'dark');
+document.getElementById('btnTheme').onclick = ()=>{
+  const cur = document.body.classList.contains('light') ? 'light':'dark';
+  const next = cur==='light' ? 'dark' : 'light';
+  localStorage.setItem(LS_THEME_KEY, next); applyTheme(next);
+};
+
+/* live digit normalization while typing */
+['inPhone','inParentPhone','parentFullPhone','viewParentPhone'].forEach(id=>{
+  document.addEventListener('input', (e)=>{ if(e.target && e.target.id===id){ e.target.value = toWesternDigits(e.target.value); } });
+});
+
+/* =================== LOGIN =================== */
+document.getElementById('inPhone').addEventListener('input', checkResume);
+function checkResume(){
+  const phone = cleanPhone(document.getElementById('inPhone').value);
+  const notice = document.getElementById('resumeNotice'); const btn = document.getElementById('btnStart');
+  if(phone.length>=6){
+    const saved = localStorage.getItem(`najm_state_${CONFIG.LESSON_SLUG}_${phone}`);
+    if(saved){ const parsed=JSON.parse(saved); if(!parsed.submitted){ notice.style.display='block'; btn.textContent='استكمال الاختبار'; return; } }
+  }
+  notice.style.display='none'; btn.textContent='بدء الاختبار';
+}
+
+async function verifyStudent(phone){
+  if(!CONFIG.VERIFY_URL) return {status:2};
+  try{
+    const res = await fetch(`${CONFIG.VERIFY_URL}?phone=${encodeURIComponent(phone)}`);
+    const data = await res.json();
+    return data;
+  }catch(e){
+    return {status:-1, networkError:true};
+  }
+}
+
+document.getElementById('btnStart').addEventListener('click', async ()=>{
+  const pass=document.getElementById('inPassword').value;
+  const name=document.getElementById('inName').value.trim();
+  const phone=cleanPhone(document.getElementById('inPhone').value);
+  const parentPhone=cleanPhone(document.getElementById('inParentPhone').value);
+  const err=document.getElementById('loginErr'); err.textContent="";
+  const startBtn=document.getElementById('btnStart');
+
+  if(normalizeAr(pass)!==normalizeAr(CONFIG.PASSWORD)){ err.textContent="كلمة السر غير صحيحة"; return; }
+  if(!name){ err.textContent="من فضلك اكتب اسمك"; return; }
+  if(!phone||phone.length<7){ err.textContent="رقم هاتف الطالب مطلوب وصحيح"; return; }
+  if(!parentPhone||parentPhone.length<7){ err.textContent="رقم هاتف ولي الأمر مطلوب وصحيح (بمفتاح الدولة)"; return; }
+
+  startBtn.disabled=true; startBtn.textContent="جاري التحقق...";
+  const verify = await verifyStudent(phone);
+  startBtn.disabled=false; startBtn.textContent="بدء الاختبار";
+
+  if(verify.networkError){ err.textContent="تعذر الاتصال بالسيرفر، تأكد من الإنترنت وحاول تاني"; return; }
+  if(Number(verify.status)!==2){ err.textContent="غير مسموح لك بالدخول حالياً، راجع إدارة النجم في الأحياء"; return; }
+
+  state.studentName=name; state.studentPhone=phone; state.parentPhone=parentPhone;
+  localStorage.setItem(LS_PARENTPHONE_KEY(), parentPhone);
+
+  const saved = localStorage.getItem(LS_STATE_KEY());
+  if(saved){ const parsed=JSON.parse(saved); if(!parsed.submitted){ state=Object.assign(state,parsed); startExamUI(true); return; } }
+
+  beginAttempt('full', null);
+});
+
+document.getElementById('btnGoLog').addEventListener('click',(e)=>{
+  e.preventDefault();
+  const phone=cleanPhone(document.getElementById('inPhone').value);
+  if(!phone){ alert('اكتب رقم هاتفك الأول عشان أعرض سجلك'); return; }
+  state.studentPhone=phone; renderLog(); show('screen-log');
+});
+
+/* =================== BEGIN / RESET ATTEMPT =================== */
+function buildSelectedFrom(bankSubset){
+  return shuffle(bankSubset).map(q=>{
+    const idx=q.options.map((o,i)=>i); const sIdx=shuffle(idx);
+    return { num:q.num, q:q.q, note:q.note, options:sIdx.map(i=>q.options[i]), answer:sIdx.indexOf(q.answer) };
+  });
+}
+function beginAttempt(type, customBankSubset){
+  const subset = customBankSubset || shuffle(QUESTION_BANK).slice(0, CONFIG.QUESTIONS_COUNT);
+  state.selected = buildSelectedFrom(subset);
+  state.answers={}; state.currentIndex=0; state.elapsedSeconds=0; state.submitted=false;
+  state.attemptType=type; state.lockedCorrect={}; cameFromReview=false;
+  persistState(); startExamUI(false);
+}
+
+/* =================== EXAM =================== */
+function persistState(){ localStorage.setItem(LS_STATE_KEY(), JSON.stringify(state)); }
+
+function startExamUI(resumed){
+  renderQuestion(); show('screen-exam'); updateMuteBtn(); startTimer();
+  if(autosaveInterval) clearInterval(autosaveInterval);
+  autosaveInterval=setInterval(persistState,30000);
+  window.onbeforeunload=function(){ if(!state.submitted) return "لسه ماخلصتش الاختبار، هيضيع تقدمك لو خرجت دلوقتي."; };
+}
+function startTimer(){
+  if(timerInterval) clearInterval(timerInterval);
+  updateTimerDisplay(state.elapsedSeconds);
+  timerInterval=setInterval(()=>{
+    state.elapsedSeconds++;
+    updateTimerDisplay(state.elapsedSeconds);
+  },1000);
+}
+function updateTimerDisplay(sec){ 
+  const p=document.getElementById('timerPill'); 
+  p.textContent=fmtTime(sec); 
+  p.classList.toggle('low', sec > 3600); // إشعار إذا تجاوز الوقت ساعة، لكن بدون إيقاف
+}
+
+function renderQuestion(){
+  const q=state.selected[state.currentIndex];
+  document.getElementById('qTag').textContent=`سؤال ${state.currentIndex+1}`;
+  document.getElementById('qText').textContent=q.q;
+  document.getElementById('qCounterPill').textContent=`${state.currentIndex+1} / ${state.selected.length}`;
+
+  const favs=loadFavs();
+  const starBtn=document.getElementById('btnStar');
+  starBtn.classList.toggle('active', favs.includes(q.num));
+  starBtn.textContent = favs.includes(q.num) ? '★' : '☆';
+  starBtn.onclick=()=>{
+    let f=loadFavs();
+    const adding = !f.includes(q.num);
+    if(f.includes(q.num)) f=f.filter(x=>x!==q.num); else f.push(q.num);
+    saveFavs(f); renderQuestion();
+    if(adding){
+      const freshBtn=document.getElementById('btnStar');
+      freshBtn.classList.add('glow');
+      setTimeout(()=>freshBtn.classList.remove('glow'), 500);
+    }
+  };
+
+  const wrap=document.getElementById('optsWrap'); wrap.innerHTML="";
+  const letters=['أ','ب','ج','د'];
+  const isLocked = state.lockedCorrect[state.currentIndex] !== undefined;
+  const chosen = state.answers[state.currentIndex];
+
+  q.options.forEach((opt,i)=>{
+    const b=document.createElement('button');
+    let cls='opt-btn';
+    if(isLocked){
+      cls += ' locked';
+      if(i===q.answer) cls+=' correct-answer';
+      else if(i===chosen) cls+=' wrong-answer';
+    } else if(chosen===i){ cls+=' selected'; }
+    b.className=cls;
+    b.innerHTML=`<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    b.onclick=()=>{
+      if(isLocked) return;
+      state.answers[state.currentIndex]=i;
+      state.lockedCorrect[state.currentIndex]=(i===q.answer);
+      beep(i===q.answer ? 'select' : 'wrong');
+      persistState(); renderQuestion();
+    };
+    wrap.appendChild(b);
+  });
+
+  const exBox=document.getElementById('explainBox');
+  if(isLocked){ exBox.classList.add('show'); document.getElementById('explainText').textContent=q.note||''; }
+  else{ exBox.classList.remove('show'); }
+
+  document.getElementById('progressBar').style.width=((state.currentIndex+1)/state.selected.length*100)+'%';
+  document.getElementById('btnPrev').disabled=state.currentIndex===0;
+  document.getElementById('btnNext').textContent = state.currentIndex===state.selected.length-1 ? 'مراجعة وتسليم ▶' : 'التالي ▶';
+}
+
+document.getElementById('btnPrev').onclick=()=>{ if(state.currentIndex>0){ state.currentIndex--; renderQuestion(); } };
+document.getElementById('btnNext').onclick=()=>{
+  if(cameFromReview){
+    const total=state.selected.length;
+    for(let step=1; step<=total; step++){
+      const idx=(state.currentIndex+step)%total;
+      if(state.answers[idx]===undefined){ state.currentIndex=idx; renderQuestion(); return; }
+    }
+    cameFromReview=false;
+    finalSubmit(false);
+    return;
+  }
+  if(state.currentIndex<state.selected.length-1){ state.currentIndex++; renderQuestion(); }
+  else { renderReview(); show('screen-review'); }
+};
+document.getElementById('btnMute').onclick=()=>{ muted=!muted; localStorage.setItem(LS_MUTE_KEY,muted?"1":"0"); updateMuteBtn(); };
+document.getElementById('btnSaveExit').onclick=()=>{
+  persistState(); window.onbeforeunload=null; clearInterval(timerInterval); clearInterval(autosaveInterval);
+  alert('تم الحفظ ✅ لما ترجع، دخل بنفس رقم هاتفك وهتلاقي "استكمال الاختبار"');
+  location.reload();
+};
+
+/* =================== REVIEW =================== */
+function renderReview(){
+  const grid=document.getElementById('reviewGrid'); grid.innerHTML="";
+  let answeredCount=0, unansweredCount=0;
+  state.selected.forEach((q,i)=>{
+    const answered=state.answers[i]!==undefined;
+    if(answered) answeredCount++; else unansweredCount++;
+    const d=document.createElement('div');
+    d.className='review-dot '+(answered?'answered':'unanswered');
+    d.textContent = answered ? (i+1) : '❗';
+    d.title = answered ? `سؤال ${i+1}` : `قم بحل هذا السؤال (${i+1})`;
+    d.onclick=()=>{ state.currentIndex=i; cameFromReview=true; renderQuestion(); show('screen-exam'); };
+    grid.appendChild(d);
+  });
+  document.getElementById('reviewSummary').textContent = unansweredCount>0
+    ? `⚠️ لسه فيه ${unansweredCount} سؤال محتاج حل من ${state.selected.length}`
+    : `✅ إجابت على كل الأسئلة (${state.selected.length})`;
+}
+document.getElementById('btnBackToExam').onclick=()=>{
+  cameFromReview=true;
+  const firstUnanswered = state.selected.findIndex((q,i)=>state.answers[i]===undefined);
+  if(firstUnanswered!==-1){ state.currentIndex=firstUnanswered; renderQuestion(); }
+  show('screen-exam');
+};
+document.getElementById('btnFinalSubmit').onclick=()=>{
+  const unanswered = state.selected.filter((q,i)=>state.answers[i]===undefined).length;
+  const msg = unanswered>0
+    ? `لسه فيه ${unanswered} سؤال ملهوش حل. متأكد إنك عايز تسلم كده؟`
+    : 'متأكد إنك عايز تسلم الاختبار؟ مش هتقدر تعدل بعد كده.';
+  if(confirm(msg)) finalSubmit(false);
+};
+
+/* =================== SUBMIT & RESULT =================== */
+function finalSubmit(timeUp){
+  clearInterval(timerInterval); clearInterval(autosaveInterval); window.onbeforeunload=null;
+  state.submitted=true; persistState();
+
+  let correct=0; const wrongList=[];
+  state.selected.forEach((q,i)=>{
+    const chosen=state.answers[i]; const isCorrect=chosen===q.answer;
+    if(isCorrect) correct++;
+    else wrongList.push({ num:q.num, q:q.q, options:q.options, correctIdx:q.answer, chosenIdx:chosen, note:q.note });
+  });
+  const total=state.selected.length; const pct=Math.round((correct/total)*100);
+  const attemptNum = nextAttemptNumber();
+
+  const record = {
+    id: Date.now(), lesson: CONFIG.LESSON, group: CONFIG.GROUP, attemptType: state.attemptType,
+    attemptNumber: attemptNum,
+    studentName: state.studentName, studentPhone: state.studentPhone, parentPhone: state.parentPhone,
+    score: correct, total: total, pct: pct, duration: state.elapsedSeconds,
+    date: new Date().toLocaleDateString('ar-EG', {year:'numeric',month:'long',day:'numeric'}),
+    wrongList: wrongList
+  };
+  const hist=loadHistory(); hist.unshift(record); saveHistory(hist);
+  localStorage.removeItem(LS_STATE_KEY());
+  showResult(record, timeUp);
+}
+
+function showResult(record, timeUp){
+  document.getElementById('scoreBig').textContent=`${record.score}/${record.total}`;
+  document.getElementById('scorePct').textContent = timeUp ? `${record.pct}% — (انتهى الوقت)` : `${record.pct}%`;
+  safeDrawCard(document.getElementById('resultCanvas'), record);
+  document.getElementById('parentFullPhone').value = record.parentPhone || localStorage.getItem(LS_PARENTPHONE_KEY()) || '';
+
+  document.getElementById('btnRetryErrors').textContent = record.wrongList.length===0 ? '🎉 لا يوجد أخطاء' :
+    (record.attemptType==='errors' ? '❌ أعد أخطاء الأخطاء' : '❌ أعد أخطائي');
+  document.getElementById('btnRetryErrors').disabled = record.wrongList.length===0;
+
+  show('screen-result');
+  beep(record.pct>=50 ? 'good':'meh');
+  if(record.pct>=50 && window.confetti){ confetti({particleCount:120, spread:80, origin:{y:0.6}, colors:['#d4af37','#12b8ac','#f3f0ff']}); }
+}
+
+document.getElementById('btnRetryFull').onclick=()=>{ beginAttempt('full', null); };
+document.getElementById('btnRetryErrors').onclick=()=>{
+  const hist=loadHistory(); const last=hist[0];
+  if(!last || last.wrongList.length===0) return;
+  const subset = last.wrongList.map(w=>BANK_BY_NUM[w.num]).filter(Boolean);
+  beginAttempt('errors', subset);
+};
+document.getElementById('btnReviewMistakes').onclick=()=>{
+  const hist=loadHistory(); const last=hist[0];
+  renderQlist('📋 مراجعة أخطائك', (last?last.wrongList:[]).map(w=>({
+    q:w.q, options:w.options, correctIdx:w.correctIdx, chosenIdx:w.chosenIdx, note:w.note
+  })), 'لا يوجد أخطاء 🎉');
+  show('screen-qlist');
+};
+document.getElementById('btnReviewFavs').onclick=()=>{
+  const favs=loadFavs();
+  const items = favs.map(n=>BANK_BY_NUM[n]).filter(Boolean).map(q=>({
+    q:q.q, options:q.options, correctIdx:q.answer, chosenIdx:undefined, note:q.note
+  }));
+  renderQlist('⭐ الأسئلة المفضلة', items, 'لسه مافضلتش أي سؤال — دوس على ⭐ جنب أي سؤال أثناء الاختبار');
+  show('screen-qlist');
+};
+document.getElementById('btnQlistBack').onclick=()=>{ show('screen-result'); };
+
+function renderQlist(title, items, emptyMsg){
+  document.getElementById('qlistTitle').textContent=title;
+  const body=document.getElementById('qlistBody'); body.innerHTML="";
+  if(items.length===0){ body.innerHTML=`<p class="muted center-txt">${emptyMsg}</p>`; return; }
+  const letters=['أ','ب','ج','د'];
+  items.forEach((it,idx)=>{
+    const div=document.createElement('div'); div.className='qa-card';
+    let optsHtml="";
+    it.options.forEach((opt,i)=>{
+      let cls='qa-opt';
+      if(i===it.correctIdx) cls+=' correct';
+      else if(i===it.chosenIdx) cls+=' chosen-wrong';
+      optsHtml+=`<div class="${cls}">${letters[i]}. ${opt}</div>`;
+    });
+    div.innerHTML=`<div class="qtxt">${idx+1}. ${it.q}</div><div>${optsHtml}</div>
+      ${it.note?`<div class="explain-box show" style="margin-top:10px;"><b>💡 توضيح: </b>${it.note}</div>`:''}`;
+    body.appendChild(div);
+  });
+}
+
+/* رسم كارت النتيجة */
+function wrapCanvasText(ctx, text, cx, y, maxWidth, lineHeight){
+  const words = text.split(' ');
+  let line = '', lines = [];
+  for(let i=0;i<words.length;i++){
+    const test = line ? line+' '+words[i] : words[i];
+    if(ctx.measureText(test).width > maxWidth && line){ lines.push(line); line = words[i]; }
+    else { line = test; }
+  }
+  if(line) lines.push(line);
+  lines.forEach((l,i)=> ctx.fillText(l, cx, y + i*lineHeight));
+  return lines.length;
+}
+
+function safeDrawCard(canvas, record){
+  drawCard(canvas, record);
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(()=>{ drawCard(canvas, record); }).catch(()=>{});
+  }
+}
+function drawCard(canvas, record){
+  const ctx=canvas.getContext('2d'); const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const grad=ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0,'#1c1444'); grad.addColorStop(1,'#0d0a1f');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+
+  ctx.save(); ctx.globalAlpha=0.045; ctx.fillStyle='#d4af37'; ctx.font='bold 32px Cairo, sans-serif';
+  ctx.translate(W/2,H/2); ctx.rotate(-35*Math.PI/180);
+  for(let y=-650;y<650;y+=95){ for(let x=-650;x<650;x+=230){ ctx.fillText('أ.عزت', x, y); } }
+  ctx.restore();
+
+  ctx.strokeStyle='#d4af37'; ctx.lineWidth=7; ctx.strokeRect(16,16,W-32,H-32);
+  ctx.strokeStyle='rgba(18,184,172,.65)'; ctx.lineWidth=2.5; ctx.strokeRect(30,30,W-60,H-60);
+
+  ctx.textAlign='center';
+  ctx.fillStyle='#f0cd6e'; ctx.font='bold 46px Amiri, Cairo, serif'; ctx.fillText('⭐ النجم في الأحياء', W/2, 100);
+  ctx.font='22px Cairo, sans-serif'; ctx.fillStyle='#d8d2f5'; ctx.fillText(CONFIG.TEACHER_NAME, W/2, 136);
+
+  ctx.strokeStyle='rgba(212,175,55,.4)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(W/2-160,158); ctx.lineTo(W/2+160,158); ctx.stroke();
+
+  ctx.fillStyle='#ffffff'; ctx.font='bold 30px Cairo, sans-serif';
+  const lessonFull = record.lesson + ' (' + record.group + ')';
+  const lessonLines = wrapCanvasText(ctx, lessonFull, W/2, 205, W-160, 40);
+
+  const nameY = 205 + lessonLines*40 + 45;
+  ctx.font='22px Cairo, sans-serif'; ctx.fillStyle='#d8d2f5'; ctx.fillText('الطالب / ة', W/2, nameY);
+  ctx.font='bold 38px Cairo, sans-serif'; ctx.fillStyle='#ffffff'; ctx.fillText(record.studentName, W/2, nameY+42);
+
+  const cx=W/2, cy=nameY+165, r=105;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.strokeStyle='rgba(255,255,255,.14)'; ctx.lineWidth=16; ctx.stroke();
+  const pctVal=record.pct/100;
+  ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+pctVal*Math.PI*2);
+  ctx.strokeStyle = record.pct>=50 ? '#4fe0a0' : '#f07272'; ctx.lineWidth=16; ctx.lineCap='round'; ctx.stroke();
+  ctx.font='bold 58px Cairo, sans-serif'; ctx.fillStyle='#f0cd6e'; ctx.fillText(record.pct+'%', cx, cy+18);
+  ctx.font='22px Cairo, sans-serif'; ctx.fillStyle='#d8d2f5'; ctx.fillText(record.score+' من '+record.total, cx, cy+54);
+
+  const mins=Math.floor(record.duration/60), secs=record.duration%60;
+  const rows=[
+    ['عدد الأسئلة', record.total+' سؤال'],
+    ['رقم المحاولة', '#'+record.attemptNumber + (record.attemptType==='errors' ? ' (إعادة أخطاء)':'')],
+    ['مدة الحل', String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0')],
+    ['هاتف ولي الأمر', maskPhone(record.parentPhone)],
+  ];
+  const panelTop = cy + r + 45;
+  const panelH = rows.length*54 + 30;
+  ctx.fillStyle='rgba(255,255,255,.06)';
+  roundRect(ctx, W/2-260, panelTop, 520, panelH, 16); ctx.fill();
+  ctx.strokeStyle='rgba(212,175,55,.3)'; ctx.lineWidth=1.5;
+  roundRect(ctx, W/2-260, panelTop, 520, panelH, 16); ctx.stroke();
+
+  let ry=panelTop+42;
+  ctx.font='bold 22px Cairo, sans-serif'; ctx.textAlign='right'; ctx.direction='rtl';
+  rows.forEach(([label,val])=>{
+    ctx.fillStyle='#c9c2ef';
+    const labelText = label+'  :  ';
+    ctx.fillText(labelText, W/2+230, ry);
+    const labelWidth = ctx.measureText(labelText).width;
+    ctx.fillStyle='#ffffff';
+    ctx.fillText(val, W/2+230-labelWidth, ry);
+    ry+=54;
+  });
+
+  const panelBottom = panelTop + panelH;
+  const noteTop = panelBottom + 34;
+  ctx.textAlign='center';
+  ctx.font='bold 19px Cairo, sans-serif'; ctx.fillStyle='#f0cd6e';
+  ctx.fillText('هذه الرسالة محولة من مستر عزت أحياء 💫💫', W/2, noteTop);
+
+  ctx.font='16px Cairo, sans-serif'; ctx.fillStyle='#c9c2ef';
+  const noteText = 'ملحوظة: فضلاً تابع مع الطالب هذا الفصل نتائج 20 اختبار إلكتروني مع 10 اختبارات ورقية مصححة';
+  const noteLines = wrapCanvasText(ctx, noteText, W/2, noteTop+32, W-140, 24);
+
+  ctx.font='18px Cairo, sans-serif'; ctx.fillStyle='#c9c2ef';
+  ctx.fillText(record.date, W/2, noteTop+32+noteLines*24+26);
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+
+/* =================== SEND TO PARENT =================== */
+function buildParentMsg(record){
+  return `${record.lesson} (${record.group})\n\nمن فضلك تابع نتيجة الاختبار من صورة النتيجة على هاتف الطالب\n${record.studentName}\n\nملحوظة: فضلاً تابع مع الطالب هذا الفصل نتائج 20 اختبار إلكتروني مع 10 اختبارات ورقية مصححة\n\nهذه الرسالة محولة من مستر عزت أحياء 💫💫`;
+}
+async function shareCardAsImage(canvas, record){
+  try{
+    if(!navigator.share || !navigator.canShare) return false;
+    const blob = await new Promise(res=> canvas.toBlob(res, 'image/png'));
+    if(!blob) return false;
+    const file = new File([blob], 'نتيجة_الاختبار.png', {type:'image/png'});
+    if(!navigator.canShare({files:[file]})) return false;
+    await navigator.share({ files:[file], title: record.lesson, text: buildParentMsg(record) });
+    return true;
+  }catch(e){ return false; }
+}
+async function sendToParent(record, phoneInputId, canvasId){
+  const phone=cleanPhone(document.getElementById(phoneInputId).value);
+  if(phone.length<7){ alert('اكتب رقم واتساب صحيح لولي الأمر (بصيغة دولية)'); return; }
+  localStorage.setItem(LS_PARENTPHONE_KEY(), phone);
+  const shared = canvasId ? await shareCardAsImage(document.getElementById(canvasId), record) : false;
+  if(shared) return;
+  const msg = buildParentMsg(record);
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+document.getElementById('btnSendParent').onclick=()=>{ const hist=loadHistory(); sendToParent(hist[0],'parentFullPhone','resultCanvas'); };
+document.getElementById('btnToLog').onclick=()=>{ renderLog(); show('screen-log'); };
+document.getElementById('btnLogBack').onclick=()=>{ location.reload(); };
+
+/* =================== LOG =================== */
+function renderLog(){
+  const hist=loadHistory().filter(r=>r.studentPhone===state.studentPhone);
+  const wrap=document.getElementById('logList'); wrap.innerHTML="";
+  if(hist.length===0){ wrap.innerHTML='<p class="muted center-txt">لسه معملتش أي اختبار</p>'; return; }
+  hist.forEach(r=>{
+    const div=document.createElement('div'); div.className='log-item';
+    div.innerHTML=`
+      <div><div style="font-weight:700;">${r.lesson} ${r.attemptType==='errors'?'<span class="muted">(إعادة أخطاء)</span>':''}</div>
+      <div class="meta">${r.date} — محاولة #${r.attemptNumber}</div></div>
+      <div class="score">${r.score}/${r.total}</div>
+      <div class="log-actions">
+        <button class="small-btn" data-id="${r.id}" data-act="view">👁️ عرض</button>
+        <button class="small-btn" data-id="${r.id}" data-act="send">📤</button>
+      </div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('button[data-act]').forEach(btn=>{
+    btn.onclick=()=>{
+      const id=Number(btn.dataset.id); const rec=loadHistory().find(x=>x.id===id);
+      if(btn.dataset.act==='view'){
+        safeDrawCard(document.getElementById('viewCanvas'), rec);
+        document.getElementById('viewParentPhone').value = rec.parentPhone || localStorage.getItem(LS_PARENTPHONE_KEY()) || '';
+        document.getElementById('btnViewSend').onclick=()=>sendToParent(rec,'viewParentPhone','viewCanvas');
+        show('screen-viewcard');
+      } else {
+        const clean = cleanPhone(rec.parentPhone || localStorage.getItem(LS_PARENTPHONE_KEY()) || '');
+        if(clean.length<7){ alert('لا يوجد رقم ولي أمر مسجل لهذه المحاولة'); return; }
+        const msg=`${rec.lesson} (${rec.group})\n\nمن فضلك تابع نتيجة الاختبار من صورة النتيجة على هاتف الطالب\n${rec.studentName}\n\nملحوظة: فضلاً تابع مع الطالب هذا الفصل نتائج 20 اختبار إلكتروني مع 10 اختبارات ورقية مصححة\n\nهذه الرسالة محولة من مستر عزت أحياء 💫💫`;
+        window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`, '_blank');
+      }
+    };
+  });
+}
+document.getElementById('btnViewBack').onclick=()=>{ show('screen-log'); };
+
+updateMuteBtn();
+</script>
+</body>
+</html>
