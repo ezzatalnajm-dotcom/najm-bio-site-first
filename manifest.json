@@ -1,0 +1,16 @@
+{
+  "name": "منصة نجم الأحياء - نظام الدروس والتدريبات",
+  "short_name": "نجم الأحياء",
+  "description": "نظام الدروس والتدريبات لمادة الأحياء - أ. عزت شعبان",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f0f4f8",
+  "theme_color": "#0f2b3d",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -6,7 +6,13 @@
     <meta name="theme-color" content="#0f2b3d">
     <title>منصة أ. عزت شعبان - الأحياء</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi2YXYr9ix2LPYqSDYp9mE2LnYsdio2Kog2KfZhNit2LHZiNmG2YrYpyIsInNob3J0X25hbWUiOiLYp9mE2LnYsdio2Kog2KfZhNit2LHZiNmG2YrYpyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjBmNGY4IiwidGhlbWVfY29sb3IiOiIjMGYyYjNkIn0=">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <meta name="apple-mobile-web-app-title" content="نجم الأحياء">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Cairo', sans-serif; background: #f0f4f8; padding: 15px; direction: rtl; min-height: 100vh; }
@@ -63,6 +69,14 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
+        }
+        .icon-action-btn.install-icon-btn {
+            width: 58px;
+            height: 58px;
+            font-size: 30px;
+            background: #ffd966;
+            color: #1a202c;
+            box-shadow: 0 3px 10px rgba(255,217,102,0.6);
         }
         .notif-badge {
             position: absolute;
@@ -510,7 +524,7 @@
                 <span class="icon-label">إشعارات</span>
             </div>
             <div class="icon-stack">
-                <button class="icon-action-btn" onclick="triggerInstall()">📲</button>
+                <button class="icon-action-btn install-icon-btn" onclick="triggerInstall()">📲</button>
                 <span class="icon-label">ثبت التطبيق</span>
             </div>
             <div class="icon-stack">
@@ -1280,6 +1294,9 @@
     };
 
     // ======================== PWA INSTALL ========================
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -1376,9 +1393,45 @@
         }
     }
 
+    async function loadAbout() {
+        const applyAbout = (rows) => {
+            if (!Array.isArray(rows) || rows.length === 0) return;
+            let name = '', image = '', paragraphs = [];
+            rows.forEach(row => {
+                const type = String(row['نوع'] ?? row.type ?? '').trim();
+                const value = String(row['القيمة'] ?? row.value ?? '').trim();
+                if (!value) return;
+                if (type === 'الاسم') name = value;
+                else if (type === 'الصورة') image = value;
+                else if (type === 'نص') paragraphs.push(value);
+            });
+            if (name) document.querySelector('#aboutPanel .about-text h3').textContent = '👨‍🏫 ' + name;
+            if (image) document.getElementById('aboutImg').src = image;
+            if (paragraphs.length) {
+                document.querySelector('#aboutPanel .about-text p').innerHTML = paragraphs.join('<br><br>');
+            }
+        };
+        const cached = localStorage.getItem('bio_about_cache');
+        if (cached) {
+            try { applyAbout(JSON.parse(cached)); } catch (e) {}
+        }
+        if (GOOGLE_SCRIPT_URL.includes('XXXXXXXX')) return;
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + '?sheet=about&t=' + Date.now());
+            const rows = await res.json();
+            if (Array.isArray(rows) && rows.length) {
+                localStorage.setItem('bio_about_cache', JSON.stringify(rows));
+                applyAbout(rows);
+            }
+        } catch (e) {
+            console.error('تعذر تحميل بيانات لمحة عني من الشيت', e);
+        }
+    }
+
     // ======================== INIT ========================
     initContentData();
     loadTopStudents();
+    loadAbout();
 </script>
 </body>
 </html>
