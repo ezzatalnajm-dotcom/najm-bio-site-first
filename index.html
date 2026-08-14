@@ -360,12 +360,16 @@
             transition: 0.3s;
         }
         .student-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .student-img {
+        .student-avatar {
             width: 100%;
-            height: 180px;
-            object-fit: cover;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f0f4f8, #dbe7ef);
             border-bottom: 3px solid #1e5a7a;
         }
+        .student-avatar svg { width: 110px; height: 110px; }
         .student-info { padding: 15px; }
         .student-info h4 { color: #1e5a7a; margin-bottom: 6px; font-size: 16px; }
         .student-info p { color: #718096; font-size: 13px; }
@@ -567,21 +571,6 @@
 
     <!-- Top Students Panel -->
     <div id="topstudentsPanel" class="panel">
-        <div class="admin-form" id="adminForm">
-            <h4>➕ إضافة متفوق جديد</h4>
-            <div class="admin-row">
-                <input type="text" id="stuName" placeholder="اسم الطالب">
-                <input type="text" id="stuDesc" placeholder="الكلية / الإنجاز (مثال: كلية الطب)">
-            </div>
-            <div class="file-input-wrapper">
-                <input type="file" id="stuImg" accept="image/*" onchange="previewImage(this)">
-                <span id="fileLabel">📷 اضغط هنا لرفع صورة الطالب</span>
-            </div>
-            <div class="admin-row" id="imgPreviewRow" style="display:none; justify-content:center;">
-                <img id="imgPreview" style="max-width:150px; max-height:150px; border-radius:10px; border:2px solid #1e5a7a;">
-            </div>
-            <button class="btn-primary" onclick="addStudent()" style="margin-top:10px;">إضافة المتفوق</button>
-        </div>
         <div class="top-students-grid" id="studentsGrid"></div>
     </div>
 
@@ -1163,37 +1152,53 @@
         }, 100);
     }
 
-    // ======================== TOP STUDENTS ========================
-    let topStudents = JSON.parse(localStorage.getItem('bio_students') || '[]');
-    let tempImageBase64 = '';
+    // ======================== TOP STUDENTS (من شيت "المتفوقون") ========================
+    // أعمدة الشيت المطلوبة: الاسم | الوصف | النوع
+    // "النوع" لازم تكون واحدة من القيم دي بالظبط:
+    //   ولد | ولد نظارة | بنت | بنت نظارة | منتقبة | غترة
+    let topStudents = [];
 
-    function previewImage(input) {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            tempImageBase64 = e.target.result;
-            document.getElementById('imgPreview').src = tempImageBase64;
-            document.getElementById('imgPreviewRow').style.display = 'flex';
-            document.getElementById('fileLabel').textContent = '✅ تم اختيار الصورة: ' + file.name;
-        };
-        reader.readAsDataURL(file);
+    const AVATAR_FACE = '<ellipse cx="60" cy="66" rx="25" ry="29" fill="#e8b48f"/><circle cx="50" cy="65" r="2.6" fill="#2b2118"/><circle cx="70" cy="65" r="2.6" fill="#2b2118"/><path d="M50,80 Q60,86 70,80" stroke="#a06a45" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+    const AVATAR_GLASSES = '<g fill="none" stroke="#1e5a7a" stroke-width="3"><circle cx="50" cy="65" r="10.5"/><circle cx="70" cy="65" r="10.5"/><line x1="60.5" y1="65" x2="59.5" y2="65"/><line x1="39" y1="63" x2="34" y2="60"/><line x1="81" y1="63" x2="86" y2="60"/></g>';
+    const AVATAR_COLLAR = '<path d="M33,120 Q33,97 60,97 Q87,97 87,120 Z" fill="#1e5a7a"/>';
+
+    const AVATAR_SVGS = {
+        'ولد': `<svg viewBox="0 0 120 120"><path d="M31,58 Q29,30 60,28 Q91,30 89,58 Q89,42 60,40 Q31,42 31,58 Z" fill="#2b2118"/>${AVATAR_FACE}${AVATAR_COLLAR}</svg>`,
+        'ولد نظارة': `<svg viewBox="0 0 120 120"><path d="M31,58 Q29,30 60,28 Q91,30 89,58 Q89,42 60,40 Q31,42 31,58 Z" fill="#2b2118"/>${AVATAR_FACE}${AVATAR_GLASSES}${AVATAR_COLLAR}</svg>`,
+        'بنت': `<svg viewBox="0 0 120 120"><path d="M26,54 Q24,24 60,22 Q96,24 94,54 L98,102 Q98,110 89,107 L84,58 Q84,38 60,36 Q36,38 36,58 L31,107 Q22,110 22,102 Z" fill="#2b2118"/>${AVATAR_FACE}<path d="M33,117 Q33,97 60,97 Q87,97 87,117 Z" fill="#c05c7e"/></svg>`,
+        'بنت نظارة': `<svg viewBox="0 0 120 120"><path d="M26,54 Q24,24 60,22 Q96,24 94,54 L98,102 Q98,110 89,107 L84,58 Q84,38 60,36 Q36,38 36,58 L31,107 Q22,110 22,102 Z" fill="#2b2118"/>${AVATAR_FACE}${AVATAR_GLASSES}<path d="M33,117 Q33,97 60,97 Q87,97 87,117 Z" fill="#c05c7e"/></svg>`,
+        'منتقبة': `<svg viewBox="0 0 120 120"><path d="M20,54 Q20,17 60,15 Q100,17 100,54 L100,112 Q100,120 90,118 L30,118 Q20,120 20,112 Z" fill="#2a2a30"/><rect x="37" y="58" width="46" height="15" rx="7.5" fill="#e8b48f"/><circle cx="49" cy="65" r="2.6" fill="#2b2118"/><circle cx="71" cy="65" r="2.6" fill="#2b2118"/></svg>`,
+        'غترة': `<svg viewBox="0 0 120 120"><path d="M23,56 Q21,20 60,18 Q99,20 97,56 L103,104 Q103,112 93,109 L87,60 Q87,39 60,37 Q33,39 33,60 L27,109 Q17,112 17,104 Z" fill="#fdfdfd" stroke="#dcdcdc" stroke-width="1"/><ellipse cx="60" cy="34" rx="31" ry="6.5" fill="none" stroke="#1a1a1a" stroke-width="5"/>${AVATAR_FACE}<path d="M33,120 Q33,99 60,99 Q87,99 87,120 Z" fill="#fdfdfd" stroke="#dcdcdc" stroke-width="1"/></svg>`
+    };
+    const DEFAULT_AVATAR_SVG = `<svg viewBox="0 0 120 120"><path d="M31,58 Q29,30 60,28 Q91,30 89,58 Q89,42 60,40 Q31,42 31,58 Z" fill="#2b2118"/>${AVATAR_FACE}${AVATAR_COLLAR}</svg>`;
+
+    function applyStudentRows(rows) {
+        return rows
+            .map(row => ({
+                name: String(row['الاسم'] ?? row.name ?? '').trim(),
+                desc: String(row['الوصف'] ?? row.desc ?? '').trim(),
+                avatarSvg: AVATAR_SVGS[String(row['النوع'] ?? row.avatar ?? '').trim()] || DEFAULT_AVATAR_SVG
+            }))
+            .filter(s => s.name);
     }
 
-    function addStudent() {
-        const name = document.getElementById('stuName').value.trim();
-        const desc = document.getElementById('stuDesc').value.trim();
-        if (!name) { alert('من فضلك أدخل اسم الطالب'); return; }
-        if (!tempImageBase64) { alert('من فضلك اختر صورة'); return; }
-        topStudents.push({ name, desc, img: tempImageBase64, date: new Date().toISOString() });
-        localStorage.setItem('bio_students', JSON.stringify(topStudents));
-        document.getElementById('stuName').value = '';
-        document.getElementById('stuDesc').value = '';
-        document.getElementById('stuImg').value = '';
-        document.getElementById('imgPreviewRow').style.display = 'none';
-        document.getElementById('fileLabel').textContent = '📷 اضغط هنا لرفع صورة الطالب';
-        tempImageBase64 = '';
-        renderStudents();
+    async function loadTopStudents() {
+        const cached = localStorage.getItem('bio_students_cache');
+        if (cached) {
+            try { topStudents = applyStudentRows(JSON.parse(cached)); renderStudents(); } catch (e) {}
+        }
+        if (GOOGLE_SCRIPT_URL.includes('XXXXXXXX')) return;
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL + '?sheet=students&t=' + Date.now());
+            const rows = await res.json();
+            if (Array.isArray(rows)) {
+                localStorage.setItem('bio_students_cache', JSON.stringify(rows));
+                topStudents = applyStudentRows(rows);
+                renderStudents();
+            }
+        } catch (e) {
+            console.error('تعذر تحميل المتفوقين من الشيت', e);
+        }
     }
 
     function renderStudents() {
@@ -1204,7 +1209,7 @@
         }
         grid.innerHTML = topStudents.map((s, i) => `
             <div class="student-card">
-                <img src="${s.img}" alt="${s.name}" class="student-img">
+                <div class="student-avatar">${s.avatarSvg}</div>
                 <div class="student-info">
                     <h4>${s.name}</h4>
                     <p>${s.desc || 'متفوق متميز'}</p>
@@ -1353,7 +1358,7 @@
 
     // ======================== INIT ========================
     initContentData();
-    renderStudents();
+    loadTopStudents();
 </script>
 </body>
 </html>
