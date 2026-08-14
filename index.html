@@ -45,7 +45,9 @@
             font-size: 14px;
         }
         .whatsapp-link, .bottom-whatsapp { background: #25D366; }
-        .icon-actions { display: flex; gap: 4px; }
+        .icon-actions { display: flex; gap: 10px; }
+        .icon-stack { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .icon-label { color: white; font-size: 10px; font-weight: 600; white-space: nowrap; }
         .icon-action-btn {
             position: relative;
             background: rgba(255,255,255,0.15);
@@ -76,10 +78,10 @@
             justify-content: center;
             padding: 0 3px;
         }
-        .notif-dropdown {
+        .notif-dropdown, .contact-dropdown {
             display: none;
             position: fixed;
-            top: 46px;
+            top: 56px;
             left: 10px;
             right: 10px;
             max-width: 340px;
@@ -91,10 +93,32 @@
             max-height: 320px;
             overflow-y: auto;
         }
-        .notif-dropdown.show { display: block; }
+        .notif-dropdown.show, .contact-dropdown.show { display: block; }
         .notif-item { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 14px; color: #1e5a7a; }
         .notif-item:last-child { border-bottom: none; }
         .notif-empty { color: #a0aec0; text-align: center; padding: 20px; }
+        .contact-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 16px;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e5a7a;
+            text-decoration: none;
+        }
+        .contact-option:last-child { border-bottom: none; }
+        .bottom-contact-btn {
+            background: #1e5a7a;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
 
         .header {
             text-align: center;
@@ -493,15 +517,30 @@
     <!-- Top Bar -->
     <div class="top-bar">
         <div class="icon-actions">
-            <button class="icon-action-btn" id="notifBtn" onclick="toggleNotifDropdown()" title="الإشعارات">🔔<span class="notif-badge" id="notifBadge"></span></button>
-            <button class="icon-action-btn" onclick="triggerInstall()" title="تثبيت التطبيق">📲</button>
-            <button class="icon-action-btn" onclick="shareApp()" title="مشاركة التطبيق">🔗</button>
+            <div class="icon-stack">
+                <button class="icon-action-btn" id="notifBtn" onclick="toggleNotifDropdown()">🔔<span class="notif-badge" id="notifBadge"></span></button>
+                <span class="icon-label">إشعارات</span>
+            </div>
+            <div class="icon-stack">
+                <button class="icon-action-btn" onclick="triggerInstall()">📲</button>
+                <span class="icon-label">ثبت التطبيق</span>
+            </div>
+            <div class="icon-stack">
+                <button class="icon-action-btn" onclick="shareApp()">🔗</button>
+                <span class="icon-label">شارك التطبيق</span>
+            </div>
+            <div class="icon-stack">
+                <button class="icon-action-btn" id="contactBtn" onclick="toggleContactDropdown()">📞</button>
+                <span class="icon-label">تواصل معنا</span>
+            </div>
         </div>
-        <div class="contact-info"><span>📞 77107247</span></div>
-        <a href="https://wa.me/97477107247?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B9%D8%B2%D8%AA%D8%8C%20%D8%B9%D9%86%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" target="_blank" class="whatsapp-link">💬 واتساب</a>
         <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="telegram-link">✈️ قناة التليجرام</a>
     </div>
     <div class="notif-dropdown" id="notifDropdown"></div>
+    <div class="contact-dropdown" id="contactDropdown">
+        <a href="tel:+97477107247" class="contact-option">📞 اتصال مباشر</a>
+        <a href="https://wa.me/97477107247?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B9%D8%B2%D8%AA%D8%8C%20%D8%B9%D9%86%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" target="_blank" class="contact-option">💬 واتساب</a>
+    </div>
 
     <!-- Header -->
     <div class="header">
@@ -564,8 +603,7 @@
 
     <!-- Bottom Bar -->
     <div class="bottom-bar">
-        <div class="bottom-contact"><span>📞 77107247</span></div>
-        <a href="https://wa.me/97477107247?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D8%A7%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B9%D8%B2%D8%AA%D8%8C%20%D8%B9%D9%86%D8%AF%D9%8A%20%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1" target="_blank" class="bottom-whatsapp">💬 واتساب</a>
+        <button class="bottom-contact-btn" onclick="toggleContactDropdown()">📞 تواصل معنا</button>
         <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank" class="bottom-telegram">✈️ قناة التليجرام</a>
     </div>
     <div class="footer-note">للاستفسار والتواصل: 77107247</div>
@@ -1318,6 +1356,7 @@
 
     function toggleNotifDropdown() {
         const dd = document.getElementById('notifDropdown');
+        document.getElementById('contactDropdown').classList.remove('show');
         const isOpen = dd.classList.toggle('show');
         if (isOpen) {
             dd.innerHTML = newItemsList.length
@@ -1327,6 +1366,11 @@
             localStorage.setItem('bio_seen_titles', JSON.stringify(getAllTitles()));
             updateNotifBadge(0);
         }
+    }
+
+    function toggleContactDropdown() {
+        document.getElementById('contactDropdown').classList.toggle('show');
+        document.getElementById('notifDropdown').classList.remove('show');
     }
 
     // ======================== INIT ========================
