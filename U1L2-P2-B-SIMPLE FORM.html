@@ -97,6 +97,7 @@ input::placeholder{color:#8b83a8; opacity:.85;}
 .opt-btn.selected{border-color:var(--teal); background:rgba(18,184,172,.14);}
 .opt-btn.correct-answer{border-color:var(--ok); background:rgba(62,207,142,.16); color:var(--ok); font-weight:700;}
 .opt-btn.wrong-answer{border-color:var(--danger); background:rgba(227,93,93,.14); color:var(--danger); font-weight:700;}
+.opt-btn > span:last-child{flex:1; min-width:0; word-break:break-word; line-height:1.6;}
 .opt-letter{width:26px; height:26px; border-radius:50%; background:rgba(128,128,128,.15); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0;}
 .opt-btn.selected .opt-letter{background:var(--teal); color:#04241f;}
 .opt-btn.correct-answer .opt-letter{background:var(--ok); color:#04241f;}
@@ -163,9 +164,6 @@ input::placeholder{color:#8b83a8; opacity:.85;}
     </div>
     <div class="center-txt" style="font-weight:800; font-size:16px; margin-bottom:6px;">الدرس 1-2 (الجزء 2): الخصائص الوظيفية للعضلات <span style="color:var(--gold-soft);">(B)</span></div>
     <div class="center-txt muted" id="resumeNotice" style="display:none; color:var(--teal); margin-bottom:8px;">🔄 عندك اختبار محفوظ لسه ماخلصتوش</div>
-
-    <label>كلمة السر</label>
-    <input type="password" id="inPassword" placeholder="أدخل كلمة السر">
 
     <label>اسم الطالب</label>
     <input type="text" id="inName" placeholder="الاسم بالكامل">
@@ -283,7 +281,6 @@ input::placeholder{color:#8b83a8; opacity:.85;}
 const CONFIG = {
   LESSON: "الدرس 1-2 (الجزء 2): الخصائص الوظيفية للعضلات", LESSON_SLUG: "u1l2p2b",
   GROUP: "B",
-  PASSWORD: "نجم الأحياء",
   QUESTIONS_COUNT: 30, DURATION_MINUTES: 999,
   TELEGRAM: "https://t.me/thanwiaqatarbioadvanced", TEACHER_NAME: "أ. عزت شعبان",
   VERIFY_URL: "https://script.google.com/macros/s/AKfycbyVTT07MONeOaqMQM1OCyqsyVF0KPUhOXwIkkjBvL9R5euCKKPvM8pQv94rywwD72C_/exec"
@@ -367,7 +364,7 @@ function normalizeAr(s){
     .replace(/[ىي]/g,'ي')
     .replace(/ؤ/g,'و')
     .replace(/ئ/g,'ي')
-    .replace(/[ً-ٰٟ]/g,'')
+    .replace(/[ً-ٰٟ]/g,'')
     .replace(/[^؀-ۿ]/g,'')
     .toLowerCase();
 }
@@ -437,14 +434,12 @@ async function verifyStudent(phone){
 }
 
 document.getElementById('btnStart').addEventListener('click', async ()=>{
-  const pass=document.getElementById('inPassword').value;
   const name=document.getElementById('inName').value.trim();
   const phone=cleanPhone(document.getElementById('inPhone').value);
   const parentPhone=cleanPhone(document.getElementById('inParentPhone').value);
   const err=document.getElementById('loginErr'); err.textContent="";
   const startBtn=document.getElementById('btnStart');
 
-  if(normalizeAr(pass)!==normalizeAr(CONFIG.PASSWORD)){ err.textContent="كلمة السر غير صحيحة"; return; }
   if(!name){ err.textContent="من فضلك اكتب اسمك"; return; }
   if(!phone||phone.length<7){ err.textContent="رقم هاتف الطالب مطلوب وصحيح"; return; }
   if(!parentPhone||parentPhone.length<7){ err.textContent="رقم هاتف ولي الأمر مطلوب وصحيح (بمفتاح الدولة)"; return; }
