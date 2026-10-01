@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فلاش كارت — الدرس 2-3 | أ. عزت نجم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:       #0d9e6e;
+  --green-light: #e6f7f2;
+  --green-dark:  #07694a;
+  --gold:        #c8961a;
+  --gold-light:  #fdf6e3;
+  --navy:        #0f2744;
+  --navy-mid:    #1a3d6e;
+  --surface:     #ffffff;
+  --surface2:    #f7f9fc;
+  --border:      #e2e8f0;
+  --text:        #1a202c;
+  --text2:       #4a5568;
+  --text3:       #718096;
+  --shadow:      0 4px 24px rgba(15,39,68,.10);
+  --shadow-card: 0 8px 40px rgba(15,39,68,.13);
+  --radius:      16px;
+  --radius-sm:   10px;
+}
+body.dark-mode {
+  --surface:     #1a202c;
+  --surface2:    #171923;
+  --text:        #f7fafc;
+  --text2:       #e2e8f0;
+  --text3:       #a0aec0;
+  --border:      #2d3748;
+  --shadow:      0 4px 24px rgba(0,0,0,.3);
+  --shadow-card: 0 8px 40px rgba(0,0,0,.4);
+  --navy:        #0d1522;
+  --navy-mid:    #1a2a44;
+  --green-light: #1c3d31;
+  --gold-light:  #3a2e15;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  background: var(--surface2);
+  color: var(--text);
+  min-height: 100vh;
+  direction: rtl;
+  transition: background 0.3s, color 0.3s;
+}
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e5799 100%);
+  padding: 2.5rem 1.5rem 3.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.hero::before {
+  content: '❤️';
+  position: absolute;
+  font-size: 120px;
+  opacity: 0.04;
+  top: -20px;
+  right: -20px;
+  animation: spin 8s linear infinite;
+}
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+body.dark-mode .hero { background: linear-gradient(135deg, #091220 0%, #112240 100%); }
+.hero-badge {
+  display: inline-block;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 16px;
+  border-radius: 99px;
+  margin-bottom: 1rem;
+}
+.hero h1 { font-size: clamp(22px, 5vw, 36px); font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: .5rem; }
+.hero h1 span { color: #5ee8b4; }
+.hero p { font-size: 15px; color: rgba(255,255,255,.7); margin-bottom: 1rem; }
+.hero-contact {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+.hero-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 12px;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 99px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+.hero-contact a:hover { background: rgba(255,255,255,0.25); }
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: .5rem;
+}
+.hero-stat { text-align: center; }
+.hero-stat .num { font-size: 28px; font-weight: 900; color: #5ee8b4; display: block; }
+.hero-stat .lbl { font-size: 12px; color: rgba(255,255,255,.6); }
+.theme-btn {
+  position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; transition: 0.2s;
+}
+.theme-btn:hover { background: rgba(255,255,255,0.3); }
+.container { max-width: 780px; margin: -20px auto 0; padding: 0 1rem 3rem; position: relative; z-index: 10; }
+.tabs-wrap { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); transition: 0.3s; }
+.tabs-label { font-size: 12px; color: var(--text3); margin-bottom: .6rem; font-weight: 600; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text2); font-size: 13px; font-family: inherit; cursor: pointer; transition: 0.2s; font-weight: 500; }
+.tab:hover { border-color: var(--green); color: var(--green); }
+.tab.active { background: var(--green); border-color: var(--green); color: #fff; font-weight: 700; }
+.tab.fav-tab { border-color: var(--gold); color: var(--gold); }
+.tab.fav-tab.active { background: var(--gold); color: #fff; }
+.progress-wrap { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); transition: 0.3s; }
+.progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; }
+.progress-counter { font-size: 13px; color: var(--text2); font-weight: 600; }
+.progress-pct { font-size: 13px; color: var(--green); font-weight: 700; }
+.progress-bar-bg { background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; border: 1px solid var(--border); }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), #5ee8b4); border-radius: 99px; transition: width .5s ease; }
+.stats-row { display: flex; gap: 8px; margin-top: .75rem; flex-wrap: wrap; }
+.stat-pill { flex: 1; border-radius: var(--radius-sm); padding: 8px 4px; text-align: center; border: 1px solid; min-width: 60px; }
+.stat-pill.correct { background: var(--green-light); border-color: #a3d9bf; color: var(--green-dark); }
+.stat-pill.wrong   { background: rgba(239,68,68,0.1); border-color: #fca5a5; color: #ef4444; }
+.stat-pill.timer   { background: var(--surface2); border-color: var(--border); color: var(--text); }
+.stat-pill .num { font-size: 20px; font-weight: 900; display: block; }
+.stat-pill .lbl { font-size: 11px; font-weight: 600; }
+.card-scene { perspective: 1200px; margin: 0 auto 1.25rem; height: 360px; cursor: pointer; user-select: none; }
+.card-scene:active .card-inner { transform: scale(.985) rotateY(var(--flip,0deg)); }
+.card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.4,0,.2,1); --flip: 0deg; }
+.card-inner.flipped { --flip: 180deg; transform: rotateY(180deg); }
+.card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: var(--radius); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; box-shadow: var(--shadow-card); background: var(--surface); transition: 0.3s; overflow-y: auto; }
+.card-back { background: var(--green-light); transform: rotateY(180deg); border-color: #a3d9bf; }
+.card-badge { position: absolute; top: 14px; right: 14px; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+.card-front .card-badge { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.card-back  .card-badge { background: rgba(255,255,255,0.5); color: var(--green-dark); border: 1px solid #a3d9bf; }
+.card-cat { position: absolute; top: 14px; left: 14px; font-size: 10px; color: var(--text3); font-weight: 600; }
+.fav-btn { position: absolute; top: 10px; left: 45px; font-size: 24px; color: var(--border); cursor: pointer; transition: 0.2s; z-index: 20; padding: 5px; line-height: 1; background: transparent; border: none; }
+.fav-btn:hover { transform: scale(1.1); }
+.fav-btn.active { color: var(--gold); text-shadow: 0 0 10px rgba(200,150,26,0.5); animation: starPulse 0.4s ease; }
+@keyframes starPulse { 0%{transform:scale(1)} 50%{transform:scale(1.4)} 100%{transform:scale(1)} }
+.card-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: .75rem; background: var(--surface2); border: 1px solid var(--border); }
+.card-back .card-icon { background: var(--green-dark); color: #fff; border: none; }
+.card-q { font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 1.6; max-width: 560px; }
+.card-a { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.7; max-width: 560px; }
+.card-hint { margin-top: .75rem; font-size: 11px; color: var(--green-dark); background: rgba(13,158,110,.1); padding: 5px 12px; border-radius: 99px; border: 1px solid rgba(13,158,110,.2); max-width: 500px; }
+body.dark-mode .card-hint { color: #5ee8b4; }
+.flip-hint { text-align: center; font-size: 12px; color: var(--text3); margin-bottom: .75rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.feedback-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 1rem; }
+.btn-feedback { flex: 1; max-width: 200px; padding: 12px; border-radius: var(--radius-sm); border: 2px solid; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: 0.2s; }
+.btn-correct { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+.btn-correct:hover { background: var(--green); color: #fff; }
+.btn-wrong { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
+.btn-wrong:hover { background: #ef4444; color: #fff; }
+.nav-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.btn { padding: 9px 18px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; }
+.btn:hover { border-color: var(--green); color: var(--green); }
+.btn-primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.btn-primary:hover { background: var(--navy-mid); }
+.btn-danger { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
+.done-screen { display: none; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-card); padding: 2.5rem 1.5rem; text-align: center; margin-bottom: 1.25rem; animation: fadeUp .5s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }
+.done-trophy { font-size: 56px; margin-bottom: .5rem; }
+.done-screen h2 { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: .5rem; }
+.done-score-wrap { display: inline-flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #5ee8b4); margin: 1rem auto; box-shadow: 0 8px 24px rgba(13,158,110,.25); }
+.done-score { font-size: 34px; font-weight: 900; color: #fff; }
+.done-detail { display: flex; gap: 10px; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.done-pill { padding: 8px 20px; border-radius: 99px; font-size: 13px; font-weight: 700; border: 1px solid; }
+@media (max-width: 500px) {
+  .card-q { font-size: 12px; }
+  .card-a { font-size: 10.5px; }
+  .hero h1 { font-size: 20px; }
+  .card-scene { height: 420px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <button class="theme-btn" onclick="toggleTheme()" title="الوضع الليلي">🌙</button>
+  <div class="hero-badge">❤️ أ. عزت نجم الأحياء — النجم لأسئلة ثانوية عامة</div>
+  <h1>فلاش كارت<br><span>الدرس 2-3</span></h1>
+  <p>أمراض القلب والأوعية الدموية</p>
+  <div class="hero-contact">
+    <a href="tel:77107247">📞 77107247</a>
+    <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank">✈️ قناة التليجرام</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num" id="totalCardsNum">60</span><span class="lbl">بطاقة</span></div>
+    <div class="hero-stat"><span class="num">7</span><span class="lbl">أقسام</span></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs-wrap">
+    <div class="tabs-label">📂 اختر القسم</div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-counter" id="counter">السؤال 1 من 60</span>
+      <span class="progress-pct" id="pct">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="pbar" style="width:0%"></div></div>
+    <div class="stats-row">
+      <div class="stat-pill correct"><span class="num" id="sc">0</span><span class="lbl">✓ صحيح</span></div>
+      <div class="stat-pill wrong"><span class="num" id="sw">0</span><span class="lbl">✗ خطأ</span></div>
+      <div class="stat-pill timer"><span class="num" id="timerDisp">00:00</span><span class="lbl">⏱️ الوقت</span></div>
+      <div class="stat-pill timer"><span class="num" id="st">60</span><span class="lbl">متبقي</span></div>
+    </div>
+  </div>
+
+  <div class="card-scene" id="cardScene" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front">
+        <span class="card-badge">❓ سؤال</span>
+        <span class="card-cat" id="cardCat"></span>
+        <button class="fav-btn" id="favBtn1" onclick="toggleFav(event)" title="أضف للمفضلة">⭐</button>
+        <div class="card-icon">❤️</div>
+        <div class="card-q" id="qText"></div>
+      </div>
+      <div class="card-face card-back">
+        <span class="card-badge">✅ إجابة</span>
+        <span class="card-cat" id="cardCat2"></span>
+        <button class="fav-btn" id="favBtn2" onclick="toggleFav(event)" title="أضف للمفضلة">⭐</button>
+        <div class="card-icon">💡</div>
+        <div class="card-a" id="aText"></div>
+        <div class="card-hint" id="hText"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip-hint">اضغط على البطاقة لقلبها</div>
+
+  <div class="feedback-row" id="fbRow" style="display:none">
+    <button class="btn-feedback btn-correct" onclick="mark(true)">✓ أعرفها</button>
+    <button class="btn-feedback btn-wrong" onclick="mark(false)">✗ لا أعرفها</button>
+  </div>
+
+  <div class="nav-row" style="margin-bottom:1rem">
+    <button class="btn" onclick="prev()">→ السابق</button>
+    <button class="btn" onclick="shuffle()">🔀 ترتيب عشوائي</button>
+    <button class="btn" onclick="next()">← التالي</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-primary" onclick="resetAll()">🔁 إعادة البدء</button>
+    <button class="btn btn-danger" onclick="clearProgress()">🗑️ مسح التقدم</button>
+    <button class="btn btn-danger" id="reviewWrongBtn" onclick="reviewWrong()" style="display:none">🔴 راجع أخطاءك</button>
+  </div>
+
+  <div class="done-screen" id="doneScreen">
+    <div class="done-trophy">🏆</div>
+    <h2>أحسنت! انتهيت من جميع البطاقات</h2>
+    <div class="done-score-wrap"><div class="done-score" id="dScore">0%</div></div>
+    <div class="done-detail">
+      <div class="done-pill" style="border-color:var(--green);color:var(--green)">✓ صحيح: <span id="dC">0</span></div>
+      <div class="done-pill" style="border-color:#ef4444;color:#ef4444">✗ خطأ: <span id="dW">0</span></div>
+      <div class="done-pill" style="border-color:var(--text3);color:var(--text)">⏱️ الوقت: <span id="dT">00:00</span></div>
+    </div>
+    <div class="done-msg" id="dMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="resetAll()">🔁 أعد التدريب</button>
+      <button class="btn btn-danger" id="reviewWrongBtnDone" onclick="reviewWrong()" style="display:none">🔴 راجع ما لم تعرفه</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================== 60 CARD DATA - LESSON 2-3 ========================
+const ALL = [
+  // === التغيرات المرتبطة بالشيخوخة (1-6) ===
+  {cat:"الشيخوخة", q:"ما التغيرات التي تحدث في العقدة الجيبية الأذنية (SA node) مع التقدم في العمر؟", a:"بعض خلاياها تموت ولا يتم تعويضها (وهي التي تنظم معدل دقات القلب).", h:"موت خلايا SA node ← عدم تعويض"},
+  {cat:"الشيخوخة", q:"كيف يؤثر التقدم في العمر على القلب من حيث الرواسب الدهنية؟", a:"تنمو الرواسب الدهنية والأنسجة الليفية على القلب.", h:"رواسب دهنية وأنسجة ليفية"},
+  {cat:"الشيخوخة", q:"كيف تتغير صمامات القلب مع التقدم في العمر؟", a:"تصبح أكثر صلابة.", h:"تصلب الصمامات"},
+  {cat:"الشيخوخة", q:"لماذا يقوم القلب في مرحلة الشيخوخة بضخ المزيد من الدم؟", a:"للحفاظ على أكسجة خلايا الجسم (لأن إنتاج خلايا الدم يتناقص مع تقدم العمر).", h:"تعويض نقص أكسجة الخلايا"},
+  {cat:"الشيخوخة", q:"كيف يؤثر التقدم في العمر على إنتاج خلايا الدم؟", a:"يتناقص إنتاج خلايا الدم.", h:"نقص إنتاج خلايا الدم"},
+  {cat:"الشيخوخة", q:"ما التغيرات الهيكلية التي تحدث في القلب مع الشيخوخة؟", a:"1- موت خلايا SA node. 2- نمو الرواسب الدهنية والأنسجة الليفية. 3- تصلب الصمامات.", h:"SA node + رواسب + صمامات"},
+
+  // === ضغط الدم وعوامل التأثير (7-18) ===
+  {cat:"ضغط الدم", q:"وضح العلاقة بين جنس الفرد وضغط الدم.", a:"تتميز النساء بضغط دم انقباضي أقل مما هو لدى الرجال (بسبب هرمون التستوستيرون عند الرجال).", h:"نساء ← ضغط أقل، رجال ← ضغط أعلى"},
+  {cat:"ضغط الدم", q:"متى يقل تأثير الجنس في ضغط الدم بين الرجال والنساء؟", a:"عند بلوغ الرجال والنساء الـ 60 سنة (في الشيخوخة).", h:"بعد 60 سنة"},
+  {cat:"ضغط الدم", q:"لماذا يختلف ضغط الدم عند الاستلقاء عن الضغط عند الجلوس أو الوقوف؟", a:"في وضعية الاستلقاء يكون ضغط الدم أقل عند قياسه لأن القلب لا يعمل بصعوبة لضخ الدم (الرأس والأعضاء في نفس مستوى القلب).", h:"استلقاء ← جهد أقل ← ضغط أقل"},
+  {cat:"ضغط الدم", q:"وضح العلاقة بين وضعية الجسم وضغط الدم.", a:"في وضعية الاستلقاء: ضغط أقل (القلب لا يعمل بصعوبة). في وضعية الجلوس أو الوقوف: ضغط أعلى.", h:"استلقاء ← أقل، جلوس/وقوف ← أعلى"},
+  {cat:"ضغط الدم", q:"وضح العلاقة بين الرياضة وضغط الدم.", a:"أثناء ممارسة الرياضة: يزداد النبض ويرتفع ضغط الدم. ولكن عندما تكون عضلات القلب قوية، فإنها تحتاج إلى دقات أقل لإنتاج نفس ضغط الدم.", h:"رياضة ← نبض↑ ضغط↑، لكن قلب قوي ← دقات أقل"},
+  {cat:"ضغط الدم", q:"كيف تؤثر العضلة القلبية القوية على ضغط الدم؟", a:"تحتاج إلى دقات أقل لإنتاج نفس ضغط الدم.", h:"كفاءة أعلى ← دقات أقل"},
+  {cat:"ضغط الدم", q:"لماذا يمكن لبعض الوصفات الطبية والأدوية أن ترفع ضغط الدم؟", a:"لأنها تجعل القلب يعمل بجهد أكبر.", h:"جهد قلب أكبر ← ضغط أعلى"},
+  {cat:"ضغط الدم", q:"اذكر أمثلة على الأدوية التي قد ترفع ضغط الدم.", a:"الكافيين، مزيلات الاحتقان، أدوية الصداع، المكملات العشبية، والستيرويدات.", h:"كافيين + مزيلات احتقان + صداع + أعشاب + ستيرويدات"},
+  {cat:"ضغط الدم", q:"ما قيمة ضغط الدم الطبيعي عند المراهقين تقريباً؟", a:"حوالي 77/117 مم زئبق.", h:"~117/77"},
+  {cat:"ضغط الدم", q:"أي طالب يعاني من ضغط دم عالٍ إذا كانت قراءات الطلاب: (140/95)، (120/75)، (117/77)؟", a:"الطالب الأول (140/95) يعاني من ضغط دم عالٍ، لأن ضغط الدم الطبيعي للمراهقين حوالي 77/117.", h:"140/95 ← مرتفع"},
+  {cat:"ضغط الدم", q:"ما الفرق بين ضغط الدم الانقباضي والانبساطي؟", a:"الانقباضي: الضغط أثناء انقباض البطينين. الانبساطي: الضغط أثناء استرخاء القلب.", h:"انقباضي ← انقباض، انبساطي ← استرخاء"},
+  {cat:"ضغط الدم", q:"ما العوامل التي تؤثر على مقاومة الأوعية الدموية؟", a:"كثافة الدم، قطر الوعاء، وطول الوعاء (كلما زاد الطول زادت المقاومة).", h:"كثافة + قطر + طول"},
+
+  // === أمراض القلب والأوعية الدموية (19-30) ===
+  {cat:"أمراض القلب", q:"عرّف مرض الشريان الأبهر (تمدّد الأوعية الدموية - Aneurysm).", a:"هو تضخم منطقة في الشريان الأبهر.", h:"تضخم موضعي في الأبهر"},
+  {cat:"أمراض القلب", q:"عرّف اضطراب النظم القلبي (Arrhythmia).", a:"هو إيقاع كهربائي غير منتظم للقلب.", h:"إيقاع غير منتظم"},
+  {cat:"أمراض القلب", q:"عرّف مرض العضلة القلبية (اعتلال عضلة القلب - Cardiomyopathy).", a:"هو مرض في جدار عضلة القلب.", h:"مرض في جدار عضلة القلب"},
+  {cat:"أمراض القلب", q:"عرّف مرض الشريان التاجي (تصلب الشرايين - Atherosclerosis).", a:"هو تراكم الرواسب الدهنية على الجدران الداخلية للشرايين.", h:"تراكم دهون داخل الشرايين"},
+  {cat:"أمراض القلب", q:"عرّف التهاب التامور (Pericarditis).", a:"هو التهاب النسيج المحيط بالقلب (غشاء التامور).", h:"التهاب غشاء القلب"},
+  {cat:"أمراض القلب", q:"عرّف فشل القلب (Heart failure).", a:"هو ضخ الحجرات (البطينين) بشكل غير فعال.", h:"ضخ غير فعال"},
+  {cat:"أمراض القلب", q:"عرّف مرض الصمام (Valvular heart disease).", a:"هو تلف أو عيب في صمام واحد أو أكثر من صمامات القلب.", h:"تلف أو عيب في الصمامات"},
+  {cat:"أمراض القلب", q:"ماذا يحدث إذا لم يستخدم الجسم كل جزيئات الليبيدات التي في الدم؟", a:"الليبيدات الزائدة تبقى معلقة في الدم إلى أن يتم جمعها وتخزينها على شكل دهون في الجسم، وعندما تتلاصق تتجمع على الجدر الداخلية للشرايين مسببة تصلب الشرايين.", h:"تراكم دهون ← تصلب شرايين"},
+  {cat:"أمراض القلب", q:"ما النتائج المترتبة على تصلب الشرايين (Atherosclerosis)؟", a:"يقل تدفق الدم، ويرتفع ضغط الدم، ويمكن أن تسبب ذبحة صدرية.", h:"تدفق↓ + ضغط↑ + ذبحة صدرية"},
+  {cat:"أمراض القلب", q:"ما هو مرض الشريان التاجي؟", a:"هو تراكم الرواسب الدهنية على الجدر الداخلية للشرايين التاجية (تصلب الشرايين).", h:"تصلب الشرايين التاجية"},
+  {cat:"أمراض القلب", q:"لماذا يعتبر الترسيب الدهني أو الخثرة الكبيرة أو المتحركة بالقرب من القلب مميتة؟", a:"لأنها تمنع وصول الأكسجين إلى جزء من القلب، فتتوقف دقات القلب.", h:"نقص أكسجين القلب ← توقف القلب"},
+  {cat:"أمراض القلب", q:"كيف يمكن منع قصور الصمامات ومرض الشريان التاجي؟", a:"بالتشخيص المبكر.", h:"تشخيص مبكر"},
+
+  // === الأمراض الوراثية وعوامل الخطر (31-40) ===
+  {cat:"عوامل الخطر", q:"اذكر أمثلة على أمراض القلب الموروثة.", a:"1- ضغط الدم العالي بسبب الكوليسترول المرتفع (يؤدي لنوبات قلبية مبكرة). 2- الإيقاع غير الطبيعي في القلب (بسبب طفرات موروثة). 3- أمراض عضلة القلب الموروثة.", h:"ضغط مرتفع + إيقاع غير طبيعي + أمراض عضلة القلب"},
+  {cat:"عوامل الخطر", q:"كيف تؤثر الوراثة على خطر الإصابة بأمراض القلب؟", a:"بعض أمراض القلب مثل ارتفاع ضغط الدم بسبب الكوليسترول المرتفع والإيقاع غير الطبيعي للقلب يمكن أن تكون بسبب طفرات موروثة.", h:"طفرات موروثة تزيد الخطر"},
+  {cat:"عوامل الخطر", q:"ما هي أنواع الدهون الجيدة التي يُفضل استخدامها بدلاً من الدهون المشبعة؟", a:"الدهون الجيدة الموجودة في المكسرات والأسماك وزيت الزيتون.", h:"مكسرات + أسماك + زيت زيتون"},
+  {cat:"عوامل الخطر", q:"لماذا يُفضل استخدام الدهون الجيدة بدلاً من الدهون المشبعة؟", a:"لأنها تقلل من مخاطر مرض تصلب الشرايين بشكل ملحوظ.", h:"تقليل تصلب الشرايين"},
+  {cat:"عوامل الخطر", q:"ما هي الدهون المشبعة التي يجب تجنبها أو تقليلها؟", a:"الدهون الموجودة في منتجات الألبان واللحوم الحمراء وزيت النخيل.", h:"ألبان + لحم أحمر + زيت نخيل"},
+  {cat:"عوامل الخطر", q:"كم يستهلك معظم البالغين من الدهون يومياً؟", a:"20-35% من السعرات الحرارية اليومية.", h:"20-35%"},
+  {cat:"عوامل الخطر", q:"كم يجب أن تكون نسبة الدهون المشبعة التي يتناولها البالغ يومياً؟", a:"أقل من 10% من السعرات الحرارية اليومية.", h:"أقل من 10%"},
+  {cat:"عوامل الخطر", q:"ما هي الإجراءات الوقائية من تصلب الشرايين؟", a:"1- استهلاك 20-35% دهون يومياً غير غنية بالكوليسترول. 2- نسبة دهون مشبعة أقل من 10%. 3- استخدام الدهون الجيدة بدلاً من المشبعة.", h:"نسبة دهون مناسبة + دهون جيدة"},
+  {cat:"عوامل الخطر", q:"ما الفرق بين الدهون المشبعة والدهون غير المشبعة من حيث التأثير على الشرايين؟", a:"الدهون المشبعة تزيد من خطر تصلب الشرايين، بينما الدهون غير المشبعة (الجيدة) تقلل من المخاطر.", h:"مشبعة ← خطر، غير مشبعة ← حماية"},
+  {cat:"عوامل الخطر", q:"كيف يمكن معالجة قصور الصمامات ومرض الشريان التاجي؟", a:"باعتماد نظام غذائي مناسب، وممارسة الرياضة، والأدوية.", h:"غذاء + رياضة + أدوية"},
+
+  // === فيزياء تدفق الدم والمقاومة (41-50) ===
+  {cat:"فيزياء التدفق", q:"أي الأوعية الدموية بها تدفق دم أقل إذا تساوت الأقطار؟", a:"الوعاء الأطول (كلما زاد الطول زادت المقاومة وقل تدفق الدم).", h:"طول أكبر ← مقاومة أكبر ← تدفق أقل"},
+  {cat:"فيزياء التدفق", q:"ما العوامل التي تؤثر على تدفق الدم في الأوعية الدموية؟", a:"فرق الضغط، قطر الوعاء، وطول الوعاء.", h:"فرق ضغط + قطر + طول"},
+  {cat:"فيزياء التدفق", q:"كيف يتأثر تدفق الدم بطول الوعاء الدموي؟", a:"كلما زاد الطول زادت المقاومة وقل تدفق الدم.", h:"علاقة عكسية"},
+  {cat:"فيزياء التدفق", q:"كيف يتأثر تدفق الدم بقطر الوعاء الدموي؟", a:"كلما زاد القطر قلت المقاومة وزاد تدفق الدم.", h:"علاقة طردية"},
+  {cat:"فيزياء التدفق", q:"كيف يتأثر تدفق الدم بكثافة الدم؟", a:"كلما زادت كثافة الدم زادت المقاومة وقل تدفق الدم.", h:"كثافة أكبر ← مقاومة أكبر"},
+  {cat:"فيزياء التدفق", q:"ماذا يحدث لتدفق الدم إذا تساوى فرق الضغط في وعاءين متماثلين في الطول والقطر؟", a:"يتساوى تدفق الدم لأن تدفق الدم يعتمد على فرق الضغط عند تساوي المقاومة.", h:"فرق ضغط متساوٍ ← تدفق متساوٍ"},
+  {cat:"فيزياء التدفق", q:"في أي نقطة في الجهاز الدوري يكون ضغط الدم أعلى؟", a:"في الشريان الأبهر (بالقرب من القلب).", h:"الأبهر ← أعلى ضغط"},
+  {cat:"فيزياء التدفق", q:"في أي نقطة في الجهاز الدوري يكون ضغط الدم أقل؟", a:"في الأوردة الرئوية (بالبعد عن القلب).", h:"أوردة رئوية ← أقل ضغط"},
+  {cat:"فيزياء التدفق", q:"لماذا يمثل الشريان الأبهر أعلى نقطة ضغط في الرسم البياني؟", a:"لارتفاع ضغط الدم بالقرب من القلب.", h:"قرب القلب"},
+  {cat:"فيزياء التدفق", q:"لماذا يمثل الوريد الرئوي أقل نقطة ضغط في الرسم البياني؟", a:"لانخفاض ضغط الدم بالبعد عن القلب.", h:"بعد عن القلب"},
+
+  // === أسئلة موضوعية (51-60) ===
+  {cat:"موضوعي", q:"أي مما يلي يؤثر على مقاومة الأوعية الدموية؟\nأ. كثافة الدم\nب. قطر الوعاء\nج. طول الوعاء\nد. كل ما ذُكر", a:"د. كل ما ذُكر ✓", h:"كثافة + قطر + طول"},
+  {cat:"موضوعي", q:"أي مما يلي يعبر عن ضغط الدم بشكل صحيح؟\nأ. يقل تأثير الجنس بين ضغط الدم للرجال والنساء في الشيخوخة\nب. ضغط الدم في الرجال والنساء متساويان في الشباب\nج. ضغط الدم في الرجال أقل بشكل عام\nد. ضغط الدم في النساء أكبر بشكل عام", a:"أ. يقل تأثير الجنس بين ضغط الدم للرجال والنساء في الشيخوخة ✓", h:"بعد 60 سنة يتساوى"},
+  {cat:"موضوعي", q:"ماذا يطلق على المرض الذي يصيب جدار عضلة القلب؟\nأ. مرض الشريان الأبهر\nب. مرض اعتلال القلب\nج. مرض فشل القلب\nد. مرض الصمام", a:"ب. مرض اعتلال القلب (Cardiomyopathy) ✓", h:"اعتلال عضلة القلب"},
+  {cat:"موضوعي", q:"أي مما يلي يعبر عن مرض الشريان التاجي؟\nأ. التهاب النسيج المحيط بالقلب\nب. ضخ الحجرات بشكل غير فعال\nج. تراكم الرواسب الدهنية على الجدر الداخلية للشرايين\nد. تلف أو عيب في صمامات القلب", a:"ج. تراكم الرواسب الدهنية على الجدر الداخلية للشرايين ✓", h:"تصلب الشرايين"},
+  {cat:"موضوعي", q:"لماذا يكون الترسيب الدهني أو الخثرة الكبيرة بالقرب من القلب مميتة؟\nأ. لا يحصل جزء من القلب على الأكسجين، فتتوقف دقات القلب\nب. لا يحصل جزء من القلب على الأكسجين، فيقل ضغط الدم\nج. تقتل الأنسجة العصبية في الدماغ\nد. تقتل الأنسجة العصبية في القلب", a:"أ. لا يحصل جزء من القلب على الأكسجين، فتتوقف دقات القلب ✓", h:"نقص أكسجين القلب"},
+  {cat:"موضوعي", q:"كم يستهلك معظم البالغين من الدهون يومياً؟\nأ. 10-15%\nب. 20-35%\nج. 40-55%\nد. 50-75%", a:"ب. 20-35% ✓", h:"20-35%"},
+  {cat:"موضوعي", q:"كم يجب أن تكون نسبة الدهون المشبعة التي يتناولها البالغ يومياً؟\nأ. أقل من 10%\nب. أقل من 30%\nج. أقل من 40%\nد. أقل من 75%", a:"أ. أقل من 10% ✓", h:"<10%"},
+  {cat:"موضوعي", q:"أي مما يلي يزيد من مقاومة الأوعية الدموية؟\nأ. قطر كبير\nب. طول قصير\nج. طول طويل\nد. كثافة منخفضة", a:"ج. طول طويل ✓", h:"طول أكبر ← مقاومة أكبر"},
+  {cat:"موضوعي", q:"أي النقاط في الجهاز الدوري تمثل أعلى ضغط دم؟\nأ. الشريان الأبهر\nب. الوريد الرئوي\nج. الوريد الأجوف\nد. الشعيرات الدموية", a:"أ. الشريان الأبهر ✓", h:"الأبهر"},
+  {cat:"موضوعي", q:"ما تأثير العضلة القلبية القوية على ضغط الدم؟\nأ. تزيد ضغط الدم\nب. تقلل ضغط الدم\nج. تحتاج إلى دقات أقل لإنتاج نفس الضغط\nد. تحتاج إلى دقات أكثر لإنتاج نفس الضغط", a:"ج. تحتاج إلى دقات أقل لإنتاج نفس الضغط ✓", h:"كفاءة أعلى ← دقات أقل"}
+];
+
+const CATS = ["الكل", "المفضلة", ...Array.from(new Set(ALL.map(c => c.cat)))];
+let activeCat = "الكل", cards = [], idx = 0, flipped = false;
+let correct = 0, wrong = 0, answered = new Set(), wrongCards = [];
+let favs = new Set();
+let timerInt = null, seconds = 0;
+
+document.getElementById('totalCardsNum').textContent = ALL.length;
+
+// Audio
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function playTone(freq, type, duration, vol = 0.1) {
+  if (!audioCtx) audioCtx = new AudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + duration);
+}
+function playCorrect() { playTone(600, 'sine', 0.1); setTimeout(() => playTone(800, 'sine', 0.15), 100); }
+function playWrong() { playTone(300, 'triangle', 0.2); setTimeout(() => playTone(250, 'triangle', 0.3), 150); }
+function playDone() { playTone(400, 'sine', 0.1); setTimeout(() => playTone(500, 'sine', 0.1), 100); setTimeout(() => playTone(600, 'sine', 0.3), 200); }
+
+function toggleTheme() {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('bio_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+}
+
+function formatTime(s) { const m = String(Math.floor(s / 60)).padStart(2, '0'); const sec = String(s % 60).padStart(2, '0'); return m + ':' + sec; }
+function startTimer() { if (!timerInt) timerInt = setInterval(() => { seconds++; document.getElementById('timerDisp').textContent = formatTime(seconds); saveState(); }, 1000); }
+function stopTimer() { clearInterval(timerInt); timerInt = null; }
+
+function saveState() {
+  const state = { c: correct, w: wrong, ans: Array.from(answered), wCards: wrongCards.map(c => ALL.indexOf(c)), sec: seconds, favs: Array.from(favs) };
+  localStorage.setItem('bio_u2l3_state', JSON.stringify(state));
+}
+function loadState() {
+  const theme = localStorage.getItem('bio_theme');
+  if (theme === 'dark') document.body.classList.add('dark-mode');
+  const saved = JSON.parse(localStorage.getItem('bio_u2l3_state'));
+  if (saved) { correct = saved.c || 0; wrong = saved.w || 0; answered = new Set(saved.ans || []); favs = new Set(saved.favs || []); wrongCards = (saved.wCards || []).map(i => ALL[i]); seconds = saved.sec || 0; document.getElementById('timerDisp').textContent = formatTime(seconds); }
+}
+function clearProgress() { if (confirm("هل أنت متأكد من مسح تقدمك؟")) { correct = 0; wrong = 0; answered.clear(); wrongCards = []; seconds = 0; stopTimer(); document.getElementById('timerDisp').textContent = "00:00"; saveState(); resetAll(); } }
+
+function getCards() {
+  if (activeCat === "المفضلة") return ALL.filter((_, i) => favs.has(i));
+  return activeCat === "الكل" ? [...ALL] : ALL.filter(c => c.cat === activeCat);
+}
+
+function buildTabs() {
+  document.getElementById("tabs").innerHTML = CATS.map(c => {
+    const count = c === "الكل" ? ALL.length : (c === "المفضلة" ? favs.size : ALL.filter(x => x.cat === c).length);
+    const cls = c === "المفضلة" ? "tab fav-tab" : "tab";
+    return `<button class="${cls}${c === activeCat ? " active" : ""}" onclick="setCat('${c}')">${c} (${count})</button>`;
+  }).join("");
+}
+
+function setCat(cat) {
+  activeCat = cat;
+  if (activeCat === "المفضلة" && favs.size === 0) { alert("لا توجد بطاقات في المفضلة بعد. اضغط على أيقونة النجمة لحفظ البطاقات."); activeCat = "الكل"; }
+  buildTabs(); resetAll();
+}
+
+function resetAll() {
+  cards = getCards(); idx = 0; flipped = false;
+  document.getElementById("doneScreen").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("fbRow").style.display = "none";
+  document.getElementById("reviewWrongBtn").style.display = "none";
+  document.getElementById("st").textContent = cards.length - answered.size;
+  showCard(); updateStats();
+}
+
+function shuffle() { cards = getCards().sort(() => Math.random() - 0.5); idx = 0; flipped = false; showCard(); }
+
+function showCard() {
+  if (idx >= cards.length) { showDone(); return; }
+  const c = cards[idx];
+  const globalIdx = ALL.indexOf(c);
+  document.getElementById("qText").innerHTML = c.q;
+  document.getElementById("aText").innerHTML = (c.a || "").replace(/\n/g, "<br>");
+  document.getElementById("hText").innerHTML = c.h ? "💡 " + c.h : "";
+  document.getElementById("cardCat").textContent = c.cat;
+  document.getElementById("cardCat2").textContent = c.cat;
+  const f1 = document.getElementById("favBtn1"), f2 = document.getElementById("favBtn2");
+  if (favs.has(globalIdx)) { f1.classList.add("active"); f2.classList.add("active"); }
+  else { f1.classList.remove("active"); f2.classList.remove("active"); }
+  document.getElementById("cardInner").classList.remove("flipped");
+  document.getElementById("fbRow").style.display = "none";
+  flipped = false;
+  const p = Math.round((idx / cards.length) * 100);
+  document.getElementById("counter").textContent = `السؤال ${idx + 1} من ${cards.length}`;
+  document.getElementById("pct").textContent = p + "%";
+  document.getElementById("pbar").style.width = p + "%";
+  startTimer();
+}
+
+function flipCard() { if (idx >= cards.length) return; flipped = !flipped; document.getElementById("cardInner").classList.toggle("flipped", flipped); document.getElementById("fbRow").style.display = flipped ? "flex" : "none"; }
+
+function toggleFav(e) { e.stopPropagation(); const globalIdx = ALL.indexOf(cards[idx]); if (favs.has(globalIdx)) favs.delete(globalIdx); else favs.add(globalIdx); const f1 = document.getElementById("favBtn1"), f2 = document.getElementById("favBtn2"); f1.classList.toggle("active"); f2.classList.toggle("active"); saveState(); buildTabs(); }
+
+function mark(ok) { if (ok) { correct++; playCorrect(); } else { wrong++; wrongCards.push(cards[idx]); playWrong(); } answered.add(ALL.indexOf(cards[idx])); updateStats(); saveState(); idx++; flipped = false; if (idx >= cards.length) showDone(); else showCard(); }
+
+function next() { if (idx < cards.length - 1) { idx++; flipped = false; showCard(); } }
+function prev() { if (idx > 0) { idx--; flipped = false; showCard(); } }
+
+function updateStats() { document.getElementById("sc").textContent = correct; document.getElementById("sw").textContent = wrong; const remain = cards.length - answered.size; document.getElementById("st").textContent = remain < 0 ? 0 : remain; }
+
+function showDone() { stopTimer(); playDone(); document.getElementById("cardScene").style.display = "none"; document.getElementById("fbRow").style.display = "none"; const t = correct + wrong, p = t > 0 ? Math.round(correct / t * 100) : 0; document.getElementById("dScore").textContent = p + "%"; document.getElementById("dC").textContent = correct; document.getElementById("dW").textContent = wrong; document.getElementById("dT").textContent = formatTime(seconds); const msgs = ["تحتاج مراجعة أكثر — أعد التدريب.", "جيد! ركز على أخطائك وأعد المحاولة.", "أداء رائع!", "ممتاز! أتقنت جميع البطاقات 🎉"]; document.getElementById("dMsg").textContent = p < 60 ? msgs[0] : p < 80 ? msgs[1] : p < 100 ? msgs[2] : msgs[3]; document.getElementById("doneScreen").style.display = "block"; document.getElementById("pbar").style.width = "100%"; document.getElementById("pct").textContent = "100%"; const btn1 = document.getElementById("reviewWrongBtn"); const btn2 = document.getElementById("reviewWrongBtnDone"); if (wrongCards.length > 0) { btn1.style.display = "flex"; btn2.style.display = "flex"; } else { btn1.style.display = "none"; btn2.style.display = "none"; } }
+
+function reviewWrong() { if (wrongCards.length === 0) return; cards = [...new Set(wrongCards)]; wrongCards = []; idx = 0; flipped = false; document.getElementById("doneScreen").style.display = "none"; document.getElementById("cardScene").style.display = "block"; document.getElementById("reviewWrongBtn").style.display = "none"; showCard(); updateStats(); startTimer(); }
+
+document.addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); flipCard(); } else if (e.key === "ArrowLeft") next(); else if (e.key === "ArrowRight") prev(); else if (e.key === "1" && flipped) mark(true); else if (e.key === "2" && flipped) mark(false); });
+
+loadState();
+buildTabs();
+resetAll();
+if (seconds > 0) document.getElementById('timerDisp').textContent = formatTime(seconds);
+</script>
+</body>
+</html>
