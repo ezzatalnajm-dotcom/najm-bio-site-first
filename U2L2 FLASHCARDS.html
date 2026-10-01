@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>فلاش كارت — الدرس 2-2 | أ. عزت نجم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:       #0d9e6e;
+  --green-light: #e6f7f2;
+  --green-dark:  #07694a;
+  --gold:        #c8961a;
+  --gold-light:  #fdf6e3;
+  --navy:        #0f2744;
+  --navy-mid:    #1a3d6e;
+  --surface:     #ffffff;
+  --surface2:    #f7f9fc;
+  --border:      #e2e8f0;
+  --text:        #1a202c;
+  --text2:       #4a5568;
+  --text3:       #718096;
+  --shadow:      0 4px 24px rgba(15,39,68,.10);
+  --shadow-card: 0 8px 40px rgba(15,39,68,.13);
+  --radius:      16px;
+  --radius-sm:   10px;
+}
+body.dark-mode {
+  --surface:     #1a202c;
+  --surface2:    #171923;
+  --text:        #f7fafc;
+  --text2:       #e2e8f0;
+  --text3:       #a0aec0;
+  --border:      #2d3748;
+  --shadow:      0 4px 24px rgba(0,0,0,.3);
+  --shadow-card: 0 8px 40px rgba(0,0,0,.4);
+  --navy:        #0d1522;
+  --navy-mid:    #1a2a44;
+  --green-light: #1c3d31;
+  --gold-light:  #3a2e15;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  background: var(--surface2);
+  color: var(--text);
+  min-height: 100vh;
+  direction: rtl;
+  transition: background 0.3s, color 0.3s;
+}
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1e5799 100%);
+  padding: 2.5rem 1.5rem 3.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.hero::before {
+  content: '❤️';
+  position: absolute;
+  font-size: 120px;
+  opacity: 0.04;
+  top: -20px;
+  right: -20px;
+  animation: spin 8s linear infinite;
+}
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+body.dark-mode .hero { background: linear-gradient(135deg, #091220 0%, #112240 100%); }
+.hero-badge {
+  display: inline-block;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 16px;
+  border-radius: 99px;
+  margin-bottom: 1rem;
+}
+.hero h1 { font-size: clamp(22px, 5vw, 36px); font-weight: 900; color: #fff; line-height: 1.3; margin-bottom: .5rem; }
+.hero h1 span { color: #5ee8b4; }
+.hero p { font-size: 15px; color: rgba(255,255,255,.7); margin-bottom: 1rem; }
+.hero-contact {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+.hero-contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 12px;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 99px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+.hero-contact a:hover { background: rgba(255,255,255,0.25); }
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: .5rem;
+}
+.hero-stat { text-align: center; }
+.hero-stat .num { font-size: 28px; font-weight: 900; color: #5ee8b4; display: block; }
+.hero-stat .lbl { font-size: 12px; color: rgba(255,255,255,.6); }
+.theme-btn {
+  position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; transition: 0.2s;
+}
+.theme-btn:hover { background: rgba(255,255,255,0.3); }
+.container { max-width: 780px; margin: -20px auto 0; padding: 0 1rem 3rem; position: relative; z-index: 10; }
+.tabs-wrap { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); transition: 0.3s; }
+.tabs-label { font-size: 12px; color: var(--text3); margin-bottom: .6rem; font-weight: 600; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { padding: 6px 14px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text2); font-size: 13px; font-family: inherit; cursor: pointer; transition: 0.2s; font-weight: 500; }
+.tab:hover { border-color: var(--green); color: var(--green); }
+.tab.active { background: var(--green); border-color: var(--green); color: #fff; font-weight: 700; }
+.tab.fav-tab { border-color: var(--gold); color: var(--gold); }
+.tab.fav-tab.active { background: var(--gold); color: #fff; }
+.progress-wrap { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); transition: 0.3s; }
+.progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .75rem; }
+.progress-counter { font-size: 13px; color: var(--text2); font-weight: 600; }
+.progress-pct { font-size: 13px; color: var(--green); font-weight: 700; }
+.progress-bar-bg { background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; border: 1px solid var(--border); }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), #5ee8b4); border-radius: 99px; transition: width .5s ease; }
+.stats-row { display: flex; gap: 8px; margin-top: .75rem; flex-wrap: wrap; }
+.stat-pill { flex: 1; border-radius: var(--radius-sm); padding: 8px 4px; text-align: center; border: 1px solid; min-width: 60px; }
+.stat-pill.correct { background: var(--green-light); border-color: #a3d9bf; color: var(--green-dark); }
+.stat-pill.wrong   { background: rgba(239,68,68,0.1); border-color: #fca5a5; color: #ef4444; }
+.stat-pill.timer   { background: var(--surface2); border-color: var(--border); color: var(--text); }
+.stat-pill .num { font-size: 20px; font-weight: 900; display: block; }
+.stat-pill .lbl { font-size: 11px; font-weight: 600; }
+.card-scene { perspective: 1200px; margin: 0 auto 1.25rem; height: 340px; cursor: pointer; user-select: none; }
+.card-scene:active .card-inner { transform: scale(.985) rotateY(var(--flip,0deg)); }
+.card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.4,0,.2,1); --flip: 0deg; }
+.card-inner.flipped { --flip: 180deg; transform: rotateY(180deg); }
+.card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: var(--radius); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; box-shadow: var(--shadow-card); background: var(--surface); transition: 0.3s; overflow-y: auto; }
+.card-back { background: var(--green-light); transform: rotateY(180deg); border-color: #a3d9bf; }
+.card-badge { position: absolute; top: 14px; right: 14px; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+.card-front .card-badge { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.card-back  .card-badge { background: rgba(255,255,255,0.5); color: var(--green-dark); border: 1px solid #a3d9bf; }
+.card-cat { position: absolute; top: 14px; left: 14px; font-size: 10px; color: var(--text3); font-weight: 600; }
+.fav-btn { position: absolute; top: 10px; left: 45px; font-size: 24px; color: var(--border); cursor: pointer; transition: 0.2s; z-index: 20; padding: 5px; line-height: 1; background: transparent; border: none; }
+.fav-btn:hover { transform: scale(1.1); }
+.fav-btn.active { color: var(--gold); text-shadow: 0 0 10px rgba(200,150,26,0.5); animation: starPulse 0.4s ease; }
+@keyframes starPulse { 0%{transform:scale(1)} 50%{transform:scale(1.4)} 100%{transform:scale(1)} }
+.card-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: .75rem; background: var(--surface2); border: 1px solid var(--border); }
+.card-back .card-icon { background: var(--green-dark); color: #fff; border: none; }
+.card-q { font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 1.8; max-width: 560px; text-align: right; }
+.card-a { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.7; max-width: 560px; }
+.card-hint { margin-top: .75rem; font-size: 11px; color: var(--green-dark); background: rgba(13,158,110,.1); padding: 5px 12px; border-radius: 99px; border: 1px solid rgba(13,158,110,.2); max-width: 500px; }
+body.dark-mode .card-hint { color: #5ee8b4; }
+.flip-hint { text-align: center; font-size: 12px; color: var(--text3); margin-bottom: .75rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.feedback-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 1rem; }
+.btn-feedback { flex: 1; max-width: 200px; padding: 12px; border-radius: var(--radius-sm); border: 2px solid; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: 0.2s; }
+.btn-correct { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+.btn-correct:hover { background: var(--green); color: #fff; }
+.btn-wrong { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
+.btn-wrong:hover { background: #ef4444; color: #fff; }
+.nav-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.btn { padding: 9px 18px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s; }
+.btn:hover { border-color: var(--green); color: var(--green); }
+.btn-primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.btn-primary:hover { background: var(--navy-mid); }
+.btn-danger { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
+.done-screen { display: none; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-card); padding: 2.5rem 1.5rem; text-align: center; margin-bottom: 1.25rem; animation: fadeUp .5s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }
+.done-trophy { font-size: 56px; margin-bottom: .5rem; }
+.done-screen h2 { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: .5rem; }
+.done-score-wrap { display: inline-flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #5ee8b4); margin: 1rem auto; box-shadow: 0 8px 24px rgba(13,158,110,.25); }
+.done-score { font-size: 34px; font-weight: 900; color: #fff; }
+.done-detail { display: flex; gap: 10px; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.done-pill { padding: 8px 20px; border-radius: 99px; font-size: 13px; font-weight: 700; border: 1px solid; }
+@media (max-width: 500px) {
+  .card-q { font-size: 12px; }
+  .card-a { font-size: 10.5px; }
+  .hero h1 { font-size: 20px; }
+  .card-scene { height: 400px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <button class="theme-btn" onclick="toggleTheme()" title="الوضع الليلي">🌙</button>
+  <div class="hero-badge">❤️ أ. عزت نجم الأحياء — النجم لأسئلة ثانوية عامة</div>
+  <h1>فلاش كارت<br><span>الدرس 2-2</span></h1>
+  <p>الجهاز القلبي الوعائي — القلب والدورة الدموية</p>
+  <div class="hero-contact">
+    <a href="tel:77107247">📞 77107247</a>
+    <a href="https://t.me/thanwiaqatarbioadvanced" target="_blank">✈️ قناة التليجرام</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num" id="totalCardsNum">95</span><span class="lbl">بطاقة</span></div>
+    <div class="hero-stat"><span class="num">7</span><span class="lbl">أقسام</span></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs-wrap">
+    <div class="tabs-label">📂 اختر القسم</div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-counter" id="counter">السؤال 1 من 95</span>
+      <span class="progress-pct" id="pct">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="pbar" style="width:0%"></div></div>
+    <div class="stats-row">
+      <div class="stat-pill correct"><span class="num" id="sc">0</span><span class="lbl">✓ صحيح</span></div>
+      <div class="stat-pill wrong"><span class="num" id="sw">0</span><span class="lbl">✗ خطأ</span></div>
+      <div class="stat-pill timer"><span class="num" id="timerDisp">00:00</span><span class="lbl">⏱️ الوقت</span></div>
+      <div class="stat-pill timer"><span class="num" id="st">95</span><span class="lbl">متبقي</span></div>
+    </div>
+  </div>
+
+  <div class="card-scene" id="cardScene" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front">
+        <span class="card-badge">❓ سؤال</span>
+        <span class="card-cat" id="cardCat"></span>
+        <button class="fav-btn" id="favBtn1" onclick="toggleFav(event)" title="أضف للمفضلة">⭐</button>
+        <div class="card-icon">❤️</div>
+        <div class="card-q" id="qText"></div>
+      </div>
+      <div class="card-face card-back">
+        <span class="card-badge">✅ إجابة</span>
+        <span class="card-cat" id="cardCat2"></span>
+        <button class="fav-btn" id="favBtn2" onclick="toggleFav(event)" title="أضف للمفضلة">⭐</button>
+        <div class="card-icon">💡</div>
+        <div class="card-a" id="aText"></div>
+        <div class="card-hint" id="hText"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip-hint">اضغط على البطاقة لقلبها</div>
+
+  <div class="feedback-row" id="fbRow" style="display:none">
+    <button class="btn-feedback btn-correct" onclick="mark(true)">✓ أعرفها</button>
+    <button class="btn-feedback btn-wrong" onclick="mark(false)">✗ لا أعرفها</button>
+  </div>
+
+  <div class="nav-row" style="margin-bottom:1rem">
+    <button class="btn" onclick="prev()">→ السابق</button>
+    <button class="btn" onclick="shuffle()">🔀 ترتيب عشوائي</button>
+    <button class="btn" onclick="next()">← التالي</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-primary" onclick="resetAll()">🔁 إعادة البدء</button>
+    <button class="btn btn-danger" onclick="clearProgress()">🗑️ مسح التقدم</button>
+    <button class="btn btn-danger" id="reviewWrongBtn" onclick="reviewWrong()" style="display:none">🔴 راجع أخطاءك</button>
+  </div>
+
+  <div class="done-screen" id="doneScreen">
+    <div class="done-trophy">🏆</div>
+    <h2>أحسنت! انتهيت من جميع البطاقات</h2>
+    <div class="done-score-wrap"><div class="done-score" id="dScore">0%</div></div>
+    <div class="done-detail">
+      <div class="done-pill" style="border-color:var(--green);color:var(--green)">✓ صحيح: <span id="dC">0</span></div>
+      <div class="done-pill" style="border-color:#ef4444;color:#ef4444">✗ خطأ: <span id="dW">0</span></div>
+      <div class="done-pill" style="border-color:var(--text3);color:var(--text)">⏱️ الوقت: <span id="dT">00:00</span></div>
+    </div>
+    <div class="done-msg" id="dMsg"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="resetAll()">🔁 أعد التدريب</button>
+      <button class="btn btn-danger" id="reviewWrongBtnDone" onclick="reviewWrong()" style="display:none">🔴 راجع ما لم تعرفه</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================== 95 CARD DATA - LESSON 2-2 (تم حذف كروت المقدمة) ========================
+const ALL = [
+  // === الدورة الدموية الجهازية والرئوية (7-18) ===
+  {cat:"الدورات الدموية", q:"وضح مسار الدم في الدورة الدموية الجهازية (الكبرى).", a:"البطين الأيسر يضخ الدم المؤكسج إلى الشريان الأبهر، ثم ينتقل إلى جميع أنحاء الجسم، ويعود الدم غير المؤكسج عبر الوريد الأجوف إلى الأذين الأيمن.", h:"بطين أيسر ← أبهر ← جسم ← وريد أجوف ← أذين أيمن"},
+  {cat:"الدورات الدموية", q:"وضح مسار الدم في الدورة الدموية الرئوية (الصغرى).", a:"الدم غير المؤكسج يخرج من البطين الأيمن عبر الشريان الرئوي إلى الرئتين، ثم يعود الدم المؤكسج عبر الأوردة الرئوية إلى الأذين الأيسر.", h:"بطين أيمن ← شريان رئوي ← رئتين ← أوردة رئوية ← أذين أيسر"},
+  {cat:"الدورات الدموية", q:"ما الذي يميز الدورة الدموية الرئوية (الصغرى)؟", a:"1- أقصر بكثير من الدورة الجهازية. 2- حجم الدم فيها حوالي 10% من الدورة الكلية. 3- أوعيتها الدموية أرق.", h:"أقصر + 10% + أوعية أرق"},
+  {cat:"الدورات الدموية", q:"ما حجم الدم في الدورة الدموية الرئوية؟", a:"حوالي 10% من إجمالي حجم الدم في الدورة الدموية الكلية.", h:"10%"},
+  {cat:"الدورات الدموية", q:"من أي جزء من القلب يخرج الدم في الدورة الدموية الرئوية؟", a:"من البطين الأيمن.", h:"بطين أيمن"},
+  {cat:"الدورات الدموية", q:"من أي جزء من القلب يخرج الدم في الدورة الدموية الجهازية؟", a:"من البطين الأيسر.", h:"بطين أيسر"},
+  {cat:"الدورات الدموية", q:"ما أهمية الدورة الدموية الرئوية؟", a:"التخلص من ثاني أكسيد الكربون والتحميل بالأكسجين.", h:"تبادل الغازات في الرئتين"},
+  {cat:"الدورات الدموية", q:"ما أهمية الدورة الدموية الجهازية؟", a:"لضخ الدم المؤكسج إلى جميع أنحاء الجسم باستثناء الرئتين.", h:"إمداد الجسم بالأكسجين"},
+  {cat:"الدورات الدموية", q:"قارن بين الشريان الأبهر والشريان الرئوي من حيث طبيعة الدم.", a:"الشريان الأبهر: دم مؤكسج. الشريان الرئوي: دم غير مؤكسج.", h:"أبهر ← مؤكسج، رئوي ← غير مؤكسج"},
+  {cat:"الدورات الدموية", q:"من أي بطين يخرج الشريان الأبهر؟", a:"من البطين الأيسر.", h:"بطين أيسر"},
+  {cat:"الدورات الدموية", q:"من أي بطين يخرج الشريان الرئوي؟", a:"من البطين الأيمن.", h:"بطين أيمن"},
+  {cat:"الدورات الدموية", q:"إلى أين يتجه الشريان الأبهر؟", a:"إلى جميع أجزاء الجسم باستثناء الرئتين.", h:"جميع الجسم"},
+
+  // === مراحل الدورة القلبية (19-30) ===
+  {cat:"الدورة القلبية", q:"عرّف الانبساط (Diastole).", a:"مرحلة استرخاء القلب التي يمتلئ فيها القلب بالدم.", h:"استرخاء ← امتلاء بالدم"},
+  {cat:"الدورة القلبية", q:"عرّف الانقباض (Systole).", a:"مرحلة تقلص حجرات القلب لضخ الدم إلى الجسم.", h:"تقلص ← ضخ الدم"},
+  {cat:"الدورة القلبية", q:"كم مرة ينبض القلب في الدقيقة تقريباً؟", a:"حوالي 70 مرة في الدقيقة.", h:"70 نبضة/دقيقة"},
+  {cat:"الدورة القلبية", q:"ما الزمن الكلي لمرحلة الانبساط (استرخاء القلب)؟", a:"حوالي 0.4 ثانية.", h:"0.4 sec"},
+  {cat:"الدورة القلبية", q:"ما الزمن الكلي لمرحلة الانقباض الأذيني؟", a:"حوالي 0.1 ثانية.", h:"0.1 sec"},
+  {cat:"الدورة القلبية", q:"ما الزمن الكلي لمرحلة الانقباض البطيني؟", a:"حوالي 0.3 ثانية.", h:"0.3 sec"},
+  {cat:"الدورة القلبية", q:"ما حالة الصمامات (الرئوي والأبهري) أثناء الانبساط؟", a:"مغلقة.", h:"مغلقة"},
+  {cat:"الدورة القلبية", q:"ما حالة الصمامات (ثلاثي الشرفات وثنائي الشرفات) أثناء الانبساط؟", a:"مفتوحة.", h:"مفتوحة"},
+  {cat:"الدورة القلبية", q:"ما حالة الصمامات (الرئوي والأبهري) أثناء الانقباض البطيني؟", a:"مفتوحة.", h:"مفتوحة"},
+  {cat:"الدورة القلبية", q:"ما حالة الصمامات (ثلاثي الشرفات وثنائي الشرفات) أثناء الانقباض البطيني؟", a:"مغلقة (لمنع عودة الدم إلى الأذينين).", h:"مغلقة"},
+  {cat:"الدورة القلبية", q:"رتب مراحل الدورة القلبية بالترتيب الصحيح.", a:"1- الانقباض الأذيني (0.1 ثانية). 2- الانقباض البطيني (0.3 ثانية). 3- الانبساط (0.4 ثانية).", h:"انقباض أذيني ← انقباض بطيني ← انبساط"},
+  {cat:"الدورة القلبية", q:"ما الذي يحدث أثناء الانقباض الأذيني؟", a:"تقلص عضلات جدار الأذنين لدفع الدم إلى البطينين.", h:"أذنان تنقبضان ← يدفعان الدم للبطينين"},
+
+  // === صمامات القلب (31-42) ===
+  {cat:"الصمامات", q:"اذكر أسماء صمامات القلب الأربعة.", a:"1- الصمام ثنائي الشرفات (Mirtal). 2- الصمام ثلاثي الشرفات (Tricuspid). 3- الصمام الأبهري (Aortic). 4- الصمام الرئوي (Pulmonary).", h:"ثنائي + ثلاثي + أبهري + رئوي"},
+  {cat:"الصمامات", q:"أين يقع الصمام ثنائي الشرفات؟ وما طبيعة الدم المار خلاله؟", a:"يفصل الأذين الأيسر عن البطين الأيسر، ويمر خلاله دم مؤكسج.", h:"أذين أيسر ← بطين أيسر (مؤكسج)"},
+  {cat:"الصمامات", q:"أين يقع الصمام ثلاثي الشرفات؟ وما طبيعة الدم المار خلاله؟", a:"يفصل الأذين الأيمن عن البطين الأيمن، ويمر خلاله دم غير مؤكسج.", h:"أذين أيمن ← بطين أيمن (غير مؤكسج)"},
+  {cat:"الصمامات", q:"أين يقع الصمام الأبهري؟ وما طبيعة الدم المار خلاله؟", a:"يفصل البطين الأيسر عن الشريان الأبهر، ويمر خلاله دم مؤكسج.", h:"بطين أيسر ← أبهر (مؤكسج)"},
+  {cat:"الصمامات", q:"أين يقع الصمام الرئوي؟ وما طبيعة الدم المار خلاله؟", a:"يفصل البطين الأيمن عن الشريان الرئوي، ويمر خلاله دم غير مؤكسج.", h:"بطين أيمن ← شريان رئوي (غير مؤكسج)"},
+  {cat:"الصمامات", q:"ما الصمامات التي تؤدي دوراً أثناء ضخ الدم غير المؤكسج من القلب؟", a:"الصمام ثلاثي الشرفات والصمام الرئوي.", h:"ثلاثي + رئوي"},
+  {cat:"الصمامات", q:"ما الصمامات التي تساعد على التحكم في الدم المؤكسج؟", a:"الصمام ثنائي الشرفات والصمام الأبهري.", h:"ثنائي + أبهري"},
+  {cat:"الصمامات", q:"ما أهمية صمامات القلب؟", a:"تمنع التدفق العكسي للدم وتضمن سريان الدم في اتجاه واحد.", h:"منع الارتجاع + اتجاه واحد"},
+
+  // === المسارات الكهربائية في القلب (43-60) ===
+  {cat:"المسارات الكهربائية", q:"ما الذي يحدث إذا تم إمداد عضلة القلب بالمواد الغذائية والأكسجين؟", a:"تنقبض من تلقاء نفسها (لا تحتاج إلى سيالات عصبية من الدماغ لتحفيز انقباضها).", h:"تنقبض ذاتياً"},
+  {cat:"المسارات الكهربائية", q:"لماذا يجب أن تكون الانقباضات منسقة بين أجزاء القلب المختلفة؟", a:"لضمان ضخ الدم بكفاءة.", h:"ضخ كفؤ"},
+  {cat:"المسارات الكهربائية", q:"أين تقع العقدة الجيبية الأذينية (SA node)؟ وما وظيفتها؟", a:"تقع في جدار الأذين الأيمن. وظيفتها: إطلاق تيار كهربائي يدق القلب وفقاً له في كل دورة قلبية (منظم ضربات القلب الطبيعي).", h:"جدار أذين أيمن ← منظم الضربات"},
+  {cat:"المسارات الكهربائية", q:"أين تقع العقدة الأذينية البطينية (AV node)؟ وما وظيفتها؟", a:"تقع بين الأذينين والبطينين. وظيفتها: تلتقط التيار من SA node وتؤخره لكي ينقبض البطينان بعد الأذينين.", h:"بين الأذينين والبطينين ← تأخير التيار"},
+  {cat:"المسارات الكهربائية", q:"عرّف حزمة هيس (Bundle of His).", a:"حزمة خاصة من ألياف عضلية قلبية في الجدار الفاصل بين الحجرات الأربع، توصل العقدة AV بكل البطينين.", h:"توصل AV node بالبطينين"},
+  {cat:"المسارات الكهربائية", q:"عرّف ألياف بيركنجي (Purkinje fibers).", a:"سلسلة من الألياف المتفرعة الممتدة من حزمة هيس، تخترق جدران كلا البطينين وتضمن وصول الاندفاعات الكهربائية إلى ألياف عضلات البطينين.", h:"توصيل كهربائي للبطينين"},
+  {cat:"المسارات الكهربائية", q:"ما التسلسل الصحيح لنقل الكهرباء في القلب؟", a:"العقدة الجيبية الأذينية (SA) ← الأذينين ← العقدة الأذينية البطينية (AV) ← حزمة هيس ← ألياف بيركنجي ← البطينين.", h:"SA ← أذينين ← AV ← هيس ← بيركنجي ← بطينين"},
+  {cat:"المسارات الكهربائية", q:"لماذا تؤخر العقدة AV التيار الكهربائي؟", a:"لكي ينقبض البطينان بعد الأذينين (لضمان امتلاء البطينين بالدم قبل انقباضهما).", h:"امتلاء البطينين أولاً"},
+  {cat:"المسارات الكهربائية", q:"ما الذي يحدث أثناء إعادة شحن العقدة الجيبية الأذينية (SA node)؟", a:"تسترخي عضلات القلب (انبساط القلب)؛ لتتم إعادة ملء جميع الحجرات بالدم.", h:"انبساط ← إعادة ملء الدم"},
+  {cat:"المسارات الكهربائية", q:"لماذا تُعرف العقدة الجيبية الأذينية (SA node) بـ «منظم ضربات القلب»؟", a:"لأنها تحدد وتيرة انقباض القلب (تطلق تياراً كهربائياً في كل دورة قلبية).", h:"تحدد وتيرة الانقباض"},
+  {cat:"المسارات الكهربائية", q:"أين تقع حزمة هيس؟\nأ. في جدار الأذينين\nب. في جدار البطينين\nج. بين الصمامين الأبهري والرئوي\nد. في الجدار الفاصل بين الحجرات الأربع", a:"د. في الجدار الفاصل بين الحجرات الأربع ✓", h:"الجدار الفاصل"},
+  {cat:"المسارات الكهربائية", q:"ما الجزء المشار إليه بالحرف A في الشكل (ألياف منتشرة في جدار البطينين)؟\nأ. حزمة هيس\nب. ألياف بيركنجي\nج. العقدة الجيبية الأذينية\nد. العقدة الأذينية البطينية", a:"ب. ألياف بيركنجي ✓", h:"ألياف بيركنجي"},
+  {cat:"المسارات الكهربائية", q:"ما دور حزمة هيس؟\nأ. تؤخر التيار عن عضلات البطينين\nب. تضمن الاندفاعات الكهربائية في عضلات البطينين\nج. تطلق تياراً كهربائياً\nد. تصل العقدة AV بكل البطينين", a:"د. تصل العقدة AV بكل البطينين ✓", h:"توصيل العقدة AV بالبطينين"},
+
+  // === تخطيط القلب الكهربائي (ECG) (61-75) ===
+  {cat:"ECG", q:"ما هو تخطيط القلب الكهربائي (ECG)؟", a:"تخطيط يوضح النشاط الكهربائي للقلب، يمكن من خلاله الكشف عن النشاط الكهربائي وإيقاع القلب.", h:"تسجيل النشاط الكهربائي للقلب"},
+  {cat:"ECG", q:"ماذا تمثل موجة P في تخطيط القلب الكهربائي؟", a:"تمثل انقباض الأذينين.", h:"انقباض أذيني"},
+  {cat:"ECG", q:"ماذا تمثل مجموعة موجات QRS في تخطيط القلب الكهربائي؟", a:"تمثل انقباض البطينين.", h:"انقباض بطيني"},
+  {cat:"ECG", q:"ماذا تمثل موجة T في تخطيط القلب الكهربائي؟", a:"تمثل مرحلة الانبساط (استرخاء البطينين).", h:"انبساط بطيني"},
+  {cat:"ECG", q:"ما الزمن التقريبي لموجة P في ECG؟", a:"حوالي 0.1 ثانية (تتزامن مع الانقباض الأذيني).", h:"0.1 sec"},
+  {cat:"ECG", q:"ما الزمن التقريبي لمركب QRS في ECG؟", a:"حوالي 0.3 ثانية (تتزامن مع الانقباض البطيني).", h:"0.3 sec"},
+  {cat:"ECG", q:"ما الزمن التقريبي لموجة T في ECG؟", a:"حوالي 0.4 ثانية (تتزامن مع الانبساط).", h:"0.4 sec"},
+  {cat:"ECG", q:"رتب موجات ECG حسب الجهد الكهربائي من الأكبر للأصغر.", a:"QRS (انقباض بطيني - 0.3 ثانية), T (انبساط - 0.4 ثانية), P (انقباض أذيني - 0.1 ثانية).", h:"QRS, T, P"},
+  {cat:"ECG", q:"ما التي تتوافق مع مرحلة الانقباض البطيني في تخطيط القلب؟", a:"موجة QRS.", h:"QRS"},
+  {cat:"ECG", q:"ما الذي يحدث للصمامين ثلاثي وثنائي الشرفات خلال موجة QRS؟", a:"يغلقان لمنع الدم من العودة إلى الأذينين.", h:"مغلقان"},
+  {cat:"ECG", q:"ما الذي يحدث لعضلات جدار الأذينين خلال موجة P؟", a:"تنقبض بقوة كافية لدفع الدم إلى البطينين.", h:"انقباض أذيني"},
+  {cat:"ECG", q:"ماذا يحدث في حالة موت أي جزء من عضلة القلب؟", a:"يمنع انتقال التيار في ذلك النسيج، فتتغير نتائج تخطيط القلب (ECG).", h:"تغير في ECG"},
+
+  // === الرجفان ومزيل الرجفان (76-85) ===
+  {cat:"الرجفان", q:"عرّف الرجفان (Fibrillation).", a:"إيقاع عضلات القلب غير المنتظم الناتج عن عدم انتظام الإشارات الكهربائية في البطينين، وقد يتوقف تدفق الدم.", h:"إيقاع غير منتظم ← خطير"},
+  {cat:"الرجفان", q:"ماذا يحدث إذا لم تتم إعادة القلب إلى الإيقاع الطبيعي بعد الرجفان؟", a:"الرجفان في البطينين يوقف تدفق الدم ويكون دائماً مميتاً، ويسبب 25% من جميع الوفيات تقريباً.", h:"مميت ← 25% من الوفيات"},
+  {cat:"الرجفان", q:"كيف يتم علاج الرجفان؟", a:"باستخدام مزيل الرجفان (Defibrillator) وهو جهاز يعطي القلب صدمة كهربائية مباشرة لاستعادة إيقاعه الطبيعي.", h:"مزيل الرجفان ← صدمة كهربائية"},
+  {cat:"الرجفان", q:"أين تتواجد أجهزة مزيل الرجفان عادةً؟", a:"في المطارات والطائرات وسيارات الإسعاف وغرف الطوارئ والأماكن العامة.", h:"أماكن عامة وطوارئ"},
+  {cat:"الرجفان", q:"ما الهدف من استخدام مزيل الرجفان؟", a:"إعادة القلب إلى الإيقاع الطبيعي وإنقاذ حياة المريض.", h:"إنقاذ الحياة"},
+
+  // === أسئلة موضوعية (86-100) ===
+  {cat:"موضوعي", q:"أي مما يلي يصف الشرايين مثل الأبهر؟\nأ. تحمل الدم المؤكسج باتجاه القلب\nب. تحمل الدم المؤكسج بعيداً عن القلب\nج. تحمل الدم غير المؤكسج باتجاه القلب\nد. تحمل الدم غير المؤكسج بعيداً عن القلب", a:"ب. تحمل الدم المؤكسج بعيداً عن القلب ✓", h:"شرايين ← بعيداً عن القلب"},
+  {cat:"موضوعي", q:"أي مما يلي يصف الأوردة المتصلة بالأذين الأيمن؟\nأ. أوعية كبيرة تعيد الدم من الجسم إلى القلب\nب. أوعية صغيرة تعيد الدم من الجسم إلى القلب\nج. أوعية كبيرة تعيد الدم من القلب إلى الجسم\nد. أوعية صغيرة تعيد الدم من القلب إلى الجسم", a:"أ. أوعية كبيرة تعيد الدم من الجسم إلى القلب ✓", h:"أوردة ← إلى القلب"},
+  {cat:"موضوعي", q:"أي مما يلي يتصل بالقلب وبه تركيز أكسجين مرتفع وضغط دم مرتفع؟\nأ. أبهر (أورطى)\nب. وريد رئوي\nج. وريد أجوف\nد. شريان كلوي", a:"أ. أبهر (أورطى) ✓", h:"أبهر ← ضغط مرتفع"},
+  {cat:"موضوعي", q:"أي مما يلي يمثل الانقباض في تخطيط القلب الكهربي؟\nأ. T\nب. P و T\nج. QRS و P\nد. جميع الموجات", a:"ج. QRS و P (QRS = انقباض بطيني، P = انقباض أذيني) ✓", h:"QRS و P"},
+  {cat:"موضوعي", q:"أي مما يلي صحيح عن تخطيط القلب الكهربي؟\nأ. T تمثل انبساط\nب. QRS تمثل انقباض أذيني\nج. T تمثل انقباط بطيني\nد. QRS تمثل انقباض بطيني", a:"د. QRS تمثل انقباض بطيني ✓", h:"QRS ← انقباض بطيني"},
+  {cat:"موضوعي", q:"أي العبارات الآتية تمثل التسلسل الصحيح لنقل الكهرباء في القلب؟\nأ. العقدة الجيبية الأذنية ← الأذينين ← العقدة الأذينية البطينية ← البطينين\nب. العقدة الجيبية الأذنية ← العقدة الأذينية البطينية ← الأذينين ← البطينين\nج. العقدة الأذينية البطينية ← البطينين ← العقدة الجيبية الأذنية ← الأذينين\nد. العقدة الجيبية الأذنية ← العقدة الأذينية البطينية ← البطينين ← الأذينين", a:"أ. العقدة الجيبية الأذنية ← الأذينين ← العقدة الأذينية البطينية ← البطينين ✓", h:"SA ← أذينين ← AV ← بطينين"},
+  {cat:"موضوعي", q:"ما عدد حجرات قلب الإنسان؟", a:"4 حجرات (أذينان وبطينان).", h:"4"},
+  {cat:"موضوعي", q:"ما اسم الوعاء الدموي الذي ينقل الدم من القلب إلى الرئتين؟", a:"الشريان الرئوي.", h:"شريان رئوي"},
+  {cat:"موضوعي", q:"ما اسم الوعاء الدموي الذي ينقل الدم من الرئتين إلى القلب؟", a:"الأوردة الرئوية.", h:"أوردة رئوية"},
+  {cat:"موضوعي", q:"ما المرحلة التي تلي الانقباض البطيني مباشرة؟", a:"الانبساط (استرخاء القلب).", h:"انبساط"},
+  {cat:"موضوعي", q:"أي الموجات في ECG تتوافق مع المرحلة التي تلي الانقباض البطيني؟", a:"موجة T (انبساط بطيني).", h:"T"},
+  {cat:"موضوعي", q:"لماذا يعتبر الشريان الأبهر أكبر شرايين الجسم؟", a:"لأنه يتلقى الدم مباشرة من البطين الأيسر ويوزعه إلى جميع أنحاء الجسم.", h:"أكبر شريان ← توزيع الدم"},
+  {cat:"موضوعي", q:"ما الفرق بين الوريد الأجوف العلوي والوريد الأجوف السفلي؟", a:"العلوي: يعيد الدم من الرأس والرقبة والأطراف العلوية. السفلي: يعيد الدم من البطن والأطراف السفلية.", h:"علوي ← أعلى الجسم، سفلي ← أسفل الجسم"},
+  {cat:"موضوعي", q:"ما اسم الصمام الموجود بين الأذين الأيمن والبطين الأيمن؟", a:"الصمام ثلاثي الشرفات.", h:"ثلاثي الشرفات"},
+  {cat:"موضوعي", q:"كم مرة تنقبض عضلة القلب في الدقيقة في حالة الراحة؟", a:"حوالي 70 مرة.", h:"70 مرة/دقيقة"}
+];
+
+const CATS = ["الكل", "المفضلة", ...Array.from(new Set(ALL.map(c => c.cat)))];
+let activeCat = "الكل", cards = [], idx = 0, flipped = false;
+let correct = 0, wrong = 0, answered = new Set(), wrongCards = [];
+let favs = new Set();
+let timerInt = null, seconds = 0;
+
+document.getElementById('totalCardsNum').textContent = ALL.length;
+
+// Audio
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function playTone(freq, type, duration, vol = 0.1) {
+  if (!audioCtx) audioCtx = new AudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + duration);
+}
+function playCorrect() { playTone(600, 'sine', 0.1); setTimeout(() => playTone(800, 'sine', 0.15), 100); }
+function playWrong() { playTone(300, 'triangle', 0.2); setTimeout(() => playTone(250, 'triangle', 0.3), 150); }
+function playDone() { playTone(400, 'sine', 0.1); setTimeout(() => playTone(500, 'sine', 0.1), 100); setTimeout(() => playTone(600, 'sine', 0.3), 200); }
+
+function toggleTheme() {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('bio_theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+}
+
+function formatTime(s) { const m = String(Math.floor(s / 60)).padStart(2, '0'); const sec = String(s % 60).padStart(2, '0'); return m + ':' + sec; }
+function startTimer() { if (!timerInt) timerInt = setInterval(() => { seconds++; document.getElementById('timerDisp').textContent = formatTime(seconds); saveState(); }, 1000); }
+function stopTimer() { clearInterval(timerInt); timerInt = null; }
+
+function saveState() {
+  const state = { c: correct, w: wrong, ans: Array.from(answered), wCards: wrongCards.map(c => ALL.indexOf(c)), sec: seconds, favs: Array.from(favs) };
+  localStorage.setItem('bio_u2l2_state', JSON.stringify(state));
+}
+function loadState() {
+  const theme = localStorage.getItem('bio_theme');
+  if (theme === 'dark') document.body.classList.add('dark-mode');
+  const saved = JSON.parse(localStorage.getItem('bio_u2l2_state'));
+  if (saved) { correct = saved.c || 0; wrong = saved.w || 0; answered = new Set(saved.ans || []); favs = new Set(saved.favs || []); wrongCards = (saved.wCards || []).map(i => ALL[i]); seconds = saved.sec || 0; document.getElementById('timerDisp').textContent = formatTime(seconds); }
+}
+function clearProgress() { if (confirm("هل أنت متأكد من مسح تقدمك؟")) { correct = 0; wrong = 0; answered.clear(); wrongCards = []; seconds = 0; stopTimer(); document.getElementById('timerDisp').textContent = "00:00"; saveState(); resetAll(); } }
+
+function getCards() {
+  if (activeCat === "المفضلة") return ALL.filter((_, i) => favs.has(i));
+  return activeCat === "الكل" ? [...ALL] : ALL.filter(c => c.cat === activeCat);
+}
+
+function buildTabs() {
+  document.getElementById("tabs").innerHTML = CATS.map(c => {
+    const count = c === "الكل" ? ALL.length : (c === "المفضلة" ? favs.size : ALL.filter(x => x.cat === c).length);
+    const cls = c === "المفضلة" ? "tab fav-tab" : "tab";
+    return `<button class="${cls}${c === activeCat ? " active" : ""}" onclick="setCat('${c}')">${c} (${count})</button>`;
+  }).join("");
+}
+
+function setCat(cat) {
+  activeCat = cat;
+  if (activeCat === "المفضلة" && favs.size === 0) { alert("لا توجد بطاقات في المفضلة بعد. اضغط على أيقونة النجمة لحفظ البطاقات."); activeCat = "الكل"; }
+  buildTabs(); resetAll();
+}
+
+function resetAll() {
+  cards = getCards(); idx = 0; flipped = false;
+  document.getElementById("doneScreen").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("fbRow").style.display = "none";
+  document.getElementById("reviewWrongBtn").style.display = "none";
+  document.getElementById("st").textContent = cards.length - answered.size;
+  showCard(); updateStats();
+}
+
+function shuffle() { cards = getCards().sort(() => Math.random() - 0.5); idx = 0; flipped = false; showCard(); }
+
+function showCard() {
+  if (idx >= cards.length) { showDone(); return; }
+  const c = cards[idx];
+  const globalIdx = ALL.indexOf(c);
+  // ✅ جعل الخيارات في أسطر منفصلة
+  document.getElementById("qText").innerHTML = (c.q || "").replace(/\n/g, "<br>");
+  document.getElementById("aText").innerHTML = (c.a || "").replace(/\n/g, "<br>");
+  document.getElementById("hText").innerHTML = c.h ? "💡 " + c.h : "";
+  document.getElementById("cardCat").textContent = c.cat;
+  document.getElementById("cardCat2").textContent = c.cat;
+  const f1 = document.getElementById("favBtn1"), f2 = document.getElementById("favBtn2");
+  if (favs.has(globalIdx)) { f1.classList.add("active"); f2.classList.add("active"); }
+  else { f1.classList.remove("active"); f2.classList.remove("active"); }
+  document.getElementById("cardInner").classList.remove("flipped");
+  document.getElementById("fbRow").style.display = "none";
+  flipped = false;
+  const p = Math.round((idx / cards.length) * 100);
+  document.getElementById("counter").textContent = `السؤال ${idx + 1} من ${cards.length}`;
+  document.getElementById("pct").textContent = p + "%";
+  document.getElementById("pbar").style.width = p + "%";
+  startTimer();
+}
+
+function flipCard() { if (idx >= cards.length) return; flipped = !flipped; document.getElementById("cardInner").classList.toggle("flipped", flipped); document.getElementById("fbRow").style.display = flipped ? "flex" : "none"; }
+
+function toggleFav(e) { e.stopPropagation(); const globalIdx = ALL.indexOf(cards[idx]); if (favs.has(globalIdx)) favs.delete(globalIdx); else favs.add(globalIdx); const f1 = document.getElementById("favBtn1"), f2 = document.getElementById("favBtn2"); f1.classList.toggle("active"); f2.classList.toggle("active"); saveState(); buildTabs(); }
+
+function mark(ok) { if (ok) { correct++; playCorrect(); } else { wrong++; wrongCards.push(cards[idx]); playWrong(); } answered.add(ALL.indexOf(cards[idx])); updateStats(); saveState(); idx++; flipped = false; if (idx >= cards.length) showDone(); else showCard(); }
+
+function next() { if (idx < cards.length - 1) { idx++; flipped = false; showCard(); } }
+function prev() { if (idx > 0) { idx--; flipped = false; showCard(); } }
+
+function updateStats() { document.getElementById("sc").textContent = correct; document.getElementById("sw").textContent = wrong; const remain = cards.length - answered.size; document.getElementById("st").textContent = remain < 0 ? 0 : remain; }
+
+function showDone() { stopTimer(); playDone(); document.getElementById("cardScene").style.display = "none"; document.getElementById("fbRow").style.display = "none"; const t = correct + wrong, p = t > 0 ? Math.round(correct / t * 100) : 0; document.getElementById("dScore").textContent = p + "%"; document.getElementById("dC").textContent = correct; document.getElementById("dW").textContent = wrong; document.getElementById("dT").textContent = formatTime(seconds); const msgs = ["تحتاج مراجعة أكثر — أعد التدريب.", "جيد! ركز على أخطائك وأعد المحاولة.", "أداء رائع!", "ممتاز! أتقنت جميع البطاقات 🎉"]; document.getElementById("dMsg").textContent = p < 60 ? msgs[0] : p < 80 ? msgs[1] : p < 100 ? msgs[2] : msgs[3]; document.getElementById("doneScreen").style.display = "block"; document.getElementById("pbar").style.width = "100%"; document.getElementById("pct").textContent = "100%"; const btn1 = document.getElementById("reviewWrongBtn"); const btn2 = document.getElementById("reviewWrongBtnDone"); if (wrongCards.length > 0) { btn1.style.display = "flex"; btn2.style.display = "flex"; } else { btn1.style.display = "none"; btn2.style.display = "none"; } }
+
+function reviewWrong() { if (wrongCards.length === 0) return; cards = [...new Set(wrongCards)]; wrongCards = []; idx = 0; flipped = false; document.getElementById("doneScreen").style.display = "none"; document.getElementById("cardScene").style.display = "block"; document.getElementById("reviewWrongBtn").style.display = "none"; showCard(); updateStats(); startTimer(); }
+
+document.addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); flipCard(); } else if (e.key === "ArrowLeft") next(); else if (e.key === "ArrowRight") prev(); else if (e.key === "1" && flipped) mark(true); else if (e.key === "2" && flipped) mark(false); });
+
+loadState();
+buildTabs();
+resetAll();
+if (seconds > 0) document.getElementById('timerDisp').textContent = formatTime(seconds);
+</script>
+</body>
+</html>
