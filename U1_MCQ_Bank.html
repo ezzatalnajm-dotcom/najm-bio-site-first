@@ -82,6 +82,11 @@
   .start-opt.fixed{border-color:rgba(0,137,123,.35);}
   .start-opt.random{border-color:rgba(224,182,47,.45);}
   .start-screen.hidden{display:none;}
+
+  #resultContainer:not(.hidden){margin:12px 14px 8px;position:relative;z-index:5;}
+  #resultContainer .final-result{animation:resultPop .35s ease;}
+  @keyframes resultPop{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
+
   #questionsContainer.hidden-qs{display:none;}
   #controlsContainer.hidden-ctrls{display:none;}
   .q-actions .q-btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
@@ -402,6 +407,8 @@
     <button class="btn btn-secondary" onclick="exitTeacherMode()" style="padding:6px 14px;font-size:11.5px;">🚪 خروج</button>
   </div>
 
+  <div id="resultContainer" class="hidden"></div>
+
   <div id="startScreen" class="start-screen">
     <h2>🎯 ابدأ الاختبار</h2>
     <p>اختر طريقة عرض الأسئلة — يمكنك إعادة الاختيار من زر «إعادة تعيين»</p>
@@ -426,7 +433,6 @@
     <button class="btn btn-secondary" onclick="resetExam()">🔄 إعادة تعيين</button>
   </div>
 
-  <div id="resultContainer" class="hidden"></div>
   <div id="retryContainer" class="hidden retry-section"></div>
   <div class="footer">💾 التعديلات تُحفظ تلقائياً • ✏️ اضغط مرتين على كلمة داخل الفقرة لجعلها مفتاحية (عريض) • نظام البدائل فعّال</div>
 </div>
@@ -466,6 +472,8 @@ const SYNONYMS = { 'وظيفة':['دور','عمل'], 'تركيب':['بنية','�
 
 let questions = [], evaluations = {}, transcripts = {}, editMode = {}, retryEditMode = {};
 let examStarted = false, orderMode = 'fixed', baseQuestions = [];
+let resultsHistory = [];
+const HISTORY_KEY = (typeof STORAGE_KEY!=='undefined'?STORAGE_KEY:'quiz') + '_history';
 let examSubmitted = false, timerInterval = null, seconds = 0;
 let isRecording = false, recordingIndex = null, retryRecordingIndex = null, recognition = null;
 let teacherClickCount = 0, teacherClickTimer = null, currentEditingIdx = null, editingImages = [];
@@ -1611,23 +1619,51 @@ function clearTr(idx){ transcripts[idx]=''; if(evaluations[idx]) delete evaluati
 function evalQ(idx){ const text=(transcripts[idx]||'').trim(); if(!text||text.length<3){ alert('⚠️ سجّل أو اكتب إجابة أولاً'); return; } reEval(idx); }
 function updateProgress(){ const t=questions.length; const e=Object.keys(evaluations).length; $('progressText').textContent=`${e}/${t}`; const p=t?(e/t)*100:0; $('progressFill').style.width=`${p}%`; }
 
+
+function loadResultsHistory(){
+  try{
+    const r = localStorage.getItem(HISTORY_KEY);
+    if(r){ const a = JSON.parse(r); if(Array.isArray(a)) resultsHistory = a; }
+  }catch(e){ resultsHistory = []; }
+}
+function saveResultsHistory(){
+  try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(resultsHistory.slice(-20))); }catch(e){}
+}
+function clearResultsHistory(){
+  if(!confirm('مسح سجل المحاولات؟')) return;
+  resultsHistory = [];
+  saveResultsHistory();
+  toast('🗑️ تم مسح السجل');
+  const rc=$('resultContainer');
+  if(rc && !rc.classList.contains('hidden') && examSubmitted) submitExam();
+}
+
 function submitExam(){
   if(typeof TEACHER_MODE !== 'undefined' && TEACHER_MODE){
     exportModel();
     return;
   }
+  // إعادة عرض النتيجة إن كانت محسوبة مسبقاً
   if(examSubmitted){
     const rc=$('resultContainer');
-    if(rc && !rc.classList.contains('hidden')) rc.scrollIntoView({behavior:'smooth',block:'start'});
+    if(rc) rc.classList.remove('hidden');
+    const qc=$('questionsContainer'); if(qc) qc.classList.add('hidden-qs');
+    window.scrollTo(0, 0);
     return;
   }
+  if(!examStarted){
+    toast('⚠️ ابدأ الاختبار أولاً');
+    return;
+  }
+  // تصحيح كل الأسئلة ثم عرض النتيجة
   questions.forEach((q,i)=>{ try{ reEval(i); }catch(e){} });
   if(typeof renderQuestions==='function') renderQuestions();
   const t=questions.length;
   const e=Object.keys(evaluations).filter(k=>evaluations[k]).length;
   examSubmitted=true;
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-  const _fb=$('finishBtn'); if(_fb) _fb.classList.add('hidden-finish');
+  // الإبقاء على زر الإنهاء ظاهراً لإعادة عرض النتيجة
+  const _fb=$('finishBtn'); if(_fb){ _fb.classList.remove('hidden-finish'); _fb.classList.add('show'); _fb.textContent='📊 النتيجة'; }
   const _eb=$('exportBtn'); if(_eb) _eb.classList.add('hidden-export');
   let ts=0, tw=0; const wrong=[];
   questions.forEach((q,i)=>{
@@ -1637,22 +1673,67 @@ function submitExam(){
   });
   if(typeof EXAM_TOTAL_OVERRIDE==='number' && EXAM_TOTAL_OVERRIDE>0) tw = EXAM_TOTAL_OVERRIDE;
   const time = ($('timerDisplay')&&$('timerDisplay').textContent) || '00:00';
-  const rc = $('resultContainer'); if(!rc) return;
-  rc.classList.remove('hidden');
   const p = tw ? Math.round((ts/tw)*100) : 0;
   const tsR = Math.round(ts*10)/10, twR = Math.round(tw*10)/10;
+  // تسجيل المحاولة في السجل
+  loadResultsHistory();
+  const attempt = {
+    at: new Date().toISOString(),
+    score: tsR,
+    total: twR,
+    percent: p,
+    answered: e,
+    questions: t,
+    time: time,
+    mode: orderMode || 'fixed'
+  };
+  resultsHistory.push(attempt);
+  saveResultsHistory();
+  // بناء عرض السجل
+  let histHtml = '';
+  if(resultsHistory.length > 1){
+    histHtml = '<div style="margin-top:16px;text-align:right;background:rgba(0,0,0,.18);border-radius:12px;padding:12px 14px;">';
+    histHtml += '<div style="font-size:13px;font-weight:800;margin-bottom:8px;opacity:.95;">📜 سجل المحاولات ('+resultsHistory.length+')</div>';
+    const recent = resultsHistory.slice().reverse().slice(0,10);
+    recent.forEach((a,i)=>{
+      const d = a.at ? new Date(a.at) : null;
+      const ds = d ? (d.toLocaleDateString('ar-EG')+' '+d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})) : '';
+      const isLast = i===0;
+      histHtml += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px;'+(isLast?'font-weight:800;':'opacity:.85;')+'">';
+      histHtml += '<span>'+(isLast?'🔹 ':'')+'محاولة '+(resultsHistory.length-i)+' · '+ds+'</span>';
+      histHtml += '<span>'+a.score+' / '+a.total+' <span style="opacity:.8;">('+a.percent+'%)</span></span>';
+      histHtml += '</div>';
+    });
+    histHtml += '<button type="button" onclick="clearResultsHistory()" style="margin-top:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:5px 12px;font-size:11px;font-family:inherit;cursor:pointer;font-weight:700;">🗑️ مسح السجل</button>';
+    histHtml += '</div>';
+  }
+  const rc = $('resultContainer'); if(!rc) return;
+  rc.classList.remove('hidden');
   rc.innerHTML = `<div class="final-result">
     <div style="font-size:15px;font-weight:800;opacity:.9;margin-bottom:6px;">النتيجة النهائية</div>
     <div class="big-score">${tsR} / ${twR}</div>
     <div class="detail">📊 النسبة: <span>${p}%</span></div>
     <div class="detail">✅ الأسئلة المُجابة: <span>${e}/${t}</span></div>
     <div class="detail">⏱️ الوقت: <span>${time}</span></div>
+    <div class="detail">🔀 الترتيب: <span>${(orderMode==='random')?'عشوائي':'ثابت'}</span></div>
     <div style="margin-top:15px;font-size:14px;">${p>=85?'🏆 ممتاز!':p>=60?'👍 مقبول!':'📚 راجع الأسئلة المتدنية (<60%)'}</div>
-    <div style="margin-top:12px;font-size:11.5px;color:rgba(255,255,255,.75);line-height:1.8;">⚠️ التصحيح تقديري حسب الفقرات — لإشراف أدق راجع معلّمك</div>
+    <div style="margin-top:12px;font-size:11.5px;color:rgba(255,255,255,.75);line-height:1.8;">⚠️ التصحيح تقديري — لإشراف أدق راجع معلّمك</div>
+    ${histHtml}
   </div>`;
-  const controls=$('controlsContainer'); if(controls) controls.classList.add('hidden');
+  // إخفاء الأسئلة وإظهار النتيجة أعلى الصفحة مباشرة
+  const qc=$('questionsContainer'); if(qc) qc.classList.add('hidden-qs');
+  const ss=$('startScreen'); if(ss) ss.classList.add('hidden');
+  const controls=$('controlsContainer');
+  if(controls){
+    controls.classList.remove('hidden');
+    controls.classList.remove('hidden-ctrls');
+  }
   if(wrong.length) setupRetry(wrong); else { const rt=$('retryContainer'); if(rt) rt.classList.add('hidden'); }
-  rc.scrollIntoView({behavior:'smooth',block:'start'});
+  // انتقال فوري لأعلى الصفحة — النتيجة أول ما يظهر
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  toast('✅ تم عرض النتيجة');
 }
 
 
@@ -1695,14 +1776,16 @@ function shuffleArr(arr){
 }
 function showStartScreen(){
   examStarted = false;
+  examSubmitted = false;
   const ss = $('startScreen');
   const qc = $('questionsContainer');
   const cc = $('controlsContainer');
   if(ss) ss.classList.remove('hidden');
   if(qc){ qc.classList.add('hidden-qs'); qc.innerHTML=''; }
   if(cc) cc.classList.add('hidden-ctrls');
-  // hide finish while not started
-  const fb=$('finishBtn'); if(fb) fb.classList.add('hidden-finish');
+  const fb=$('finishBtn'); if(fb){ fb.classList.add('hidden-finish'); fb.textContent='📊 إنهاء'; }
+  const rc=$('resultContainer'); if(rc){ rc.classList.add('hidden'); rc.innerHTML=''; }
+  const rt=$('retryContainer'); if(rt) rt.classList.add('hidden');
 }
 function hideStartScreen(){
   const ss = $('startScreen');
@@ -1740,9 +1823,14 @@ function startExam(mode){
   evaluations = {}; transcripts = {}; editMode = {}; retryEditMode = {};
   examSubmitted = false;
   hideStartScreen();
+  const rc=$('resultContainer'); if(rc){ rc.classList.add('hidden'); rc.innerHTML=''; }
+  const qc=$('questionsContainer'); if(qc) qc.classList.remove('hidden-qs');
+  examSubmitted = false;
+  const fb=$('finishBtn'); if(fb){ fb.textContent='📊 إنهاء'; fb.classList.remove('hidden-finish'); fb.classList.add('show'); }
   renderQuestions();
   startTimer();
   updateProgress();
+  window.scrollTo(0, 0);
 }
 
 function resetExam(){
@@ -1969,7 +2057,7 @@ function printWorksheet(){
 }
 
 
-applyTheme(); updateModeAvatar();
+applyTheme(); updateModeAvatar(); loadResultsHistory();
 try{ 
   const _chk = localStorage.getItem(STORAGE_KEY);
   if(_chk){
