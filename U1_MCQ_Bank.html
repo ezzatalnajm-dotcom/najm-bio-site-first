@@ -345,6 +345,8 @@
   .float-export{background:linear-gradient(150deg,#5c6bc0,#3949ab);color:#fff;}
   .float-home:hover,.float-finish:hover,.float-export:hover{transform:scale(1.04);}
   .float-finish.hidden-finish,.float-export.hidden-export{display:none !important;}
+
+  textarea.answer-ta[readonly]{opacity:.85;cursor:not-allowed;background:rgba(10,27,46,.06);}
 </style>
 </head>
 <body>
@@ -809,9 +811,9 @@ function renderQuestions(){
       }
       if(chosen>=0 && !isEval && !TEACHER_MODE) trHtml += `<div style="margin-top:6px;"><button class="btn-edit" style="padding:4px 9px;font-size:10px;" onclick="clearTr(${idx})">🗑️ مسح الاختيار</button></div>`;
     } else {
-      trHtml = `<textarea id="tr-ta-${idx}" class="answer-ta" placeholder="اكتب إجابتك هنا أو سجّل صوتياً..." oninput="onAnswerInput(${idx},this.value)" onblur="onAnswerSave(${idx},this.value)">${tr||''}</textarea>
+      trHtml = `<textarea id="tr-ta-${idx}" class="answer-ta" placeholder="اكتب إجابتك هنا أو سجّل صوتياً..." ${isEval?'readonly':''} oninput="if(!evaluations[${idx}])onAnswerInput(${idx},this.value)" onblur="if(!evaluations[${idx}])onAnswerSave(${idx},this.value)">${tr||''}</textarea>
     <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-      ${tr?`<button class="btn-edit" style="padding:4px 9px;font-size:10px;" onclick="clearTr(${idx})">🗑️ مسح الإجابة</button>`:''}
+      ${tr && !isEval?`<button class="btn-edit" style="padding:4px 9px;font-size:10px;" onclick="clearTr(${idx})">🗑️ مسح الإجابة</button>`:''}
       <span class="status-text" style="font-size:10px;">💾 يُحفظ تلقائياً عند الكتابة</span>
     </div>`;
     }
@@ -832,7 +834,7 @@ let qa='';
     if(TEACHER_MODE) wIn=`<div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><label style="font-size:11.5px;color:var(--gold-600);font-weight:800;">⚖️ الدرجة:</label><input type="number" value="${q.weight}" min="0" step="0.5" style="width:70px;padding:4px 8px;border-radius:8px;border:1px solid rgba(10,27,46,.15);background:var(--card);color:var(--ink);font-weight:700;text-align:center;font-family:inherit;font-size:12px;" onchange="setW(${idx},this.value)"></div>`;
     const isPlay=playingState[idx]===true;
     const hp=hasRec?`<button class="btn-headphones ${isPlay?'playing':''}" onclick="togglePlayback(${idx})">${isPlay?'🎧 يعمل...':'🎧 اسمع'}</button>`:`<button class="btn-headphones" disabled>🎧 اسمع</button>`;
-    html+=`<div class="question-card ${cardClass}" data-qi="${idx}" onclick="if(TEACHER_MODE)setPasteTarget(${idx})"><div class="q-header"><span class="q-num">${idx+1}</span>${q.type==='mcq'?`<span class="badge" style="background:rgba(0,137,123,.18);color:#00897b;">اختيار</span>`:''}${scoreBadge}<span class="weight-badge">⚖️ ${q.weight}</span></div>${qa}<div class="question-text">${q.text}</div>${imgs}${wIn}${isMcq?'' : `<div class="voice-area"><button class="btn-voice" id="vb-${idx}" onclick="toggleRec(${idx})" ontouchend="event.preventDefault();toggleRec(${idx});">🎤 تسجيل</button>${hp}<button class="btn-evaluate" onclick="evalQ(${idx})" ${evalDis?'disabled':''}>📊 تقييم</button><span class="status-text ${tr?'done':''}" id="vs-${idx}">${tr?'✅ تم التسجيل':'⏳ في انتظار التسجيل'}</span></div>`}<div class="transcript-box"><span class="label">${isMcq?'📝 اختر الإجابة الصحيحة:':'📝 إجابتك:'}</span>${trHtml}</div>${isMcq && !isEval && (typeof transcripts[idx]==='string' && transcripts[idx].startsWith('MCQ:')) ? `<div style="margin:8px 0;"><button class="btn-evaluate" onclick="evalQ(${idx})">📊 تقييم</button></div>`:''}${resultHtml}</div>`;
+    html+=`<div class="question-card ${cardClass}" data-qi="${idx}" onclick="if(TEACHER_MODE)setPasteTarget(${idx})"><div class="q-header"><span class="q-num">${idx+1}</span>${q.type==='mcq'?`<span class="badge" style="background:rgba(0,137,123,.18);color:#00897b;">اختيار</span>`:''}${scoreBadge}<span class="weight-badge">⚖️ ${q.weight}</span></div>${qa}<div class="question-text">${q.text}</div>${imgs}${wIn}${isMcq?'' : `<div class="voice-area"><button class="btn-voice" id="vb-${idx}" onclick="if(evaluations[${idx}])return;toggleRec(${idx})" ontouchend="event.preventDefault();toggleRec(${idx});">🎤 تسجيل</button>${hp}<button class="btn-evaluate" onclick="evalQ(${idx})" ${evalDis?'disabled':''}>📊 تقييم</button><span class="status-text ${tr?'done':''}" id="vs-${idx}">${tr?'✅ تم التسجيل':'⏳ في انتظار التسجيل'}</span></div>`}<div class="transcript-box"><span class="label">${isMcq?'📝 اختر الإجابة الصحيحة:':'📝 إجابتك:'}</span>${trHtml}</div>${isMcq && !isEval && (typeof transcripts[idx]==='string' && transcripts[idx].startsWith('MCQ:')) ? `<div style="margin:8px 0;"><button class="btn-evaluate" onclick="evalQ(${idx})">📊 تقييم</button></div>`:''}${resultHtml}</div>`;
   });
   c.innerHTML=html; updateProgress();
 }
@@ -1058,6 +1060,7 @@ function editPMax(idx,pi,val){
 
 
 function selectMcq(idx, ci){
+  if(evaluations[idx]) return;
   // في وضع المعلم: الضغط على الخيارات لا يُسجَّل كإجابة طالب
   if(typeof TEACHER_MODE !== 'undefined' && TEACHER_MODE) return;
   transcripts[idx] = 'MCQ:' + ci;
@@ -1605,14 +1608,14 @@ function stopV(idx){
   recordingIndex=null; renderQuestions();
 }
 
-function onAnswerInput(idx, val){
+function onAnswerInput(idx, val){ if(evaluations[idx])return;
   transcripts[idx] = cleanText(val||'');
   const eb = document.querySelectorAll('.question-card')[idx]?.querySelector('.btn-evaluate');
   if(eb) eb.disabled = !(transcripts[idx]||'').trim().length>5;
   const st = $('vs-'+idx);
   if(st){ const has=(transcripts[idx]||'').trim().length>5; st.textContent=has?'✅ تم التسجيل':'⏳ في انتظار التسجيل'; st.className='status-text '+(has?'done':''); }
 }
-function onAnswerSave(idx, val){
+function onAnswerSave(idx, val){ if(evaluations[idx])return;
   transcripts[idx] = cleanText((val||'').trim());
   // لا نعيد رسم الصفحة حتى لا يفقد المؤشر
 }
@@ -1620,7 +1623,7 @@ function toggleEdit(idx){ /* لم يعد مستخدماً — الصندوق د�
 
 function saveEdit(idx){ const ta=$(`edit-ta-${idx}`); if(ta){ transcripts[idx]=cleanText(ta.value.trim()); editMode[idx]=false; renderQuestions(); } }
 function cancelEdit(idx){ editMode[idx]=false; renderQuestions(); }
-function clearTr(idx){ transcripts[idx]=''; if(evaluations[idx]) delete evaluations[idx]; if(audioUrls[idx]){try{URL.revokeObjectURL(audioUrls[idx]);}catch(e){}} delete audioUrls[idx]; delete audioBlobs[idx]; delete audioPlayers[idx]; playingState[idx]=false; renderQuestions(); updateProgress(); }
+function clearTr(idx){ if(evaluations[idx]){ if(typeof toast==='function')toast('🔒 السؤال مُقيَّم — لا يمكن التعديل. استخدم إعادة الاختبار.'); else alert('🔒 السؤال مُقيَّم — لا يمكن التعديل.'); return; } transcripts[idx]=''; if(evaluations[idx]) delete evaluations[idx]; if(audioUrls[idx]){try{URL.revokeObjectURL(audioUrls[idx]);}catch(e){}} delete audioUrls[idx]; delete audioBlobs[idx]; delete audioPlayers[idx]; playingState[idx]=false; renderQuestions(); updateProgress(); }
 function evalQ(idx){ const text=(transcripts[idx]||'').trim(); if(!text||text.length<3){ alert('⚠️ سجّل أو اكتب إجابة أولاً'); return; } reEval(idx); }
 function updateProgress(){ const t=questions.length; const e=Object.keys(evaluations).length; $('progressText').textContent=`${e}/${t}`; const p=t?(e/t)*100:0; $('progressFill').style.width=`${p}%`; }
 
