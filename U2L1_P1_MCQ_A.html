@@ -370,7 +370,7 @@
         <button class="tool-mini teal hidden" id="undoBtn" onclick="undoAction()">↩️</button>
         <button class="tool-mini teal hidden" id="redoBtn" onclick="redoAction()">↪️</button>
         <button class="tool-mini danger" id="resetSavedBtn" onclick="resetSavedData()" title="مسح كل التعديلات">🗑️</button>
-        <button class="tool-mini gold teacher-only-btn hidden" id="printBtn" onclick="printWorksheet()" title="طباعة الملزمة">🖨️ طباعة</button>
+        <button class="tool-mini gold teacher-only-btn hidden" id="printBtn" onclick="printWorksheet()" title="طباعة الملزمة" class="print-btn teacher-only">🖨️ طباعة</button>
         <button class="tool-mini" id="themeBtn" onclick="toggleTheme()">🌓</button>
         <span class="mode-avatar" id="modeAvatar" onclick="onModeAvatarClick()" title="اضغط 3 مرات لتغيير الوضع">👨‍🎓</span><span class="mode-label" id="modeLabel">طالب</span>
       </div>
@@ -424,13 +424,16 @@
     <div class="phone-box" style="margin:14px 0 18px;text-align:right;">
       <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;opacity:.9;">📱 رقم هاتف الطالب</label>
       <div style="display:flex;align-items:center;gap:8px;direction:ltr;justify-content:center;">
-        <span style="font-weight:800;font-size:15px;opacity:.85;min-width:42px;">+974</span>
-        <input type="tel" id="studentPhone" inputmode="numeric" maxlength="8" placeholder="XXXX XXXX"
+        <input type="tel" id="countryCode" value="974" maxlength="4" inputmode="numeric"
+          style="width:52px;padding:10px 4px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);
+          background:rgba(0,0,0,.25);color:#fff;font-size:15px;font-weight:800;font-family:inherit;text-align:center;"
+          title="رمز الدولة (افتراضي 974) — قابل للتعديل" oninput="onCountryCodeInput()">
+        <input type="tel" id="studentPhone" inputmode="numeric" maxlength="12" placeholder="XXXXXXXX"
           style="flex:1;max-width:180px;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);
           background:rgba(0,0,0,.25);color:#fff;font-size:16px;font-weight:700;font-family:inherit;letter-spacing:1px;text-align:center;"
           oninput="onStudentPhoneInput()" onblur="onStudentPhoneInput()">
       </div>
-      <div id="phoneHint" style="font-size:11px;opacity:.7;margin-top:6px;">أدخل 8 أرقام (مثال: 33123456 أو ٣٣١٢٣٤٥٦) — مطلوب</div>
+      <div id="phoneHint" style="font-size:11px;opacity:.7;margin-top:6px;">أدخل رقم الهاتف (رمز الدولة قابل للتعديل — افتراضي 974)</div>
       <label style="display:block;font-size:13px;font-weight:700;margin:14px 0 6px;opacity:.9;">👤 الاسم <span style="font-weight:500;opacity:.65;">(اختياري)</span></label>
       <input type="text" id="studentName" placeholder="اسم الطالب"
         style="width:100%;max-width:260px;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);
@@ -733,7 +736,7 @@ function onModeAvatarClick(){
   teacherClickTimer=setTimeout(()=>{teacherClickCount=0;},2000);
   if(teacherClickCount>=3){
     teacherClickCount=0;
-    TEACHER_MODE=!TEACHER_MODE; try{ if(TEACHER_MODE) document.body.classList.add('teacher-mode'); else document.body.classList.remove('teacher-mode'); }catch(e){};
+    TEACHER_MODE=!TEACHER_MODE; try{ if(TEACHER_MODE) document.body.classList.add('teacher-mode'); else document.body.classList.remove('teacher-mode'); }catch(e){}; try{ if(TEACHER_MODE) document.body.classList.add('teacher-mode'); else document.body.classList.remove('teacher-mode'); }catch(e){};
     $('teacherPanel').classList.toggle('hidden',!TEACHER_MODE);
     $('undoBtn').classList.toggle('hidden',!TEACHER_MODE);
     $('redoBtn').classList.toggle('hidden',!TEACHER_MODE);
@@ -752,7 +755,7 @@ function onModeAvatarClick(){
     toast(`${teacherClickCount}/3`);
   }
 }
-function exitTeacherMode(){ TEACHER_MODE=false; try{document.body.classList.remove('teacher-mode')}catch(e){}; document.body.classList.remove('teacher-active'); $('teacherPanel').classList.add('hidden'); $('undoBtn').classList.add('hidden'); $('redoBtn').classList.add('hidden'); updateModeAvatar(); toast('🔒 وضع المعلم مغلق'); renderQuestions(); }
+function exitTeacherMode(){ TEACHER_MODE=false; try{document.body.classList.remove('teacher-mode')}catch(e){}; try{document.body.classList.remove('teacher-mode')}catch(e){}; document.body.classList.remove('teacher-active'); $('teacherPanel').classList.add('hidden'); $('undoBtn').classList.add('hidden'); $('redoBtn').classList.add('hidden'); updateModeAvatar(); toast('🔒 وضع المعلم مغلق'); renderQuestions(); }
 
 function applyDefaultWeight(){ const v=parseFloat($('defaultWeight').value)||2; snapshot('درجة افتراضية'); questions.forEach(q=>q.weight=v); saveQuestions(); renderQuestions(); toast('✅ '+v); }
 function applyExamTotal(){ const v=$('examTotalOverride').value.trim(); EXAM_TOTAL_OVERRIDE = v===''?null:parseFloat(v); toast(EXAM_TOTAL_OVERRIDE?'✅ '+EXAM_TOTAL_OVERRIDE:'✅ تلقائي'); }
@@ -861,7 +864,7 @@ let qa='';
     if(TEACHER_MODE) wIn=`<div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><label style="font-size:11.5px;color:var(--gold-600);font-weight:800;">⚖️ الدرجة:</label><input type="number" value="${q.weight}" min="0" step="0.5" style="width:70px;padding:4px 8px;border-radius:8px;border:1px solid rgba(10,27,46,.15);background:var(--card);color:var(--ink);font-weight:700;text-align:center;font-family:inherit;font-size:12px;" onchange="setW(${idx},this.value)"></div>`;
     const isPlay=playingState[idx]===true;
     const hp=hasRec?`<button class="btn-headphones ${isPlay?'playing':''}" onclick="togglePlayback(${idx})">${isPlay?'🎧 يعمل...':'🎧 اسمع'}</button>`:`<button class="btn-headphones" disabled>🎧 اسمع</button>`;
-    html+=`<div class="question-card ${cardClass}" data-qi="${idx}" onclick="if(TEACHER_MODE)setPasteTarget(${idx})"><div class="q-header"><span class="q-num">${idx+1}</span>${q.type==='mcq'?`<span class="badge" style="background:rgba(0,137,123,.18);color:#00897b;">اختيار</span>`:''}${scoreBadge}<span class="weight-badge">⚖️ ${q.weight}</span></div>${qa}<div class="question-text">${q.text}</div>${imgs}${wIn}${isMcq?'' : `<div class="voice-area"><button class="btn-voice" id="vb-${idx}" onclick="if(evaluations[${idx}])return;toggleRec(${idx})" ontouchend="event.preventDefault();toggleRec(${idx});">🎤 تسجيل</button>${hp}${(examSubmitted||TEACHER_MODE)?`<button class="btn-evaluate" onclick="evalQ(${idx})" ${evalDis?'disabled':''}>📊 تقييم</button>`:``}<span class="status-text ${tr?'done':''}" id="vs-${idx}">${tr?'✅ تم التسجيل':'⏳ في انتظار التسجيل'}</span></div>`}<div class="transcript-box"><span class="label">${isMcq?'📝 اختر الإجابة الصحيحة:':'📝 إجابتك:'}</span>${trHtml}</div>${isMcq && !isEval && (typeof transcripts[idx]==='string' && transcripts[idx].startsWith('MCQ:')) ? `<div style="margin:8px 0;">${(examSubmitted||TEACHER_MODE)?`<button class="btn-evaluate" onclick="evalQ(${idx})">📊 تقييم</button>`:``}</div>`:''}${resultHtml}</div>`;
+    html+=`<div class="question-card ${cardClass}" data-qi="${idx}" onclick="if(TEACHER_MODE)setPasteTarget(${idx})"><div class="q-header"><span class="q-num">${idx+1}</span>${q.type==='mcq'?`<span class="badge" style="background:rgba(0,137,123,.18);color:#00897b;">اختيار</span>`:''}${scoreBadge}<span class="weight-badge">⚖️ ${q.weight}</span></div>${qa}<div class="question-text">${q.text}</div>${imgs}${wIn}${isMcq?'' : `<div class="voice-area"><button class="btn-voice" id="vb-${idx}" onclick="if(evaluations[${idx}])return;toggleRec(${idx})" ontouchend="event.preventDefault();toggleRec(${idx});">🎤 تسجيل</button>${hp}${(examSubmitted||TEACHER_MODE)?`${(examSubmitted||TEACHER_MODE)?`<button class="btn-evaluate" onclick="evalQ(${idx})" ${evalDis?'disabled':''}>📊 تقييم</button>`:``}`:``}<span class="status-text ${tr?'done':''}" id="vs-${idx}">${tr?'✅ تم التسجيل':'⏳ في انتظار التسجيل'}</span></div>`}<div class="transcript-box"><span class="label">${isMcq?'📝 اختر الإجابة الصحيحة:':'📝 إجابتك:'}</span>${trHtml}</div>${isMcq && !isEval && (typeof transcripts[idx]==='string' && transcripts[idx].startsWith('MCQ:')) ? `<div style="margin:8px 0;">${(examSubmitted||TEACHER_MODE)?`${(examSubmitted||TEACHER_MODE)?`<button class="btn-evaluate" onclick="evalQ(${idx})">📊 تقييم</button>`:``}`:``}</div>`:''}${resultHtml}</div>`;
   });
   c.innerHTML=html; updateProgress();
 }
@@ -1754,7 +1757,7 @@ function submitExam(){
   if(typeof renderQuestions==='function') renderQuestions();
   const t=questions.length;
   const e=Object.keys(evaluations).filter(k=>evaluations[k]).length;
-  examSubmitted=true; try{document.body.classList.add('exam-done')}catch(e){};
+  examSubmitted=true; try{document.body.classList.add('exam-done')}catch(e){}; try{document.body.classList.add('exam-done')}catch(e){};
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
   // الإبقاء على زر الإنهاء ظاهراً لإعادة عرض النتيجة
   const _fb=$('finishBtn'); if(_fb){ _fb.classList.remove('hidden-finish'); _fb.classList.add('show'); _fb.textContent='📊 النتيجة'; }
@@ -1874,7 +1877,7 @@ function shuffleArr(arr){
 }
 function showStartScreen(){
   examStarted = false;
-  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){};
+  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; try{document.body.classList.remove('exam-done')}catch(e){};
   const ss = $('startScreen');
   const qc = $('questionsContainer');
   const cc = $('controlsContainer');
@@ -1927,6 +1930,22 @@ async function lookupStudentName(phone8){
   return null;
 }
 let _nameLookupTimer = null;
+
+function onCountryCodeInput(){
+  const inp = document.getElementById('countryCode');
+  if(!inp) return;
+  let d = (typeof toEnglishDigits==='function' ? toEnglishDigits(inp.value) : inp.value).replace(/\D/g,'');
+  if(d.length > 4) d = d.slice(0,4);
+  if(inp.value !== d) inp.value = d;
+  if(typeof onStudentPhoneInput==='function') onStudentPhoneInput();
+}
+function getFullPhone(){
+  const cc = (document.getElementById('countryCode')||{}).value || '974';
+  const local = (document.getElementById('studentPhone')||{}).value || '';
+  const digits = (typeof normalizePhoneDigits==='function' ? normalizePhoneDigits : (s=>String(s||'').replace(/\D/g,'')))(cc + local);
+  return digits;
+}
+
 function onStudentPhoneInput(){
   const inp = document.getElementById('studentPhone');
   if(!inp) return;
@@ -1935,10 +1954,10 @@ function onStudentPhoneInput(){
   // أظهر الأرقام بالإنجليزية دائماً داخل الحقل (لا نغيّر للعربي)
   if(inp.value !== digits){
     const pos = inp.selectionStart;
-    inp.value = digits.slice(0,8);
+    inp.value = digits.slice(0,12);
     try{ inp.setSelectionRange(Math.min(pos, inp.value.length), Math.min(pos, inp.value.length)); }catch(e){}
-  } else if(digits.length > 8){
-    inp.value = digits.slice(0,8);
+  } else if(digits.length > 12){
+    inp.value = digits.slice(0,12);
   }
   const nameInp = document.getElementById('studentName');
   const hint = document.getElementById('phoneHint');
@@ -1957,7 +1976,7 @@ function onStudentPhoneInput(){
       }
     }, 350);
   } else {
-    if(hint) hint.textContent = 'أدخل 8 أرقام (مثال: 33123456 أو ٣٣١٢٣٤٥٦) — مطلوب';
+    if(hint) hint.textContent = 'أدخل رقم الهاتف (رمز الدولة قابل للتعديل — افتراضي 974)';
   }
 }
 
@@ -2005,11 +2024,11 @@ function startExam(mode){
     else toast('📋 ترتيب ثابت');
   }
   evaluations = {}; transcripts = {}; editMode = {}; retryEditMode = {};
-  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){};
+  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; try{document.body.classList.remove('exam-done')}catch(e){};
   hideStartScreen();
   const rc=$('resultContainer'); if(rc){ rc.classList.add('hidden'); rc.innerHTML=''; }
   const qc=$('questionsContainer'); if(qc) qc.classList.remove('hidden-qs');
-  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){};
+  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; try{document.body.classList.remove('exam-done')}catch(e){};
   const fb=$('finishBtn'); if(fb){ fb.textContent='📊 إنهاء'; fb.classList.remove('hidden-finish'); fb.classList.add('show'); }
   renderQuestions();
   startTimer();
@@ -2027,7 +2046,7 @@ function resetExam(){
   Object.keys(audioUrls).forEach(k=>{try{URL.revokeObjectURL(audioUrls[k]);}catch(e){} delete audioUrls[k];});
   Object.keys(audioPlayers).forEach(k=>{try{audioPlayers[k].pause();}catch(e){} delete audioPlayers[k];});
   Object.keys(playingState).forEach(k=>delete playingState[k]);
-  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; historyStack=[]; historyPointer=-1;
+  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; try{document.body.classList.remove('exam-done')}catch(e){}; historyStack=[]; historyPointer=-1;
   const rc=$('resultContainer'); if(rc) rc.classList.add('hidden');
   const rty=$('retryContainer'); if(rty) rty.classList.add('hidden');
   const hb=$('homeBtn'); if(hb) hb.classList.add('show');
@@ -2055,6 +2074,20 @@ window.addEventListener('scroll',()=>{
 setTimeout(()=>{ const fb=$('finishBtn'); if(fb && !examSubmitted){ fb.classList.add('show'); fb.classList.remove('hidden-finish'); } const hb=$('homeBtn'); if(hb) hb.classList.add('show'); }, 100);
 
 
+
+
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')){
+    const sel = window.getSelection();
+    if(!sel || sel.rangeCount===0) return;
+    const node = sel.anchorNode;
+    if(!node) return;
+    const editable = (node.nodeType===1?node:node.parentElement);
+    if(!editable || !editable.isContentEditable) return;
+    e.preventDefault();
+    document.execCommand('underline', false, null);
+  }
+});
 
 function exportModel(){
   try{
