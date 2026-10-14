@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة تقدمي — أ. عزت نجم الأحياء</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b1a3b;--navy2:#13285a;--gold:#f5c542;--gold2:#d9a521;--tx:#fff;--mut:#aeb9d6}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Cairo',sans-serif;background:linear-gradient(160deg,var(--navy),#060f26);color:var(--tx);min-height:100vh;padding:16px}
+.wrap{max-width:640px;margin:0 auto}
+.brand{text-align:center;color:var(--gold);font-weight:900;font-size:20px;margin:6px 0 16px}
+.card{background:var(--navy2);border:1px solid rgba(245,197,66,.3);border-radius:18px;padding:18px;margin-bottom:14px}
+label{display:block;font-weight:700;font-size:14px;margin:10px 0 6px}
+.row{display:flex;gap:8px;direction:ltr}
+input{font-family:inherit;font-size:16px;padding:12px;border-radius:12px;border:2px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#fff;direction:ltr;text-align:center}
+.cc{width:84px;font-weight:800}.num{flex:1;min-width:0}
+button{font-family:inherit;font-weight:800;font-size:16px;border:0;border-radius:12px;padding:13px;cursor:pointer;width:100%;margin-top:14px;background:linear-gradient(150deg,var(--gold),var(--gold2));color:var(--navy)}
+button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255,255,.2);font-size:14px;padding:10px}
+.hint{font-size:12px;color:var(--mut);margin-top:6px}.err{color:#ff8a8a;font-weight:700;margin-top:10px;display:none}
+.hide{display:none}
+.big{text-align:center}.big .p{font-size:54px;font-weight:900;color:var(--gold);line-height:1.1}
+.big .g{font-size:24px;font-weight:900;margin:4px 0}.big .t{color:var(--gold);font-weight:700;font-size:14px}
+.big .s{color:var(--mut);font-size:13px;margin-top:6px}
+.ex{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.ex:last-child{border:0}.ex .n{flex:1;font-weight:700;font-size:14px}.ex .d{font-size:11px;color:var(--mut);font-weight:400}
+.ex .pc{font-weight:900;color:var(--gold);min-width:56px;text-align:left;direction:ltr}
+.bar{height:6px;border-radius:4px;background:rgba(255,255,255,.1);margin-top:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+.wa{background:linear-gradient(150deg,#25d366,#128c4a);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">⭐ أ. عزت نجم الأحياء — لوحة تقدمي</div>
+
+  <div class="card" id="login">
+    <label>هاتف الطالب</label>
+    <div class="row"><input class="cc" id="c1" value="974" inputmode="numeric" maxlength="4" oninput="this.value=en(this.value).replace(/\D/g,'')"><input class="num" id="p1" type="tel" inputmode="numeric" placeholder="50123456"></div>
+    <label>هاتف ولي الأمر</label>
+    <div class="row"><input class="cc" id="c2" value="974" inputmode="numeric" maxlength="4" oninput="this.value=en(this.value).replace(/\D/g,'')"><input class="num" id="p2" type="tel" inputmode="numeric" placeholder="50123456"></div>
+    <div class="hint">اكتب الرقم مباشرة (المفتاح 974 مضاف تلقائيًا)، وغيّره فقط للأرقام الدولية.</div>
+    <button onclick="go()">عرض نتائجي</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div id="dash" class="hide">
+    <div class="card big">
+      <div id="nm" style="font-weight:800;margin-bottom:6px"></div>
+      <div class="p" id="pc"></div><div class="g" id="gr"></div><div class="t" id="tp"></div><div class="s" id="tk"></div>
+    </div>
+    <div class="card"><div style="font-weight:900;color:var(--gold);margin-bottom:4px">📊 أعلى نتيجة في كل اختبار</div><div id="list"></div></div>
+    <button class="wa" onclick="share()">📲 شارك النتيجة مع ولي الأمر</button>
+    <button class="sec" onclick="out()">تسجيل خروج</button>
+  </div>
+</div>
+
+<script>
+const URL_="https://script.google.com/macros/s/AKfycbzpVJBVOa_ewqV4K0hyeiTaeIZFbXGZLvYoD4at-9FLim98C-YHw18XZa_M_PSIeM9_kA/exec";
+const $=id=>document.getElementById(id);
+const en=s=>String(s==null?'':s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+let U=null,D=null;
+
+function full(code,num){
+  code=en(code).replace(/\D/g,'').replace(/^0+/,'')||'974';
+  let r=en(num).replace(/[\s\-().]/g,'');
+  if(r[0]==='+'||r.startsWith('00')) return r.replace(/\D/g,'').replace(/^00/,'');
+  r=r.replace(/\D/g,'');
+  return (code==='974'&&/^974\d{8}$/.test(r))?r:code+r;
+}
+function ok(p){return p.startsWith('974')?/^974\d{8}$/.test(p):/^\d{8,15}$/.test(p)}
+function grade(p){return p>=85?'ممتاز':p>=75?'جيد جدًا':p>=60?'جيد':p>=45?'مقبول':'يحتاج إلى دعم'}
+function showErr(m){const e=$('err');e.textContent=m;e.style.display='block'}
+
+async function go(){
+  const phone=full($('c1').value,$('p1').value),parent=full($('c2').value,$('p2').value);
+  if(!ok(phone)||!ok(parent)) return showErr('❌ تأكد من الرقمين (رقم قطري من 8 أرقام)');
+  $('err').style.display='none';
+  const b=document.querySelector('#login button');b.textContent='⏳ جاري التحميل...';
+  try{
+    const r=await fetch(URL_+'?action=progress&phone='+phone+'&parent='+parent+'&t='+Date.now());
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error==='not found'?'nf':'x');
+    U={phone,parent};D=d;
+    try{localStorage.setItem('najm_progress_user',JSON.stringify(U))}catch(e){}
+    render();
+  }catch(e){showErr(e.message==='nf'?'❌ الرقمان غير مسجلين. تواصل مع الأستاذ.':'❌ تعذر الاتصال، حاول مرة أخرى.')}
+  b.textContent='عرض نتائجي';
+}
+
+function render(){
+  $('login').classList.add('hide');$('dash').classList.remove('hide');
+  $('nm').textContent='👤 '+(D.name||'طالب');
+  if(D.overall==null){
+    $('pc').textContent='—';$('gr').textContent='لا توجد نتائج بعد';$('tp').textContent='';$('tk').textContent='ابدأ بحل أحد بنوك الأسئلة وستظهر نتيجتك هنا';
+    $('list').innerHTML='<div class="hint">لم تسجل أي نتيجة حتى الآن.</div>';return;
+  }
+  $('pc').textContent=D.overall.toFixed(1)+'%';
+  $('gr').textContent=grade(D.overall);
+  $('tp').textContent=(D.n>=20&&D.topPct<=20)?'🏅 ضمن أفضل '+D.topPct+'% من الطلاب':'';
+  $('tk').textContent='أنجز '+D.taken+' اختبارًا (مجموع الدرجات ÷ مجموع الدرجات الكلية)';
+  $('list').innerHTML=D.exams.map(e=>{
+    const dt=e.at?new Date(e.at).toLocaleDateString('ar-EG'):'';
+    return `<div class="ex"><div class="n">${e.title}<div class="d">${dt} · ${e.score}/${e.total} · ${e.attempts} محاولة</div><div class="bar"><i style="width:${Math.min(100,e.percent)}%"></i></div></div><div class="pc">${e.percent.toFixed(1)}%</div></div>`;
+  }).join('');
+}
+
+function share(){
+  let t=`*نتيجة ${D.name||'الطالب'} في بنوك الأسئلة — أ. عزت نجم الأحياء*\nالتقدير العام: ${D.overall==null?'—':grade(D.overall)+' ('+D.overall.toFixed(1)+'%)'}\nعدد الاختبارات: ${D.taken}\n`;
+  D.exams.forEach(e=>t+=`• ${e.title}: ${e.percent.toFixed(1)}%\n`);
+  window.open('https://wa.me/'+U.parent+'?text='+encodeURIComponent(t),'_blank');
+}
+function out(){try{localStorage.removeItem('najm_progress_user')}catch(e){}U=D=null;$('dash').classList.add('hide');$('login').classList.remove('hide')}
+
+(function(){try{const s=JSON.parse(localStorage.getItem('najm_progress_user')||'null');
+  if(s&&s.phone&&s.parent){$('p1').value='+'+s.phone;$('p2').value='+'+s.parent;go()}}catch(e){}})();
+</script>
+</body>
+</html>
