@@ -80,11 +80,11 @@ async function go(){
   try{
     const r=await fetch(URL_+'?action=progress&phone='+phone+'&parent='+parent+'&t='+Date.now());
     const d=await r.json();
-    if(!d.ok) throw new Error(d.error==='not found'?'nf':'x');
+    if(!d.ok) throw new Error(d.error==='pending'?'pd':d.error==='not found'?'nf':'x');
     U={phone,parent};D=d;
     try{localStorage.setItem('najm_progress_user',JSON.stringify(U))}catch(e){}
     render();
-  }catch(e){showErr(e.message==='nf'?'❌ الرقمان غير مسجلين. تواصل مع الأستاذ.':'❌ تعذر الاتصال، حاول مرة أخرى.')}
+  }catch(e){showErr(e.message==='pd'?'⏳ طلبك قيد المراجعة وسيتم تفعيله قريبًا.':e.message==='nf'?'❌ الرقمان غير مسجلين. تواصل مع الأستاذ.':'❌ تعذر الاتصال، حاول مرة أخرى.')}
   b.textContent='عرض نتائجي';
 }
 
@@ -112,7 +112,7 @@ function share(){
 }
 function out(){try{localStorage.removeItem('najm_progress_user')}catch(e){}U=D=null;$('dash').classList.add('hide');$('login').classList.remove('hide')}
 
-(function(){try{const s=JSON.parse(localStorage.getItem('najm_progress_user')||'null');
+(function(){try{const s=JSON.parse(localStorage.getItem('najm_progress_user')||localStorage.getItem('najm_shared_user')||'null');
   if(s&&s.phone&&s.parent){$('p1').value='+'+s.phone;$('p2').value='+'+s.parent;go()}}catch(e){}})();
 </script>
 </body>

@@ -133,6 +133,9 @@
             margin-top: 8px;
         }
 
+        .hdr-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+        .hdr-btn { background: #ffd966; color: #0f2b3d; border: 0; border-radius: 50px; padding: 7px 16px; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .hdr-btn.alt { background: rgba(255,255,255,0.18); color: #fff; }
         .tabs {
             display: flex;
             gap: 8px;
@@ -290,6 +293,12 @@
         }
         .form-group input:focus { outline: none; border-color: #1e5a7a; }
         .form-hint { font-size: 12px; color: #718096; margin-top: 4px; }
+        .phone-row { display: flex; gap: 8px; direction: ltr; align-items: stretch; }
+        .phone-row .cc-wrap { position: relative; flex: 0 0 92px; }
+        .phone-row .cc-wrap span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #718096; font-weight: 700; pointer-events: none; }
+        .phone-row .cc-wrap input { padding-left: 26px; padding-right: 8px; text-align: center; font-weight: 700; }
+        .phone-row .num-input { flex: 1; min-width: 0; }
+        .phone-row input { direction: ltr; }
         .btn-primary {
             width: 100%;
             padding: 12px;
@@ -548,6 +557,10 @@
     <div class="header">
         <h1>أ. <span>عزت شعبان</span></h1>
         <div class="badge">⭐ النجم في الأحياء — ثانوية عامة</div>
+        <div class="hdr-actions">
+            <a class="hdr-btn" href="https://najm-bio-site-first.vercel.app/Student_Progress.html" target="_blank" rel="noopener">📊 لوحة تقدمي</a>
+            <button class="hdr-btn alt" id="hdrRegBtn" onclick="openRegister()">📝 تسجيل</button>
+        </div>
     </div>
 
     <!-- Tabs -->
@@ -606,21 +619,48 @@
         <h3>🔐 تسجيل الدخول - المحتوى المشترك</h3>
         <div class="form-group">
             <label>هاتف الطالب</label>
-            <input type="tel" id="loginPhone" placeholder="مثال: 97450123456" oninput="validatePhone(this)">
-            <div class="form-hint">يجب أن يبدأ الرقم بـ 974 ويتبعه 8 أرقام</div>
+            <div class="phone-row">
+                <div class="cc-wrap"><span>+</span><input type="tel" id="loginPhoneCode" value="974" inputmode="numeric" maxlength="4" aria-label="مفتاح الدولة" oninput="validateCode(this)"></div>
+                <input type="tel" id="loginPhone" class="num-input" placeholder="مثال: 50123456" inputmode="numeric" oninput="validatePhone(this)">
+            </div>
+            <div class="form-hint">اكتب رقمك مباشرة (8 أرقام) — المفتاح 974 مضاف تلقائيًا، وغيّره فقط إن كان رقمك من دولة أخرى</div>
         </div>
         <div class="form-group">
             <label>هاتف ولي الأمر</label>
-            <input type="tel" id="loginParent" placeholder="مثال: 97450123456" oninput="validatePhone(this)">
-            <div class="form-hint">يجب أن يبدأ الرقم بـ 974 ويتبعه 8 أرقام</div>
+            <div class="phone-row">
+                <div class="cc-wrap"><span>+</span><input type="tel" id="loginParentCode" value="974" inputmode="numeric" maxlength="4" aria-label="مفتاح الدولة" oninput="validateCode(this)"></div>
+                <input type="tel" id="loginParent" class="num-input" placeholder="مثال: 50123456" inputmode="numeric" oninput="validatePhone(this)">
+            </div>
+            <div class="form-hint">اكتب رقمك مباشرة (8 أرقام) — المفتاح 974 مضاف تلقائيًا، وغيّره فقط إن كان رقمك من دولة أخرى</div>
         </div>
         <div class="form-group" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <input type="checkbox" id="rememberMe" checked style="width:18px;height:18px;accent-color:#1e5a7a;">
             <label for="rememberMe" style="margin:0;font-weight:600;color:#2d3748;cursor:pointer;">تذكرني على هذا الجهاز</label>
         </div>
         <button class="btn-primary" onclick="doLogin()">دخول</button>
+        <button class="btn-secondary" onclick="openRegister()">📝 تسجيل جديد</button>
         <button class="btn-secondary" onclick="closeLogin()">إلغاء</button>
         <div class="login-error" id="loginError"></div>
+    </div>
+</div>
+
+<!-- Register Modal -->
+<div class="modal-overlay" id="regModal">
+    <div class="modal-box" id="regBox">
+        <h3>📝 تسجيل طالب جديد</h3>
+        <p id="regNote" style="display:none;text-align:center;color:#1e5a7a;font-weight:700;font-size:14px;line-height:1.7;margin:-8px 0 14px">🔒 هذا القسم للمشتركين فقط.<br>سجّل بياناتك ليتم تفعيل حسابك، أو سجّل دخولك إن كنت مشتركًا.</p>
+        <div class="form-group"><label>اسم الطالب</label><input type="text" id="regName" autocomplete="name" placeholder="الاسم الثلاثي"></div>
+        <div class="form-group"><label>هاتف الطالب</label>
+            <div class="phone-row"><div class="cc-wrap"><span>+</span><input type="tel" id="regPhoneCode" value="974" inputmode="numeric" maxlength="4" oninput="validateCode(this)"></div>
+            <input type="tel" id="regPhone" class="num-input" placeholder="50123456" inputmode="numeric" oninput="validatePhone(this)"></div></div>
+        <div class="form-group"><label>هاتف ولي الأمر</label>
+            <div class="phone-row"><div class="cc-wrap"><span>+</span><input type="tel" id="regParentCode" value="974" inputmode="numeric" maxlength="4" oninput="validateCode(this)"></div>
+            <input type="tel" id="regParent" class="num-input" placeholder="50123456" inputmode="numeric" oninput="validatePhone(this)"></div></div>
+        <div class="form-group"><label>منطقة السكن</label><input type="text" id="regArea" placeholder="مثال: الوكرة"></div>
+        <button class="btn-primary" id="regBtn" onclick="doRegister()">إرسال طلب التسجيل</button>
+        <button class="btn-secondary" onclick="openLoginFromReg()">🔐 لدي حساب — تسجيل الدخول</button>
+        <button class="btn-secondary" onclick="skipRegister()">تصفح بدون تسجيل</button>
+        <div class="login-error" id="regMsg"></div>
     </div>
 </div>
 
@@ -630,7 +670,7 @@
     // ║  مثال: https://script.google.com/macros/s/XXXX/exec    ║
     // ║  ورقة "الطلاب" — الأعمدة بيتقرأوا بالاسم مش بالترتيب، فترتيبهم في الشيت غير مهم  ║
     // ║  المطلوب فعليًا لتسجيل الدخول: هاتف الطالب + هاتف ولي الأمر يتطابقوا مع صف في الشيت ║
-    // ║  عمود "الحالة" بقى للاستخدام الشخصي بس، مبقاش بيأثر على الدخول                    ║
+    // ║  عمود "الحالة": 2 = مفعّل (يدخل المحتوى المشترك)، وأي قيمة أخرى = تصفح عام فقط                    ║
     // ║  الحالة = 2 → مسموح | 0 أو 1 → مرفوض                      ║
     // ═══════════════════════════════════════════════════════════
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpVJBVOa_ewqV4K0hyeiTaeIZFbXGZLvYoD4at-9FLim98C-YHw18XZa_M_PSIeM9_kA/exec";
@@ -991,12 +1031,48 @@
     let allowedUsers = [];
     let isLoading = false;
 
+    // تحويل الأرقام العربية (٠-٩) والفارسية (۰-۹) إلى أرقام إنجليزية
+    function toEnDigits(str) {
+        return String(str == null ? '' : str)
+            .replace(/[\u0660-\u0669]/g, d => d.charCodeAt(0) - 0x0660)
+            .replace(/[\u06F0-\u06F9]/g, d => d.charCodeAt(0) - 0x06F0);
+    }
+
+    // حقل الرقم: يقبل أرقامًا عربية/إنجليزية، ويُبقي علامة + في البداية فقط (لمن يكتب رقمه دوليًا كاملًا)
     function validatePhone(input) {
-        input.value = input.value.replace(/\D/g, '');
+        let v = toEnDigits(input.value);
+        const plus = v.trim().startsWith('+');
+        v = v.replace(/\D/g, '');
+        input.value = (plus ? '+' : '') + v;
+    }
+
+    // حقل المفتاح: أرقام فقط
+    function validateCode(input) {
+        input.value = toEnDigits(input.value).replace(/\D/g, '');
+    }
+
+    // تركيب الرقم الكامل من (المفتاح + الرقم المحلي)
+    function buildFullPhone(codeRaw, numRaw) {
+        let code = toEnDigits(codeRaw).replace(/\D/g, '').replace(/^0+/, '') || '974';
+        let rawNum = toEnDigits(numRaw).replace(/[\s\-().]/g, '');
+        // لو كتب الطالب رقمه دوليًا كاملًا (+... أو 00...) نتجاهل خانة المفتاح
+        if (rawNum.startsWith('+') || rawNum.startsWith('00')) {
+            return rawNum.replace(/\D/g, '').replace(/^00/, '');
+        }
+        let num = rawNum.replace(/\D/g, '');
+        // لو كتب 974 في خانة الرقم مع أن المفتاح 974 → لا نكرر المفتاح
+        if (code === '974' && /^974\d{8}$/.test(num)) return num;
+        return code + num;
     }
 
     function isValidQatarPhone(phone) {
         return /^974\d{8}$/.test(phone);
+    }
+
+    // قطر: 974 + 8 أرقام — الدول الأخرى: رقم دولي عام (من 8 إلى 15 رقمًا)
+    function isValidPhone(phone) {
+        if (phone.startsWith('974')) return isValidQatarPhone(phone);
+        return /^\d{8,15}$/.test(phone);
     }
 
     async function loadAllowedUsers() {
@@ -1021,43 +1097,39 @@
 
     function closeLogin() {
         document.getElementById('loginModal').classList.remove('show');
-        if (!currentUser) {
+        if (!currentUser && sharedActive()) {
             switchTab('public');
         }
     }
 
     async function doLogin() {
-        const phone = document.getElementById('loginPhone').value.trim();
-        const parent = document.getElementById('loginParent').value.trim();
+        const phone = buildFullPhone(document.getElementById('loginPhoneCode').value, document.getElementById('loginPhone').value);
+        const parent = buildFullPhone(document.getElementById('loginParentCode').value, document.getElementById('loginParent').value);
         const err = document.getElementById('loginError');
+        err.style.color = "#e53e3e";
 
-        if (!isValidQatarPhone(phone)) { err.textContent = "❌ هاتف الطالب غير صحيح (يجب 974 + 8 أرقام)"; err.style.display = 'block'; return; }
-        if (!isValidQatarPhone(parent)) { err.textContent = "❌ هاتف ولي الأمر غير صحيح (يجب 974 + 8 أرقام)"; err.style.display = 'block'; return; }
+        if (!isValidPhone(phone)) { err.textContent = "❌ هاتف الطالب غير صحيح (رقم قطري من 8 أرقام، أو غيّر المفتاح لرقم دولي)"; err.style.display = 'block'; return; }
+        if (!isValidPhone(parent)) { err.textContent = "❌ هاتف ولي الأمر غير صحيح (رقم قطري من 8 أرقام، أو غيّر المفتاح لرقم دولي)"; err.style.display = 'block'; return; }
 
         err.textContent = "⏳ جاري التحقق...";
         err.style.color = "#1e5a7a";
         err.style.display = 'block';
 
-        // Load users from Google Sheet
-        allowedUsers = await loadAllowedUsers();
-
-        // Check if phone + parent phone match a row in the sheet (من غير شرط "الحالة")
-        const match = allowedUsers.find(u => {
-            const uPhone = String(u.phone || u['هاتف الطالب'] || '').trim();
-            const uParent = String(u.parent || u['هاتف ولي الأمر'] || '').trim();
-            const cleanPhone = phone.replace(/^974/, '');
-            const cleanParent = parent.replace(/^974/, '');
-            const cleanUPhone = uPhone.replace(/^974/, '');
-            const cleanUParent = uParent.replace(/^974/, '');
-            return (cleanUPhone === cleanPhone) && (cleanUParent === cleanParent);
-        });
-
-        if (!match) {
-            err.textContent = "❌ هذا الطالب غير مسجل أو غير مفعل. تواصل مع الأستاذ.";
+        // التحقق يتم داخل السكربت (لا تُحمَّل قائمة الطلاب في المتصفح)
+        let d;
+        try {
+            const r = await fetch(GOOGLE_SCRIPT_URL + '?action=login&phone=' + phone + '&parent=' + parent + '&t=' + Date.now());
+            d = await r.json();
+        } catch (e) { err.textContent = "❌ تعذر الاتصال، حاول مرة أخرى."; err.style.color = "#e53e3e"; return; }
+        if (!d || !d.ok) {
+            err.textContent = (d && d.error === 'pending')
+                ? "⏳ طلبك قيد المراجعة وسيتم تفعيله قريبًا. يمكنك تصفح المحتوى العام الآن."
+                : "❌ هذا الرقم غير مسجل. يمكنك التسجيل الآن من زر «تسجيل جديد».";
             err.style.color = "#e53e3e";
             err.style.display = 'block';
             return;
         }
+        const match = { name: d.name };
 
         currentUser = { name: match.name || match['اسم الطالب'] || match['الاسم'] || 'طالب', phone, parent };
         const rememberEl = document.getElementById('rememberMe');
@@ -1071,13 +1143,62 @@
         } else {
             localStorage.removeItem('najm_shared_user');
         }
+        updateHeaderAuth();
         closeLogin();
         renderSharedPanel();
+    }
+
+    // ======================== التسجيل الذاتي ========================
+    const REG_BOX_HTML = document.getElementById('regBox').innerHTML;
+    function openRegister(fromShared) {
+        document.getElementById('loginModal').classList.remove('show');
+        if (!document.getElementById('regName')) document.getElementById('regBox').innerHTML = REG_BOX_HTML;
+        document.getElementById('regNote').style.display = fromShared === true ? 'block' : 'none';
+        document.getElementById('regModal').classList.add('show');
+    }
+    function updateHeaderAuth() {
+        const b = document.getElementById('hdrRegBtn');
+        if (b) b.style.display = currentUser ? 'none' : 'inline-block';
+    }
+    function sharedActive() { return document.getElementById('sharedPanel').classList.contains('active-panel'); }
+    function openLoginFromReg() {
+        document.getElementById('regModal').classList.remove('show');
+        try { if (!localStorage.getItem('najm_reg_state')) localStorage.setItem('najm_reg_state', 'skipped'); } catch (e) {}
+        showLogin();
+    }
+    function skipRegister() {
+        document.getElementById('regModal').classList.remove('show');
+        try { if (!localStorage.getItem('najm_reg_state')) localStorage.setItem('najm_reg_state', 'skipped'); } catch (e) {}
+        if (!currentUser && sharedActive()) switchTab('public');
+    }
+    async function doRegister() {
+        const g = id => document.getElementById(id).value;
+        const name = g('regName').trim(), area = g('regArea').trim();
+        const phone = buildFullPhone(g('regPhoneCode'), g('regPhone')), parent = buildFullPhone(g('regParentCode'), g('regParent'));
+        const m = document.getElementById('regMsg'), btn = document.getElementById('regBtn');
+        const bad = t => { m.textContent = t; m.style.color = '#e53e3e'; m.style.display = 'block'; };
+        if (name.length < 3) return bad('❌ اكتب اسم الطالب');
+        if (!isValidPhone(phone)) return bad('❌ هاتف الطالب غير صحيح');
+        if (!isValidPhone(parent)) return bad('❌ هاتف ولي الأمر غير صحيح');
+        if (area.length < 2) return bad('❌ اكتب منطقة السكن');
+        btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...';
+        try {
+            const r = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'register', name, phone, parent, area }) });
+            const d = await r.json();
+            if (d.ok) {
+                try { localStorage.setItem('najm_reg_state', 'sent'); } catch (e) {}
+                document.getElementById('regBox').innerHTML = '<div style="text-align:center;padding:20px 8px;"><div style="font-size:48px">✅</div><h3>تم استلام طلبك</h3><p style="color:#718096;line-height:1.8">ستتم مراجعة طلبك وتفعيله قريبًا.<br>يمكنك الآن تصفح المحتوى العام.</p><button class="btn-primary" onclick="skipRegister()">متابعة التصفح</button></div>';
+                return;
+            }
+            bad(d.error === 'active' ? '✅ أنت مسجل بالفعل — اضغط «تسجيل الدخول».' : d.error === 'pending' ? '⏳ طلبك مستلم سابقًا وقيد المراجعة.' : '❌ تعذر إرسال الطلب، راجع البيانات.');
+        } catch (e) { bad('❌ تعذر الاتصال، حاول مرة أخرى.'); }
+        btn.disabled = false; btn.textContent = 'إرسال طلب التسجيل';
     }
 
     function logout() {
         currentUser = null;
         localStorage.removeItem('najm_shared_user');
+        updateHeaderAuth();
         switchTab('public');
     }
 
@@ -1105,6 +1226,21 @@
             localStorage.removeItem('najm_shared_user');
         }
     })();
+
+    // التحقق الصامت من الجلسة المحفوظة: إن لم تعد الحالة 2 يُلغى الدخول
+    (async function verifySession() {
+        if (!currentUser) return;
+        try {
+            const r = await fetch(GOOGLE_SCRIPT_URL + '?action=login&phone=' + currentUser.phone + '&parent=' + currentUser.parent + '&t=' + Date.now());
+            const d = await r.json();
+            if (d && d.ok === false) {
+                currentUser = null; localStorage.removeItem('najm_shared_user'); updateHeaderAuth();
+                if (document.getElementById('sharedPanel').classList.contains('active-panel')) renderSharedPanel();
+            }
+        } catch (e) {}
+    })();
+
+    updateHeaderAuth(); // الافتراضي: تصفح عام بدون نوافذ — التسجيل من زر الهيدر أو عند فتح «مشترك»
 
     // ======================== RENDER FUNCTIONS ========================
     function renderRevision(panelId, revisionData, title, isFirstRevision) {
@@ -1181,6 +1317,7 @@
                 <h3 style="color:#1e5a7a;margin-bottom:10px;">المحتوى المشترك</h3>
                 <p style="color:#718096;margin-bottom:20px;">يجب تسجيل الدخول للوصول إلى المحتوى المشترك</p>
                 <button class="btn-primary" style="width:auto;padding:10px 30px;" onclick="showLogin()">تسجيل الدخول</button>
+                <div style="margin-top:10px"><button class="btn-secondary" style="width:auto;padding:10px 30px;" onclick="openRegister()">📝 تسجيل جديد</button></div>
             </div>`;
             return;
         }
@@ -1306,7 +1443,8 @@
         } else if (tab === 'shared') {
             document.getElementById('sharedPanel').classList.add('active-panel');
             if (!currentUser) {
-                showLogin();
+                renderSharedPanel();
+                openRegister(true);
             } else {
                 renderSharedPanel();
             }
