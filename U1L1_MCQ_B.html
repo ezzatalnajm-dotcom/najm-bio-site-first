@@ -1726,6 +1726,15 @@ function submitExam(){
   };
   resultsHistory.push(attempt);
   saveResultsHistory();
+  try{
+    const wrongDetails = wrong.map(i=>{
+      const q=questions[i]||{}; const tr=transcripts[i]||''; let chosen='';
+      if(q.type==='mcq' && tr.startsWith('MCQ:')){ chosen=(q.choices||[])[parseInt(tr.slice(4))]||''; }
+      const cr = q.type==='mcq' ? ((q.choices||[])[typeof q.correctIndex==='number'?q.correctIndex:0]||'') : (q.modelAnswer||'');
+      return { q:String(q.text||'').slice(0,200), a:String(chosen).slice(0,100), c:String(cr).slice(0,100) };
+    });
+    sendResultToSheet(attempt, wrongDetails);
+  }catch(e){}
   // بناء عرض السجل
   let histHtml = '';
   if(resultsHistory.length > 1){
@@ -1838,6 +1847,32 @@ function hideStartScreen(){
 
 // —— أرقام عربية ↔ إنجليزية + جلب الاسم من شيت Google ——
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpVJBVOa_ewqV4K0hyeiTaeIZFbXGZLvYoD4at-9FLim98C-YHw18XZa_M_PSIeM9_kA/exec";
+// —— إرسال النتيجة لشيت Google (لوحة التقدم) مع إعادة المحاولة عند ضعف الإنترنت ——
+const EXAM_ID = "U1L1_MCQ_B";
+const PENDING_KEY = 'najm_pending_results_v1';
+function _pendingGet(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]'); }catch(e){ return []; } }
+function _pendingSet(a){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(a.slice(-100))); }catch(e){} }
+async function flushPendingResults(){
+  let q = _pendingGet(); if(!q.length) return;
+  const rest = [];
+  for(const item of q){
+    try{
+      const res = await fetch(GOOGLE_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(item) });
+      const j = await res.json();
+      if(!j || j.ok !== true) rest.push(item);
+    }catch(e){ rest.push(item); }
+  }
+  _pendingSet(rest);
+}
+function sendResultToSheet(a, wrongList){
+  if(!a || !a.phone) return;
+  const item = { action:'saveResult', id: EXAM_ID+'|'+a.phone+'|'+a.at, at:a.at, phone:a.phone, name:a.name||'',
+    exam:EXAM_ID, title:(document.title||EXAM_ID).replace(/^بنك اختياري\s*[—-]\s*/,''), score:a.score, total:a.total, time:a.time||'', answered:a.answered, mode:a.mode, wrong:(wrongList||[]) };
+  const q = _pendingGet(); q.push(item); _pendingSet(q);
+  flushPendingResults();
+}
+setTimeout(flushPendingResults, 3000);
+
 function toEnglishDigits(s){
   if(!s) return '';
   const ar='٠١٢٣٤٥٦٧٨٩';
@@ -1848,25 +1883,7 @@ function normalizePhoneDigits(raw){
   // يقبل عربي أو إنجليزي، يُرجع أرقاماً إنجليزية فقط
   return toEnglishDigits(raw||'').replace(/\D/g,'');
 }
-async function lookupStudentName(phone8){
-  // phone8 = 8 أرقام بعد 974
-  try{
-    if(!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('XXXXXXXX')) return null;
-    const res = await fetch(GOOGLE_SCRIPT_URL + '?sheet=users&t=' + Date.now());
-    const data = await res.json();
-    if(!Array.isArray(data)) return null;
-    const target = phone8;
-    for(const u of data){
-      let up = String(u.phone || u['هاتف الطالب'] || u['الهاتف'] || '').trim();
-      up = normalizePhoneDigits(up);
-      if(up.startsWith('974')) up = up.slice(3);
-      if(up === target){
-        return (u.name || u['اسم الطالب'] || u['الاسم'] || u['الطالب'] || '').trim() || null;
-      }
-    }
-  }catch(e){ console.warn('lookup name failed', e); }
-  return null;
-}
+async function lookupStudentName(){ return null; } // أُلغي البحث عن الاسم حفاظًا على خصوصية الطلاب
 let _nameLookupTimer = null;
 
 function onCountryCodeInput(){
@@ -1900,7 +1917,7 @@ function onStudentPhoneInput(){
   const nameInp = document.getElementById('studentName');
   const hint = document.getElementById('phoneHint');
   if(digits.length === 8){
-    if(hint) hint.textContent = '⏳ جاري البحث عن الاسم في السجل...';
+    if(hint) hint.textContent = '';
     clearTimeout(_nameLookupTimer);
     _nameLookupTimer = setTimeout(async ()=>{
       const nm = await lookupStudentName(digits);
@@ -1910,7 +1927,7 @@ function onStudentPhoneInput(){
         if(hint) hint.textContent = '✅ تم التعرف: ' + nm;
         toast('👤 ' + nm);
       } else {
-        if(hint) hint.textContent = digits.length===8 ? 'رقم مسجّل — يمكنك كتابة الاسم يدوياً إن لم يظهر' : 'أدخل 8 أرقام (عربي أو إنجليزي)';
+        if(hint) hint.textContent = digits.length===8 ? 'اكتب اسمك (اختياري)' : 'أدخل 8 أرقام (عربي أو إنجليزي)';
       }
     }, 350);
   } else {
@@ -1924,14 +1941,18 @@ function startExam(mode){
   if(!TEACHER_MODE){
     const inp = document.getElementById('studentPhone');
     const rawTyped = (inp && inp.value) ? inp.value : '';
-    const digits = normalizePhoneDigits(rawTyped).slice(0,8);
-    if(digits.length !== 8){
+    const ccEl = document.getElementById('countryCode');
+    const cc = normalizePhoneDigits((ccEl && ccEl.value) || '974') || '974';
+    let digits = normalizePhoneDigits(rawTyped);
+    if(cc === '974' && /^974\d{8}$/.test(digits)) digits = digits.slice(3);
+    digits = digits.slice(0, cc === '974' ? 8 : 12);
+    if(cc === '974' ? digits.length !== 8 : digits.length < 6){
       const shown = rawTyped.trim() || '(فارغ)';
       toast('⚠️ الرقم المدخل «' + shown + '» غير مكتمل — يجب 8 أرقام بعد +974 (عربي أو إنجليزي)');
       if(inp){ inp.focus(); inp.style.borderColor='#ff5252'; }
       return;
     }
-    studentPhone = '974' + digits;
+    studentPhone = cc + digits;
     if(inp){ inp.value = digits; inp.style.borderColor=''; }
     const nameInp = document.getElementById('studentName');
     studentName = (nameInp && nameInp.value) ? nameInp.value.trim() : '';

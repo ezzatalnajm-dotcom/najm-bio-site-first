@@ -27,6 +27,7 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
 .ex:last-child{border:0}.ex .n{flex:1;font-weight:700;font-size:14px}.ex .d{font-size:11px;color:var(--mut);font-weight:400}
 .ex .pc{font-weight:900;color:var(--gold);min-width:56px;text-align:left;direction:ltr}
 .bar{height:6px;border-radius:4px;background:rgba(255,255,255,.1);margin-top:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+.rv{margin-top:8px}.rv summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:12px}.rv .w{background:rgba(0,0,0,.25);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:12px;line-height:1.7;font-weight:400}.rv .a{color:#ff9d9d}.rv .c{color:#8ee6a8}.rv .ok{font-size:12px;color:#8ee6a8;margin-top:6px}
 .wa{background:linear-gradient(150deg,#25d366,#128c4a);color:#fff}
 </style>
 </head>
@@ -58,6 +59,12 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
 <script>
 const URL_="https://script.google.com/macros/s/AKfycbzpVJBVOa_ewqV4K0hyeiTaeIZFbXGZLvYoD4at-9FLim98C-YHw18XZa_M_PSIeM9_kA/exec";
 const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function review(e){
+  if(!Array.isArray(e.wrong)) return '';
+  if(!e.wrong.length) return '<div class="ok">🌟 أجبت كل الأسئلة بشكل صحيح</div>';
+  return '<details class="rv"><summary>📝 راجع أخطائي ('+e.wrong.length+')</summary>'+e.wrong.map(w=>'<div class="w">'+esc(w.q)+'<br><span class="a">إجابتك: '+(w.a?esc(w.a):'لم تُجب')+'</span><br><span class="c">الصحيحة: '+esc(w.c)+'</span></div>').join('')+'</details>';
+}
 const en=s=>String(s==null?'':s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 let U=null,D=null;
 
@@ -101,7 +108,7 @@ function render(){
   $('tk').textContent='أنجز '+D.taken+' اختبارًا (مجموع الدرجات ÷ مجموع الدرجات الكلية)';
   $('list').innerHTML=D.exams.map(e=>{
     const dt=e.at?new Date(e.at).toLocaleDateString('ar-EG'):'';
-    return `<div class="ex"><div class="n">${e.title}<div class="d">${dt} · ${e.score}/${e.total} · ${e.attempts} محاولة</div><div class="bar"><i style="width:${Math.min(100,e.percent)}%"></i></div></div><div class="pc">${e.percent.toFixed(1)}%</div></div>`;
+    return `<div class="ex"><div class="n">${esc(e.title)}<div class="d">${dt} · ${e.score}/${e.total} · ${e.attempts} محاولة</div><div class="bar"><i style="width:${Math.min(100,e.percent)}%"></i></div>${review(e)}</div><div class="pc">${e.percent.toFixed(1)}%</div></div>`;
   }).join('');
 }
 
