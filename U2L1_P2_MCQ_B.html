@@ -1788,6 +1788,15 @@ function submitExam(){
   };
   resultsHistory.push(attempt);
   saveResultsHistory();
+  try{
+    const wrongDetails = wrong.map(i=>{
+      const q=questions[i]||{}; const tr=transcripts[i]||''; let chosen='';
+      if(q.type==='mcq' && tr.startsWith('MCQ:')){ chosen=(q.choices||[])[parseInt(tr.slice(4))]||''; }
+      const cr = q.type==='mcq' ? ((q.choices||[])[typeof q.correctIndex==='number'?q.correctIndex:0]||'') : (q.modelAnswer||'');
+      return { q:String(q.text||'').slice(0,200), a:String(chosen).slice(0,100), c:String(cr).slice(0,100) };
+    });
+    sendResultToSheet(attempt, wrongDetails);
+  }catch(e){}
   // بناء عرض السجل
   let histHtml = '';
   if(resultsHistory.length > 1){
@@ -1829,7 +1838,7 @@ function submitExam(){
     controls.classList.remove('hidden');
     controls.classList.remove('hidden-ctrls');
   }
-  if(wrong.length) setupRetry(wrong); else { const rt=$('retryContainer'); if(rt) rt.classList.add('hidden'); }
+  retryPick={}; if(wrong.length) setupRetry(wrong); else { const rt=$('retryContainer'); if(rt) rt.classList.add('hidden'); }
   // انتقال فوري لأعلى الصفحة — النتيجة أول ما يظهر
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;
@@ -1838,17 +1847,48 @@ function submitExam(){
 }
 
 
+var retryPick = {}, retryList = [];
 function setupRetry(wi){
+  retryList = wi.slice();
   const c=$('retryContainer'); c.classList.remove('hidden');
-  c.innerHTML=`<h3>🔁 إعادة المحاولة (${wi.length})</h3><div id="retryQ"></div><div class="center mt-20"><button class="btn" onclick="checkRetry()">📊 فحص التقدم</button><button class="btn btn-secondary" onclick="resetRetry()">🔄 إعادة</button></div><div id="retryR" class="hidden mt-20"></div>`;
-  const cont=$('retryQ'); let h='';
-  wi.forEach((oi,ri)=>{ const q=questions[oi]; const ev=evaluations[oi]||null; const tr=transcripts[oi]||''; const isE=ev!==null; const isEdit=retryEditMode[ri]||false;
-    let sb='',rh='',cc='';
-    if(isE){ const p=ev.percentage; cc=p>=60?'evaluated':'poor'; const sc=p>=60?'good':(p>=60?'average':'poor'); const e2=Math.round(ev.score*10)/10; sb=`<span class="score-display ${sc}">درجتك: <span class="score-value">${e2}</span><span class="score-total">/ ${q.weight}</span></span>`; rh=`<div class="result-box show"><div class="score-row"><div><span class="badge ${ev.gradeClass==='good'?'badge-good':ev.gradeClass==='average'?'badge-average':'badge-poor'}">${ev.percentage}%</span></div><div class="score-value ${ev.gradeClass}">${e2} / ${q.weight}</div></div><div class="model-answer"><div class="label">📖 الإجابة:</div><div class="answer">${ev.modelAnswer}</div></div></div>`; }
-    const ed=isE||!tr||tr.trim().length<5; const hr=!!audioUrls[oi]; const ip=playingState[oi]===true;
-    let th=`<textarea id="retry-ta-${ri}" class="answer-ta" placeholder="اكتب إجابتك..." oninput="transcripts[${oi}]=cleanText(this.value);const eb=this.closest('.question-card')?.querySelector('.btn-evaluate');if(eb)eb.disabled=!(this.value||'').trim().length>5;">${tr||''}</textarea>`;
-    const hp=hr?`<button class="btn-headphones ${ip?'playing':''}" onclick="togglePlayback(${oi})">${ip?'🎧 يعمل':'🎧 اسمع'}</button>`:`<button class="btn-headphones" disabled>🎧 اسمع</button>`;
-    h+=`<div class="question-card ${cc}" data-qi="${idx}" onclick="if(TEACHER_MODE)setPasteTarget(${idx})"><div class="q-header"><span class="q-num">R${ri+1}</span>${sb}<span class="weight-badge">⚖️ ${q.weight}</span></div><div class="question-text">${q.text}</div><div class="voice-area"><button class="btn-voice" id="retry-vb-${ri}" onclick="toggleRetryRec(${ri},${oi})">🎤 تسجيل</button>${hp}<button class="btn-evaluate" onclick="evalRetry(${ri},${oi})" ${ed?'disabled':''}>📊 تقييم</button></div><div class="transcript-box"><span class="label">📝 إجابتك:</span>${th}</div>${rh}</div>`; });
+  c.innerHTML=`<h3>🔁 إعادة أخطائك (${wi.length})</h3><div id="retryQ"></div><div class="center mt-20"><button class="btn" onclick="checkRetry()">📊 فحص التقدم</button><button class="btn btn-secondary" onclick="resetRetry()">🔄 إعادة</button></div><div id="retryR" class="hidden mt-20"></div>`;
+  renderRetryQs();
+}
+function pickRetry(oi,ci){
+  if(typeof retryPick[oi]==='number') return; // بعد الاختيار تظهر النتيجة مباشرة
+  retryPick[oi]=ci;
+  renderRetryQs();
+}
+function renderRetryQs(){
+  const cont=$('retryQ'); if(!cont) return;
+  const letters=['أ','ب','ج','د','ه','و'];
+  let h='';
+  retryList.forEach((oi,ri)=>{
+    const q=questions[oi]; if(!q) return;
+    let imgs=''; if(q.images&&q.images.length) q.images.forEach(src=>{ imgs+=`<div class="img-wrap"><img src="${src}" class="question-img" alt=""></div>`; });
+    if(q.type==='mcq'){
+      const picked=(typeof retryPick[oi]==='number')?retryPick[oi]:-1;
+      const correct=(typeof q.correctIndex==='number')?q.correctIndex:0;
+      let opts='';
+      (q.choices||[]).forEach((ch,ci)=>{
+        let mark='';
+        if(picked>=0){ if(ci===correct) mark='correct'; else if(ci===picked) mark='wrong'; }
+        opts+=`<label class="mcq-option ${picked===ci?'selected':''} ${mark}" onclick="pickRetry(${oi},${ci});return false;"><span class="opt-letter">${letters[ci]||(ci+1)}</span><span>${ch}</span></label>`;
+      });
+      let fb='';
+      if(picked>=0){
+        fb = picked===correct
+          ? `<div class="result-box show"><div class="score-row"><span class="badge badge-good">🌟 أحسنت! إجابة صحيحة</span></div></div>`
+          : `<div class="result-box show"><div class="score-row"><span class="badge badge-poor">❌ خاطئة</span></div><div class="model-answer"><div class="label">📖 الصحيحة:</div><div class="answer">(${letters[correct]||correct}) ${(q.choices||[])[correct]||''}</div></div></div>`;
+      }
+      const cc = picked<0 ? '' : (picked===correct ? 'evaluated' : 'poor');
+      h+=`<div class="question-card ${cc}"><div class="q-header"><span class="q-num">R${ri+1}</span><span class="weight-badge">⚖️ ${q.weight||1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="mcq-options">${opts}</div>${fb}</div>`;
+    } else {
+      const ev=evaluations[oi]||null; const tr=transcripts[oi]||'';
+      const rh = ev ? `<div class="result-box show"><div class="model-answer"><div class="label">📖 الإجابة:</div><div class="answer">${ev.modelAnswer}</div></div></div>` : '';
+      h+=`<div class="question-card"><div class="q-header"><span class="q-num">R${ri+1}</span><span class="weight-badge">⚖️ ${q.weight||1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="transcript-box"><span class="label">📝 إجابتك:</span><textarea id="retry-ta-${ri}" class="answer-ta" placeholder="اكتب إجابتك..." oninput="transcripts[${oi}]=cleanText(this.value);">${tr}</textarea></div><div class="voice-area"><button class="btn-evaluate" onclick="evalRetry(${ri},${oi})">📊 تقييم</button></div>${rh}</div>`;
+    }
+  });
   cont.innerHTML=h;
 }
 function toggleRetryRec(ri,oi){
@@ -1863,8 +1903,15 @@ function saveRetryEdit(ri,oi){ const ta=$(`retry-ta-${ri}`); if(ta){ transcripts
 function cancelRetryEdit(ri){ retryEditMode[ri]=false; refreshRetry(); }
 function refreshRetry(){ const w=[]; questions.forEach((q,i)=>{ if(!evaluations[i]||evaluations[i].percentage<60) w.push(i); }); setupRetry(w); }
 function evalRetry(ri,oi){ const t=(transcripts[oi]||'').trim(); if(!t||t.length<3) return; reEval(oi); refreshRetry(); }
-function checkRetry(){ const w=[]; questions.forEach((q,i)=>{ if(!evaluations[i]||evaluations[i].percentage<60) w.push(i); }); const rd=$('retryR'); rd.classList.remove('hidden'); if(!w.length) rd.innerHTML=`<div class="final-result" style="background:linear-gradient(150deg,var(--ok),#1e7a44);"><div style="font-size:30px;color:#fff;font-weight:900;">🎉 تم الاجتياز!</div></div>`; else rd.innerHTML=`<div class="final-result"><div style="font-size:22px;color:var(--gold-400);font-weight:900;">${w.length} أسئلة أقل من 60%</div><div class="detail">استمر في التدريب!</div></div>`; rd.scrollIntoView({behavior:'smooth',block:'center'}); }
-function resetRetry(){ const w=[]; questions.forEach((q,i)=>{ if(!evaluations[i]||evaluations[i].percentage<60) w.push(i); }); if(!w.length){ $('retryContainer').classList.add('hidden'); return; } retryEditMode={}; setupRetry(w); }
+function checkRetry(){
+  const rd=$('retryR'); if(!rd) return; rd.classList.remove('hidden');
+  let ok=0, bad=0, left=0;
+  retryList.forEach(oi=>{ const q=questions[oi]||{}; if(q.type!=='mcq'){ return; } const p=retryPick[oi]; if(typeof p!=='number') left++; else if(p===((typeof q.correctIndex==='number')?q.correctIndex:0)) ok++; else bad++; });
+  if(!bad && !left) rd.innerHTML=`<div class="final-result" style="background:linear-gradient(150deg,var(--ok),#1e7a44);"><div style="font-size:30px;color:#fff;font-weight:900;">🎉 تم الاجتياز!</div></div>`;
+  else rd.innerHTML=`<div class="final-result"><div style="font-size:22px;color:var(--gold-400);font-weight:900;">✅ ${ok} صحيحة · ❌ ${bad} خاطئة · ⏳ ${left} لم تُجَب</div><div class="detail">استمر في التدريب!</div></div>`;
+  rd.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function resetRetry(){ retryPick={}; retryEditMode={}; const rd=$('retryR'); if(rd) rd.classList.add('hidden'); if(!retryList.length){ $('retryContainer').classList.add('hidden'); return; } renderRetryQs(); }
 
 
 function shuffleArr(arr){
@@ -1900,6 +1947,32 @@ function hideStartScreen(){
 
 // —— أرقام عربية ↔ إنجليزية + جلب الاسم من شيت Google ——
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpVJBVOa_ewqV4K0hyeiTaeIZFbXGZLvYoD4at-9FLim98C-YHw18XZa_M_PSIeM9_kA/exec";
+// —— إرسال النتيجة لشيت Google (لوحة التقدم) مع إعادة المحاولة عند ضعف الإنترنت ——
+const EXAM_ID = "U2L1_P1_P2_MCQ_B";
+const PENDING_KEY = 'najm_pending_results_v1';
+function _pendingGet(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]'); }catch(e){ return []; } }
+function _pendingSet(a){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(a.slice(-100))); }catch(e){} }
+async function flushPendingResults(){
+  let q = _pendingGet(); if(!q.length) return;
+  const rest = [];
+  for(const item of q){
+    try{
+      const res = await fetch(GOOGLE_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(item) });
+      const j = await res.json();
+      if(!j || j.ok !== true) rest.push(item);
+    }catch(e){ rest.push(item); }
+  }
+  _pendingSet(rest);
+}
+function sendResultToSheet(a, wrongList){
+  if(!a || !a.phone) return;
+  const item = { action:'saveResult', id: EXAM_ID+'|'+a.phone+'|'+a.at, at:a.at, phone:a.phone, name:a.name||'',
+    exam:EXAM_ID, title:(document.title||EXAM_ID).replace(/^بنك اختياري\s*[—-]\s*/,''), score:a.score, total:a.total, time:a.time||'', answered:a.answered, mode:a.mode, wrong:(wrongList||[]) };
+  const q = _pendingGet(); q.push(item); _pendingSet(q);
+  flushPendingResults();
+}
+setTimeout(flushPendingResults, 3000);
+
 function toEnglishDigits(s){
   if(!s) return '';
   const ar='٠١٢٣٤٥٦٧٨٩';
@@ -1910,25 +1983,7 @@ function normalizePhoneDigits(raw){
   // يقبل عربي أو إنجليزي، يُرجع أرقاماً إنجليزية فقط
   return toEnglishDigits(raw||'').replace(/\D/g,'');
 }
-async function lookupStudentName(phone8){
-  // phone8 = 8 أرقام بعد 974
-  try{
-    if(!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('XXXXXXXX')) return null;
-    const res = await fetch(GOOGLE_SCRIPT_URL + '?sheet=users&t=' + Date.now());
-    const data = await res.json();
-    if(!Array.isArray(data)) return null;
-    const target = phone8;
-    for(const u of data){
-      let up = String(u.phone || u['هاتف الطالب'] || u['الهاتف'] || '').trim();
-      up = normalizePhoneDigits(up);
-      if(up.startsWith('974')) up = up.slice(3);
-      if(up === target){
-        return (u.name || u['اسم الطالب'] || u['الاسم'] || u['الطالب'] || '').trim() || null;
-      }
-    }
-  }catch(e){ console.warn('lookup name failed', e); }
-  return null;
-}
+async function lookupStudentName(){ return null; } // أُلغي البحث عن الاسم حفاظًا على خصوصية الطلاب
 let _nameLookupTimer = null;
 
 function onCountryCodeInput(){
@@ -1962,7 +2017,7 @@ function onStudentPhoneInput(){
   const nameInp = document.getElementById('studentName');
   const hint = document.getElementById('phoneHint');
   if(digits.length === 8){
-    if(hint) hint.textContent = '⏳ جاري البحث عن الاسم في السجل...';
+    if(hint) hint.textContent = '';
     clearTimeout(_nameLookupTimer);
     _nameLookupTimer = setTimeout(async ()=>{
       const nm = await lookupStudentName(digits);
@@ -1972,7 +2027,7 @@ function onStudentPhoneInput(){
         if(hint) hint.textContent = '✅ تم التعرف: ' + nm;
         toast('👤 ' + nm);
       } else {
-        if(hint) hint.textContent = digits.length===8 ? 'رقم مسجّل — يمكنك كتابة الاسم يدوياً إن لم يظهر' : 'أدخل 8 أرقام (عربي أو إنجليزي)';
+        if(hint) hint.textContent = digits.length===8 ? 'اكتب اسمك (اختياري)' : 'أدخل 8 أرقام (عربي أو إنجليزي)';
       }
     }, 350);
   } else {
@@ -1986,14 +2041,18 @@ function startExam(mode){
   if(!TEACHER_MODE){
     const inp = document.getElementById('studentPhone');
     const rawTyped = (inp && inp.value) ? inp.value : '';
-    const digits = normalizePhoneDigits(rawTyped).slice(0,8);
-    if(digits.length !== 8){
+    const ccEl = document.getElementById('countryCode');
+    const cc = normalizePhoneDigits((ccEl && ccEl.value) || '974') || '974';
+    let digits = normalizePhoneDigits(rawTyped);
+    if(cc === '974' && /^974\d{8}$/.test(digits)) digits = digits.slice(3);
+    digits = digits.slice(0, cc === '974' ? 8 : 12);
+    if(cc === '974' ? digits.length !== 8 : digits.length < 6){
       const shown = rawTyped.trim() || '(فارغ)';
       toast('⚠️ الرقم المدخل «' + shown + '» غير مكتمل — يجب 8 أرقام بعد +974 (عربي أو إنجليزي)');
       if(inp){ inp.focus(); inp.style.borderColor='#ff5252'; }
       return;
     }
-    studentPhone = '974' + digits;
+    studentPhone = cc + digits;
     if(inp){ inp.value = digits; inp.style.borderColor=''; }
     const nameInp = document.getElementById('studentName');
     studentName = (nameInp && nameInp.value) ? nameInp.value.trim() : '';
