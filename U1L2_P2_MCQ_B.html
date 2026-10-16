@@ -1130,6 +1130,7 @@ function selectMcq(idx, ci){
   // في وضع المعلم: الضغط على الخيارات لا يُسجَّل كإجابة طالب
   if(typeof TEACHER_MODE !== 'undefined' && TEACHER_MODE) return;
   transcripts[idx] = 'MCQ:' + ci;
+  saveAttempt();
   if(evaluations[idx]) delete evaluations[idx];
   renderQuestions();
   updateProgress();
@@ -1757,7 +1758,7 @@ function submitExam(){
   if(typeof renderQuestions==='function') renderQuestions();
   const t=questions.length;
   const e=Object.keys(evaluations).filter(k=>evaluations[k]).length;
-  examSubmitted=true; try{document.body.classList.add('exam-done')}catch(e){}; try{document.body.classList.add('exam-done')}catch(e){};
+  examSubmitted=true; clearAttempt(); try{document.body.classList.add('exam-done')}catch(e){}; try{document.body.classList.add('exam-done')}catch(e){};
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
   // الإبقاء على زر الإنهاء ظاهراً لإعادة عرض النتيجة
   const _fb=$('finishBtn'); if(_fb){ _fb.classList.remove('hidden-finish'); _fb.classList.add('show'); _fb.textContent='📊 النتيجة'; }
@@ -2060,7 +2061,7 @@ function startExam(mode){
     studentPhone = '';
     studentName = '';
   }
-  examStarted = true;
+  examStarted = true; clearAttempt();
   // rebuild from base
   const src = (baseQuestions && baseQuestions.length) ? baseQuestions : buildQuestions();
   baseQuestions = src.map(q => Object.assign({}, q, {
@@ -2354,6 +2355,61 @@ if(!questions || !questions.length){
   console.error('RAW_QUESTIONS empty?', typeof RAW_QUESTIONS, RAW_QUESTIONS&&RAW_QUESTIONS.length);
 }
 
+
+
+/* ===== حفظ تلقائي للمحاولة + استعادتها ===== */
+const ATTEMPT_KEY = STORAGE_KEY + '_attempt';
+function _qSig(q){ return (q.text||'') + '|' + (q.choices||[]).join('|'); }
+function saveAttempt(){
+  try{
+    if(TEACHER_MODE || !examStarted || examSubmitted) return;
+    if(!Object.keys(transcripts).length) return;
+    localStorage.setItem(ATTEMPT_KEY, JSON.stringify({
+      t: Date.now(), phone: studentPhone, name: studentName, mode: orderMode, seconds: seconds,
+      order: questions.map(_qSig),
+      answers: questions.map((q,i)=> (transcripts[i]===undefined ? null : transcripts[i]))
+    }));
+  }catch(e){}
+}
+function clearAttempt(){ try{ localStorage.removeItem(ATTEMPT_KEY); }catch(e){} }
+function tryResumeAttempt(){
+  try{
+    if(TEACHER_MODE) return;
+    let a=null; try{ a=JSON.parse(localStorage.getItem(ATTEMPT_KEY)||'null'); }catch(e){ a=null; }
+    if(!a || !Array.isArray(a.order) || !Array.isArray(a.answers)) return;
+    if(Date.now() - (a.t||0) > 3*24*3600*1000){ clearAttempt(); return; }
+    const done = a.answers.filter(x=>x!==null && x!==undefined).length;
+    if(!done){ clearAttempt(); return; }
+    // أعد بناء نفس ترتيب الأسئلة
+    const pool = baseQuestions.map((q,i)=>({sig:_qSig(q), i:i, used:false}));
+    const idxs = [];
+    for(const sig of a.order){
+      const m = pool.find(p=>!p.used && p.sig===sig);
+      if(!m){ clearAttempt(); return; } // الأسئلة تغيّرت — لا يمكن الاستعادة
+      m.used = true; idxs.push(m.i);
+    }
+    if(!confirm('لديك محاولة غير منتهية (' + done + ' من ' + a.order.length + ' سؤالًا).\n\nموافق = المتابعة من حيث توقفت\nإلغاء = البدء من جديد')){ clearAttempt(); return; }
+    questions = idxs.map(i => { const q=baseQuestions[i]; return Object.assign({}, q, {
+      paragraphs:(q.paragraphs||[]).map(p=>Object.assign({},p)), choices:(q.choices||[]).slice(),
+      images:(q.images||[]).slice(), keywords:(q.keywords||[]).slice() }); });
+    studentPhone = a.phone || ''; studentName = a.name || ''; orderMode = a.mode || 'fixed';
+    examStarted = true; examSubmitted = false;
+    evaluations = {}; transcripts = {}; editMode = {}; retryEditMode = {};
+    a.answers.forEach((v,i)=>{ if(v!==null && v!==undefined) transcripts[i]=v; });
+    seconds = a.seconds || 0;
+    hideStartScreen();
+    const rc=$('resultContainer'); if(rc){ rc.classList.add('hidden'); rc.innerHTML=''; }
+    const rty=$('retryContainer'); if(rty) rty.classList.add('hidden');
+    const qc=$('questionsContainer'); if(qc) qc.classList.remove('hidden-qs');
+    const fb=$('finishBtn'); if(fb){ fb.textContent='📊 إنهاء'; fb.classList.remove('hidden-finish'); fb.classList.add('show'); }
+    renderQuestions(); startTimer(); updateProgress();
+    window.scrollTo(0,0);
+    toast('↩️ تمت استعادة محاولتك — أكمل ثم اضغط إنهاء', 4000);
+  }catch(e){ console.error('resume failed', e); }
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveAttempt(); });
+window.addEventListener('pagehide', saveAttempt);
+tryResumeAttempt();
 
 </script>
 </body>
