@@ -41,7 +41,8 @@
   .hero-title-block h1{font-size:16px;font-weight:900;margin:0 0 2px;color:#fff;line-height:1.25;letter-spacing:.2px;}
   .hero-title-block h1 span{background:linear-gradient(90deg,var(--gold-400),var(--gold-600));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
   .hero-title-block .unit-line{font-size:11.5px;font-weight:700;color:rgba(255,255,255,.85);line-height:1.4;}
-  .hero-title-block .unit-line small{font-size:9.5px;color:rgba(240,201,72,.75);font-weight:600;letter-spacing:.3px;margin-inline-start:4px;}
+  .hero-title-block .unit-line small{display:none;}
+  .hero-title-block .eng-line{display:block;font-size:12.5px;font-weight:800;color:rgba(240,201,72,.95);letter-spacing:.6px;margin-top:4px;font-family:system-ui,Segoe UI,sans-serif;}
   .contact-mini{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:150px;}
   .contact-mini a{padding:6px 9px;border-radius:999px;font-size:10.5px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:3px;transition:.2s;white-space:nowrap;border:none;cursor:pointer;}
   .contact-mini a:hover{transform:translateY(-1px);}
@@ -374,8 +375,7 @@
     <div class="hero-title-row">
       <div class="hero-title-block">
         <h1 id="mainTitle">بنك اختياري <span>الوحدة 1</span></h1>
-        <div class="unit-line" id="unitName">الدرس 1-1 تشريح العضلات: تشريح العضلات<small>Unit 1 · U1L1 MCQ (B)</small></div>
-<div class="eng-line" id="engTitle"></div>
+        <div class="unit-line" id="unitName">الدرس 1-1 تشريح العضلات</div><div class="eng-line" id="engLine">U1L1_MCQ_B</div>
       </div>
       <div class="contact-mini">
         <a class="cm-wa" href="https://wa.me/97477107247" target="_blank" id="contactWa">💬 واتساب</a>
@@ -1792,8 +1792,21 @@ function setupRetry(wi){
   retryList = wi.slice();
   const c=$('retryContainer'); c.classList.remove('hidden');
   c.innerHTML=`<h3>🔁 إعادة أخطائك (${wi.length})</h3><div id="retryQ"></div><div class="center mt-20"><button class="btn" onclick="checkRetry()">📊 فحص التقدم</button><button class="btn btn-secondary" onclick="resetRetry()">🔄 إعادة</button></div><div id="retryR" class="hidden mt-20"></div>`;
-  renderRetryQs();
+  renderRetryQs(); showRetryBig(wi.length);
 }
+function showRetryBig(n){
+  try{
+    let b=$('retryBigBtn');
+    if(!b){
+      b=document.createElement('button'); b.id='retryBigBtn'; b.type='button';
+      b.setAttribute('style','display:block;width:calc(100% - 28px);margin:14px;padding:18px 12px;font-size:22px;font-weight:900;font-family:inherit;color:#0b1f4d;background:linear-gradient(135deg,#ffd75e,#f0a800);border:3px solid #fff3c4;border-radius:16px;box-shadow:0 6px 18px rgba(240,168,0,.45);cursor:pointer;');
+      b.onclick=function(){ const r=$('retryContainer'); if(r) r.scrollIntoView({behavior:'smooth',block:'start'}); };
+      const rc=$('resultContainer'); if(rc&&rc.parentNode) rc.parentNode.insertBefore(b, rc.nextSibling); else document.body.appendChild(b);
+    }
+    b.textContent='🔁 إعادة أخطائي ('+n+')';
+  }catch(e){}
+}
+function hideRetryBig(){ try{ const b=$('retryBigBtn'); if(b&&b.parentNode) b.parentNode.removeChild(b); }catch(e){} }
 function pickRetry(oi,ci){
   if(typeof retryPick[oi]==='number') return; // بعد الاختيار تظهر النتيجة مباشرة
   retryPick[oi]=ci;
@@ -2000,7 +2013,7 @@ function startExam(mode){
     studentPhone = '';
     studentName = '';
   }
-  examStarted = true; clearAttempt();
+  examStarted = true; clearAttempt(); hideRetryBig();
   // rebuild from base
   const src = (baseQuestions && baseQuestions.length) ? baseQuestions : buildQuestions();
   baseQuestions = src.map(q => Object.assign({}, q, {
@@ -2036,6 +2049,7 @@ function startExam(mode){
 }
 
 function resetExam(){
+  hideRetryBig();
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
   stopAllAudio(); seconds=0; const td=$('timerDisplay'); if(td) td.textContent='00:00';
   baseQuestions = buildQuestions();

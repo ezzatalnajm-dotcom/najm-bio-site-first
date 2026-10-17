@@ -377,8 +377,8 @@
     </div>
     <div class="hero-title-row">
       <div class="hero-title-block">
-        <h1 id="mainTitle">بنك اختياري <span>الوحدة 2</span></h1>
-        <div class="unit-line" id="unitName">الدرس 1-2 تركيب العضلة</div><div class="eng-line" id="engLine">UNIT 1 · U1L2-P1 MCQ (B)</div>
+        <h1 id="mainTitle">بنك اختياري <span>الوحدة 1</span></h1>
+        <div class="unit-line" id="unitName">الدرس 1-2 تركيب العضلة</div><div class="eng-line" id="engLine">U1L2_P1_MCQ_B</div>
       </div>
       <div class="contact-mini">
         <a class="cm-wa" href="https://wa.me/97477107247" target="_blank" id="contactWa">💬 واتساب</a>
@@ -1854,8 +1854,21 @@ function setupRetry(wi){
   retryList = wi.slice();
   const c=$('retryContainer'); c.classList.remove('hidden');
   c.innerHTML=`<h3>🔁 إعادة أخطائك (${wi.length})</h3><div id="retryQ"></div><div class="center mt-20"><button class="btn" onclick="checkRetry()">📊 فحص التقدم</button><button class="btn btn-secondary" onclick="resetRetry()">🔄 إعادة</button></div><div id="retryR" class="hidden mt-20"></div>`;
-  renderRetryQs();
+  renderRetryQs(); showRetryBig(wi.length);
 }
+function showRetryBig(n){
+  try{
+    let b=$('retryBigBtn');
+    if(!b){
+      b=document.createElement('button'); b.id='retryBigBtn'; b.type='button';
+      b.setAttribute('style','display:block;width:calc(100% - 28px);margin:14px;padding:18px 12px;font-size:22px;font-weight:900;font-family:inherit;color:#0b1f4d;background:linear-gradient(135deg,#ffd75e,#f0a800);border:3px solid #fff3c4;border-radius:16px;box-shadow:0 6px 18px rgba(240,168,0,.45);cursor:pointer;');
+      b.onclick=function(){ const r=$('retryContainer'); if(r) r.scrollIntoView({behavior:'smooth',block:'start'}); };
+      const rc=$('resultContainer'); if(rc&&rc.parentNode) rc.parentNode.insertBefore(b, rc.nextSibling); else document.body.appendChild(b);
+    }
+    b.textContent='🔁 إعادة أخطائي ('+n+')';
+  }catch(e){}
+}
+function hideRetryBig(){ try{ const b=$('retryBigBtn'); if(b&&b.parentNode) b.parentNode.removeChild(b); }catch(e){} }
 function pickRetry(oi,ci){
   if(typeof retryPick[oi]==='number') return; // بعد الاختيار تظهر النتيجة مباشرة
   retryPick[oi]=ci;
@@ -2062,7 +2075,7 @@ function startExam(mode){
     studentPhone = '';
     studentName = '';
   }
-  examStarted = true; clearAttempt();
+  examStarted = true; clearAttempt(); hideRetryBig();
   // rebuild from base
   const src = (baseQuestions && baseQuestions.length) ? baseQuestions : buildQuestions();
   baseQuestions = src.map(q => Object.assign({}, q, {
@@ -2098,6 +2111,7 @@ function startExam(mode){
 }
 
 function resetExam(){
+  hideRetryBig();
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
   stopAllAudio(); seconds=0; const td=$('timerDisplay'); if(td) td.textContent='00:00';
   baseQuestions = buildQuestions();
