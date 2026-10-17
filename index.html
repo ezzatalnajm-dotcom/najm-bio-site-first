@@ -664,6 +664,17 @@
     </div>
 </div>
 
+<!-- Choose Modal (تبويب مشترك) -->
+<div class="modal-overlay" id="chooseModal">
+    <div class="modal-box">
+        <h3>🔓 المحتوى المشترك</h3>
+        <p style="text-align:center;color:#718096;font-weight:600;line-height:1.8;margin:-6px 0 16px;">اختر ما يناسبك:</p>
+        <button class="btn-primary" style="font-size:17px;padding:14px;" onclick="chooseLogin()">🔐 لدي حساب</button>
+        <button class="btn-secondary" style="font-size:17px;padding:14px;" onclick="chooseRegister()">📝 تسجيل جديد</button>
+        <button class="btn-secondary" style="font-size:17px;padding:14px;" onclick="choosePublic()">📖 تصفح عام</button>
+    </div>
+</div>
+
 <script>
     // ═══════════════════════════════════════════════════════════
     // ║  ضع هنا رابط Google Apps Script الخاص بك               ║
@@ -1160,6 +1171,17 @@
         const b = document.getElementById('hdrRegBtn');
         if (b) b.style.display = currentUser ? 'none' : 'inline-block';
     }
+    // ======================== شاشة الاختيار (تبويب مشترك) ========================
+    function openChoose() {
+        document.getElementById('loginModal').classList.remove('show');
+        document.getElementById('regModal').classList.remove('show');
+        document.getElementById('chooseModal').classList.add('show');
+    }
+    function closeChoose() { document.getElementById('chooseModal').classList.remove('show'); }
+    function chooseLogin() { closeChoose(); showLogin(); }
+    function chooseRegister() { closeChoose(); openRegister(true); }
+    function choosePublic() { closeChoose(); switchTab('public'); }
+
     function sharedActive() { return document.getElementById('sharedPanel').classList.contains('active-panel'); }
     function openLoginFromReg() {
         document.getElementById('regModal').classList.remove('show');
@@ -1190,7 +1212,7 @@
                 document.getElementById('regBox').innerHTML = '<div style="text-align:center;padding:20px 8px;"><div style="font-size:48px">✅</div><h3>تم استلام طلبك</h3><p style="color:#718096;line-height:1.8">ستتم مراجعة طلبك وتفعيله قريبًا.<br>يمكنك الآن تصفح المحتوى العام.</p><button class="btn-primary" onclick="skipRegister()">متابعة التصفح</button></div>';
                 return;
             }
-            bad(d.error === 'active' ? '✅ أنت مسجل بالفعل — اضغط «تسجيل الدخول».' : d.error === 'pending' ? '⏳ طلبك مستلم سابقًا وقيد المراجعة.' : '❌ تعذر إرسال الطلب، راجع البيانات.');
+            bad(d.error === 'active' ? '✅ أنت مسجل بالفعل — اضغط «تسجيل الدخول».' : d.error === 'pending' ? '⏳ طلبك مستلم سابقًا وقيد المراجعة.' : d.error === 'exists' ? '⚠️ هذا الرقم مسجل مسبقًا. اضغط «لدي حساب — تسجيل الدخول»، وإن لم تستطع الدخول تواصل مع الأستاذ: 77107247' : '❌ تعذر إرسال الطلب، راجع البيانات.');
         } catch (e) { bad('❌ تعذر الاتصال، حاول مرة أخرى.'); }
         btn.disabled = false; btn.textContent = 'إرسال طلب التسجيل';
     }
@@ -1318,6 +1340,7 @@
                 <p style="color:#718096;margin-bottom:20px;">يجب تسجيل الدخول للوصول إلى المحتوى المشترك</p>
                 <button class="btn-primary" style="width:auto;padding:10px 30px;" onclick="showLogin()">تسجيل الدخول</button>
                 <div style="margin-top:10px"><button class="btn-secondary" style="width:auto;padding:10px 30px;" onclick="openRegister()">📝 تسجيل جديد</button></div>
+                <div style="margin-top:10px"><button class="btn-secondary" style="width:auto;padding:10px 30px;" onclick="switchTab('public')">📖 تصفح عام</button></div>
             </div>`;
             return;
         }
@@ -1444,7 +1467,7 @@
             document.getElementById('sharedPanel').classList.add('active-panel');
             if (!currentUser) {
                 renderSharedPanel();
-                openRegister(true);
+                openChoose();
             } else {
                 renderSharedPanel();
             }
