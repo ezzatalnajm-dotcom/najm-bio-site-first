@@ -29,6 +29,11 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
 .bar{height:6px;border-radius:4px;background:rgba(255,255,255,.1);margin-top:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
 .rv{margin-top:8px}.rv summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:12px}.rv .w{background:rgba(0,0,0,.25);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:12px;line-height:1.7;font-weight:400}.rv .a{color:#ff9d9d}.rv .c{color:#8ee6a8}.rv .ok{font-size:12px;color:#8ee6a8;margin-top:6px}
 .wa{background:linear-gradient(150deg,#25d366,#128c4a);color:#fff}
+.prog{margin:14px auto 4px;padding:12px 14px;border:2px solid var(--gold);border-radius:16px;background:rgba(245,197,66,.12)}
+.prog .pt{font-weight:900;font-size:20px;line-height:1.6}
+.prog .pt b{color:var(--gold);font-size:32px;margin:0 4px;vertical-align:middle}
+.prog .pb{height:10px;border-radius:6px;background:rgba(255,255,255,.15);margin-top:8px;overflow:hidden}
+.prog .pb i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2))}
 </style>
 </head>
 <body>
@@ -48,7 +53,7 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
   <div id="dash" class="hide">
     <div class="card big">
       <div id="nm" style="font-weight:800;margin-bottom:6px"></div>
-      <div class="p" id="pc"></div><div class="g" id="gr"></div><div class="t" id="tp"></div><div class="s" id="tk"></div>
+      <div class="p" id="pc"></div><div class="g" id="gr"></div><div class="t" id="tp"></div><div class="prog" id="prog"></div><div class="s" id="tk"></div>
     </div>
     <div class="card"><div style="font-weight:900;color:var(--gold);margin-bottom:4px">📊 أعلى نتيجة في كل اختبار</div><div id="list"></div></div>
     <button class="wa" onclick="share()">📲 شارك النتيجة مع ولي الأمر</button>
@@ -67,6 +72,17 @@ function review(e){
 }
 const en=s=>String(s==null?'':s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 let U=null,D=null;
+const exW=n=>(n>=2&&n<=10)?'اختبارات':'اختبارًا';
+function examsLine(){ // "أنجز X اختبارًا من أصل Y" (Y = الاختبارات الظاهرة للمشتركين حاليًا)
+  const taken=+D.taken||0, tot=+D.totalExams||0;
+  if(tot<=0) return {text:'أنجز '+taken+' '+exW(taken),pct:null};
+  const total=Math.max(tot,taken);
+  return {text:'أنجز '+taken+' '+exW(taken)+' من أصل '+total,taken:taken,total:total,pct:Math.round(taken/total*100)};
+}
+function progBox(){
+  const l=examsLine();
+  $('prog').innerHTML='<div class="pt">🎯 '+(l.pct==null?'أنجز <b>'+(+D.taken||0)+'</b> '+exW(+D.taken||0):'أنجز <b>'+l.taken+'</b> '+exW(l.taken)+' من أصل <b>'+l.total+'</b>')+'</div>'+(l.pct==null?'':'<div class="pb"><i style="width:'+l.pct+'%"></i></div>');
+}
 
 function full(code,num){
   code=en(code).replace(/\D/g,'').replace(/^0+/,'')||'974';
@@ -99,13 +115,13 @@ function render(){
   $('login').classList.add('hide');$('dash').classList.remove('hide');
   $('nm').textContent='👤 '+(D.name||'طالب');
   if(D.overall==null){
-    $('pc').textContent='—';$('gr').textContent='لا توجد نتائج بعد';$('tp').textContent='';$('tk').textContent='ابدأ بحل أحد بنوك الأسئلة وستظهر نتيجتك هنا';
+    $('pc').textContent='—';$('gr').textContent='لا توجد نتائج بعد';$('tp').textContent='';$('tk').textContent='ابدأ بحل أحد بنوك الأسئلة وستظهر نتيجتك هنا';progBox();
     $('list').innerHTML='<div class="hint">لم تسجل أي نتيجة حتى الآن.</div>';return;
   }
   $('pc').textContent=D.overall.toFixed(1)+'%';
   $('gr').textContent=grade(D.overall);
   $('tp').textContent=(D.n>=20&&D.topPct<=20)?'🏅 ضمن أفضل '+D.topPct+'% من الطلاب':'';
-  $('tk').textContent='أنجز '+D.taken+' اختبارًا (مجموع الدرجات ÷ مجموع الدرجات الكلية)';
+  progBox();$('tk').textContent='التقدير العام = مجموع الدرجات ÷ مجموع الدرجات الكلية';
   $('list').innerHTML=D.exams.map(e=>{
     const dt=e.at?new Date(e.at).toLocaleDateString('ar-EG'):'';
     return `<div class="ex"><div class="n">${esc(e.title)}<div class="d">${dt} · ${e.score}/${e.total} · ${e.attempts} محاولة</div><div class="bar"><i style="width:${Math.min(100,e.percent)}%"></i></div>${review(e)}</div><div class="pc">${e.percent.toFixed(1)}%</div></div>`;
@@ -113,7 +129,7 @@ function render(){
 }
 
 function share(){
-  let t=`*نتيجة ${D.name||'الطالب'} في بنوك الأسئلة — أ. عزت نجم الأحياء*\nالتقدير العام: ${D.overall==null?'—':grade(D.overall)+' ('+D.overall.toFixed(1)+'%)'}\nعدد الاختبارات: ${D.taken}\n`;
+  let t=`*نتيجة ${D.name||'الطالب'} في بنوك الأسئلة — أ. عزت نجم الأحياء*\nالتقدير العام: ${D.overall==null?'—':grade(D.overall)+' ('+D.overall.toFixed(1)+'%)'}\nالاختبارات المنجزة: ${(()=>{const l=examsLine();return l.pct==null?(+D.taken||0):l.taken+' من أصل '+l.total})()}\n`;
   D.exams.forEach(e=>t+=`• ${e.title}: ${e.percent.toFixed(1)}%\n`);
   window.open('https://wa.me/'+U.parent+'?text='+encodeURIComponent(t),'_blank');
 }
