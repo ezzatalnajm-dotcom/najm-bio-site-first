@@ -571,6 +571,9 @@
         <button class="tab-btn" onclick="switchTab('topstudents')">🏆 المتفوقون</button>
     </div>
 
+    <!-- تذكير: ملفات جديدة لم تُفتح (للمشتركين المسجّل دخولهم) -->
+    <div id="pendingBanner" style="display:none;margin:10px 12px;padding:12px 14px;background:#fff7e0;border:2px solid #f0a800;border-radius:12px;color:#5a4200;font-size:14px;line-height:1.8;"></div>
+
     <!-- Panels -->
     <div id="publicPanel" class="panel active-panel"></div>
     <div id="sharedPanel" class="panel"></div>
@@ -1157,6 +1160,8 @@
         updateHeaderAuth();
         closeLogin();
         renderSharedPanel();
+        checkForNewItems();
+        checkPending();
     }
 
     // ======================== التسجيل الذاتي ========================
@@ -1222,6 +1227,8 @@
         localStorage.removeItem('najm_shared_user');
         updateHeaderAuth();
         switchTab('public');
+        checkForNewItems();
+        hidePendingBanner();
     }
 
     // استعادة تسجيل الدخول المحفوظ (تذكرني) — صالح 60 يوم
@@ -1258,11 +1265,66 @@
             if (d && d.ok === false) {
                 currentUser = null; localStorage.removeItem('najm_shared_user'); updateHeaderAuth();
                 if (document.getElementById('sharedPanel').classList.contains('active-panel')) renderSharedPanel();
+            } else if (d && d.ok) {
+                checkPending();
             }
         } catch (e) {}
     })();
 
     updateHeaderAuth(); // الافتراضي: تصفح عام بدون نوافذ — التسجيل من زر الهيدر أو عند فتح «مشترك»
+
+    // ======================== تذكير: ملفات جديدة لم تُفتح ========================
+    function pEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+    // تسجيل فتح الملف (للمشتركين فقط) ليعرف السكربت من لم يفتحه
+    function logOpen(link, title) {
+        if (!currentUser || !link || link === '#') return;
+        try {
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'open', phone: currentUser.phone, parent: currentUser.parent, link: link, title: title || '' }), keepalive: true }).catch(function () {});
+        } catch (e) {}
+    }
+    document.addEventListener('click', function (ev) {
+        const a = ev.target && ev.target.closest ? ev.target.closest('a.resource-link, a.revision-item, a.pending-open') : null;
+        if (!a || !currentUser) return;
+        const href = a.getAttribute('href');
+        if (!href || href === '#') return;
+        const tEl = a.querySelector('.resource-title, .revision-title');
+        logOpen(href, a.getAttribute('data-title') || ((tEl || a).textContent || '').trim());
+        if (a.classList.contains('pending-open')) {
+            setTimeout(function () {
+                a.remove();
+                const b = document.getElementById('pendingBanner');
+                if (b && !b.querySelector('a.pending-open')) hidePendingBanner();
+            }, 400);
+        }
+    }, true);
+    function hidePendingBanner() { const b = document.getElementById('pendingBanner'); if (b) { b.style.display = 'none'; b.innerHTML = ''; } }
+    function dismissPending() {
+        try { localStorage.setItem('najm_pending_dismiss', new Date().toDateString()); } catch (e) {}
+        hidePendingBanner();
+    }
+    function showPendingBanner(items) {
+        const b = document.getElementById('pendingBanner'); if (!b || !items || !items.length) return;
+        const n = items.length;
+        const msg = n === 1 ? 'تم إضافة ملف جديد من أسبوع لم تطلع عليه — افتح الملف وابدأ بحله'
+                            : 'تم إضافة ' + n + ' ملفات جديدة من أسبوع لم تطلع عليها — افتحها وابدأ بحلها';
+        let h = '<div style="font-weight:800;margin-bottom:4px;">⏰ ' + msg + '</div>';
+        items.slice(0, 3).forEach(function (i) {
+            h += '<a class="pending-open" data-title="' + pEsc(i.title) + '" href="' + pEsc(i.link) + '" target="_blank" style="display:block;color:#1e5a7a;font-weight:700;text-decoration:underline;margin:2px 0;">📄 ' + pEsc(i.title) + '</a>';
+        });
+        h += '<button type="button" onclick="dismissPending()" style="margin-top:8px;background:transparent;border:1px solid #c9a24a;color:#5a4200;border-radius:8px;padding:4px 12px;font-size:12px;cursor:pointer;width:auto;">إخفاء اليوم</button>';
+        b.innerHTML = h; b.style.display = 'block';
+    }
+    async function checkPending() {
+        if (!currentUser) { hidePendingBanner(); return; }
+        try { if (localStorage.getItem('najm_pending_dismiss') === new Date().toDateString()) return; } catch (e) {}
+        try {
+            const r = await fetch(GOOGLE_SCRIPT_URL + '?action=pending&phone=' + currentUser.phone + '&parent=' + currentUser.parent + '&t=' + Date.now());
+            const d = await r.json();
+            if (!currentUser) return;
+            if (d && d.ok && d.items && d.items.length) showPendingBanner(d.items); else hidePendingBanner();
+        } catch (e) {}
+    }
 
     // ======================== RENDER FUNCTIONS ========================
     function renderRevision(panelId, revisionData, title, isFirstRevision) {
@@ -1544,15 +1606,20 @@
     }
 
     // ======================== إشعارات المحتوى الجديد ========================
-    function getAllTitles() {
+    // المحتوى "الفعّال" الذي يراه هذا الزائر فقط:
+    //  - زائر عام: عناصر تبويب عام + المراجعات
+    //  - مشترك مسجّل دخوله: عناصر تبويب مشترك + المراجعات
+    //  وأي عنصر رابطه فاضي أو "#" (قريباً) لا يُحتسب إلا عندما يصير له رابط فعلي.
+    function getAudienceItems() {
         const all = [];
-        Object.values(publicData).forEach(arr => arr.forEach(i => all.push(i.title)));
-        Object.values(sharedData).forEach(arr => arr.forEach(i => all.push(i.title)));
-        Object.values(premiumData).forEach(arr => arr.forEach(i => all.push(i.title)));
-        REVISION_FIRST.forEach(u => u.items.forEach(i => all.push(i.title)));
-        REVISION_SECOND.forEach(u => u.items.forEach(i => all.push(i.title)));
-        return all;
+        const add = it => { if (it && it.link && it.link !== '#') all.push(it.title); };
+        const base = currentUser ? sharedData : publicData;
+        Object.values(base).forEach(arr => arr.forEach(add));
+        REVISION_FIRST.forEach(u => u.items.forEach(add));
+        REVISION_SECOND.forEach(u => u.items.forEach(add));
+        return Array.from(new Set(all));
     }
+    function seenKey() { return currentUser ? 'bio_seen_v2_sub' : 'bio_seen_v2_pub'; }
 
     function updateNotifBadge(count) {
         const badge = document.getElementById('notifBadge');
@@ -1567,12 +1634,12 @@
 
     let newItemsList = [];
     function checkForNewItems() {
-        const current = getAllTitles();
-        let seen;
-        try { seen = JSON.parse(localStorage.getItem('bio_seen_titles') || '[]'); } catch (e) { seen = []; }
-        // أول مرة يفتح فيها أي حد الموقع، منعتبرش كل المحتوى الموجود وقتها "جديد"
-        if (seen.length === 0) {
-            localStorage.setItem('bio_seen_titles', JSON.stringify(current));
+        const current = getAudienceItems();
+        let seen = null;
+        try { const raw = localStorage.getItem(seenKey()); seen = raw === null ? null : JSON.parse(raw); } catch (e) { seen = null; }
+        // أول مرة لهذا النوع من الزوار (عام / مشترك): نحفظ الموجود حاليًا ولا نعتبره "جديدًا"
+        if (!Array.isArray(seen)) {
+            try { localStorage.setItem(seenKey(), JSON.stringify(current)); } catch (e) {}
             newItemsList = [];
             updateNotifBadge(0);
             return;
@@ -1590,7 +1657,7 @@
                 ? newItemsList.map(t => `<div class="notif-item">🆕 ${t}</div>`).join('')
                 : `<div class="notif-item notif-empty">مفيش إشعارات جديدة حاليًا</div>`;
             // بمجرد ما يفتحها ويشوفها، اعتبرها بقت مقروءة
-            localStorage.setItem('bio_seen_titles', JSON.stringify(getAllTitles()));
+            try { localStorage.setItem(seenKey(), JSON.stringify(getAudienceItems())); } catch (e) {}
             updateNotifBadge(0);
         }
     }
