@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="app-version" content="2026-10-21-a">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>لوحة تقدمي — أ. عزت نجم الأحياء</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -34,6 +37,24 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
 .prog .pt b{color:var(--gold);font-size:32px;margin:0 4px;vertical-align:middle}
 .prog .pb{height:10px;border-radius:6px;background:rgba(255,255,255,.15);margin-top:8px;overflow:hidden}
 .prog .pb i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.tl{display:block;text-align:center;margin-top:14px;font-size:11px;color:var(--mut);opacity:.55;cursor:pointer;text-decoration:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.chip{border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:700;width:auto;margin:0;cursor:pointer}
+.chip.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.band{border-radius:14px;margin-top:12px;border:1px solid rgba(255,255,255,.12);overflow:hidden}
+.band .bh{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;font-weight:900;font-size:15px}
+.band .bh span{background:rgba(0,0,0,.25);border-radius:12px;padding:1px 10px;font-size:13px}
+.band .st{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.07);font-size:14px;font-weight:600}
+.band .st i{font-style:normal;font-weight:900;direction:ltr;color:var(--gold)}
+.band .st small{color:var(--mut);font-weight:400;font-size:11px;display:block}
+.b-ex .bh{background:rgba(245,197,66,.25);color:var(--gold)}
+.b-vg .bh{background:rgba(70,200,120,.22);color:#8ee6a8}
+.b-g .bh{background:rgba(90,150,255,.22);color:#9cc2ff}
+.b-ac .bh{background:rgba(255,160,60,.22);color:#ffc27a}
+.b-lo .bh{background:rgba(255,90,90,.2);color:#ff9d9d}
+.b-no .bh{background:rgba(255,255,255,.1);color:var(--mut)}
+.sumline{font-size:13px;color:var(--mut);margin:8px 0 2px}
+.upd{position:fixed;bottom:12px;left:12px;right:12px;background:var(--gold);color:var(--navy);font-weight:800;text-align:center;padding:10px;border-radius:12px;z-index:9;display:none}
 </style>
 </head>
 <body>
@@ -48,6 +69,26 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
     <div class="hint">اكتب الرقم مباشرة (المفتاح 974 مضاف تلقائيًا)، وغيّره فقط للأرقام الدولية.</div>
     <button onclick="go()">عرض نتائجي</button>
     <div class="err" id="err"></div>
+    <a class="tl" onclick="tShow()">دخول المعلم</a>
+  </div>
+
+  <div class="card hide" id="tlogin">
+    <label>رمز المعلم</label>
+    <input id="tkey" type="password" style="width:100%" placeholder="••••••">
+    <button onclick="tGo()">عرض المجموعات</button>
+    <button class="sec" onclick="tBack()">رجوع</button>
+    <div class="err" id="terr"></div>
+  </div>
+
+  <div id="tview" class="hide">
+    <div class="card">
+      <div style="font-weight:900;color:var(--gold)">👨‍🏫 المجموعات حسب التقدير</div>
+      <div class="chips" id="tchips"></div>
+      <div class="sumline" id="tsum"></div>
+      <div id="tbands"></div>
+    </div>
+    <button class="sec" onclick="tGo(true)">🔄 تحديث البيانات</button>
+    <button class="sec" onclick="tOut()">خروج المعلم</button>
   </div>
 
   <div id="dash" class="hide">
@@ -60,6 +101,7 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
     <button class="sec" onclick="out()">تسجيل خروج</button>
   </div>
 </div>
+<div class="upd" id="upd">⏳ جاري تحديث الصفحة لآخر نسخة...</div>
 
 <script>
 const URL_="https://script.google.com/macros/s/AKfycbzpVJBVOa_ewqV4K0hyeiTaeIZFbXGZLvYoD4at-9FLim98C-YHw18XZa_M_PSIeM9_kA/exec";
@@ -134,6 +176,64 @@ function share(){
   window.open('https://wa.me/'+U.parent+'?text='+encodeURIComponent(t),'_blank');
 }
 function out(){try{localStorage.removeItem('najm_progress_user')}catch(e){}U=D=null;$('dash').classList.add('hide');$('login').classList.remove('hide')}
+
+/* ===== شاشة المعلم: المجموعات حسب التقدير ===== */
+let TD=null,TG='';
+const BANDS=[['b-ex','ممتاز',p=>p>=85],['b-vg','جيد جدًا',p=>p>=75&&p<85],['b-g','جيد',p=>p>=60&&p<75],['b-ac','مقبول',p=>p>=45&&p<60],['b-lo','يحتاج إلى دعم',p=>p<45]];
+function tShow(){$('login').classList.add('hide');$('tlogin').classList.remove('hide');$('tkey').value=sessionStorage.getItem('najm_tkey')||''}
+function tBack(){$('tlogin').classList.add('hide');$('login').classList.remove('hide')}
+function tOut(){try{sessionStorage.removeItem('najm_tkey')}catch(e){}TD=null;$('tview').classList.add('hide');$('login').classList.remove('hide')}
+async function tGo(again){
+  const k=again?(sessionStorage.getItem('najm_tkey')||''):$('tkey').value.trim();
+  const e=$('terr');e.style.display='none';
+  if(!k){e.textContent='❌ اكتب الرمز';e.style.display='block';return}
+  try{
+    const r=await fetch(URL_+'?action=groups&key='+encodeURIComponent(k)+'&t='+Date.now());
+    const d=await r.json();
+    if(!d.ok||!Array.isArray(d.students)) throw new Error(d.error==='unauthorized'?'ua':'x');
+    try{sessionStorage.setItem('najm_tkey',k)}catch(_){}
+    TD=d.students;
+    if(!TG||!TD.some(s=>(s.group||'بدون مجموعة')===TG)) TG='';
+    $('tlogin').classList.add('hide');$('login').classList.add('hide');$('tview').classList.remove('hide');tRender();
+  }catch(x){
+    const m=x.message==='ua'?'❌ الرمز غير صحيح':'❌ تعذر جلب البيانات (تأكد أن الخادم محدَّث لدعم المجموعات)';
+    if(again){alert(m)}else{e.textContent=m;e.style.display='block'}
+  }
+}
+function tRender(){
+  const gs={};TD.forEach(s=>{const g=s.group||'بدون مجموعة';(gs[g]=gs[g]||[]).push(s)});
+  const names=Object.keys(gs).sort((a,b)=>a.localeCompare(b,'ar'));
+  if(TG!==''&&!gs[TG]) TG='';
+  $('tchips').innerHTML='<button class="chip'+(TG===''?' on':'')+'" onclick="tPick(\'\')">الكل ('+TD.length+')</button>'+names.map(n=>'<button class="chip'+(TG===n?' on':'')+'" data-g="'+esc(n)+'" onclick="tPick(this.dataset.g)">'+esc(n)+' ('+gs[n].length+')</button>').join('');
+  const list=TG===''?TD:gs[TG];
+  const has=list.filter(s=>s.overall!=null),no=list.filter(s=>s.overall==null);
+  $('tsum').textContent=BANDS.map(b=>b[1]+': '+has.filter(s=>b[2](+s.overall)).length).join(' · ')+(no.length?' · بدون نتائج: '+no.length:'');
+  const row=s=>'<div class="st"><div>'+esc(s.name||'—')+(TG===''&&s.group?'<small>'+esc(s.group)+'</small>':'')+'</div><i>'+(s.overall==null?'—':(+s.overall).toFixed(1)+'%')+'</i></div>';
+  let h='';
+  BANDS.forEach(b=>{const L=has.filter(s=>b[2](+s.overall)).sort((x,y)=>y.overall-x.overall);
+    h+='<div class="band '+b[0]+'"><div class="bh">'+b[1]+'<span>'+L.length+'</span></div>'+(L.length?L.map(row).join(''):'<div class="st" style="color:var(--mut)">لا يوجد</div>')+'</div>'});
+  if(no.length) h+='<div class="band b-no"><div class="bh">لم يبدؤوا بعد<span>'+no.length+'</span></div>'+no.map(row).join('')+'</div>';
+  $('tbands').innerHTML=h;
+}
+function tPick(g){TG=g;tRender()}
+
+/* ===== تحديث تلقائي: يمنع ظهور النسخة القديمة للطلاب ===== */
+const APP_V=(document.querySelector('meta[name=app-version]')||{}).content||'';
+async function checkUpdate(){
+  try{
+    const r=await fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'});
+    const m=(await r.text()).match(/<meta name="app-version" content="([^"]+)"/);
+    if(!m||m[1]===APP_V) return;
+    if(sessionStorage.getItem('najm_sp_reloaded')===m[1]) return; // منع التكرار
+    sessionStorage.setItem('najm_sp_reloaded',m[1]);
+    $('upd').style.display='block';
+    if('serviceWorker' in navigator){(await navigator.serviceWorker.getRegistrations()).forEach(x=>x.unregister())}
+    if(window.caches){(await caches.keys()).forEach(k=>caches.delete(k))}
+    location.replace(location.pathname+'?v='+encodeURIComponent(m[1]));
+  }catch(e){}
+}
+checkUpdate();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
 (function(){try{const s=JSON.parse(localStorage.getItem('najm_progress_user')||localStorage.getItem('najm_shared_user')||'null');
   if(s&&s.phone&&s.parent){$('p1').value='+'+s.phone;$('p2').value='+'+s.parent;go()}}catch(e){}})();
