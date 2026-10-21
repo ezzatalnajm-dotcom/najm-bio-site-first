@@ -871,3 +871,4 @@ function buildQuestionStats() {
   out.setFrozenRows(1);
   out.getRange(1, 1, 1, 7).setFontWeight('bold');
 }
+ 
