@@ -206,6 +206,18 @@
             font-size: 14px;
         }
         .resource-link:hover { background: #eef2ff; border-color: #1e5a7a; transform: translateY(-1px); }
+        .resource-link .resource-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+        .resource-code {
+            font-size: 11px;
+            font-weight: 700;
+            color: #718096;
+            direction: ltr;
+            text-align: right;
+            letter-spacing: 0.3px;
+            font-family: system-ui, Segoe UI, monospace;
+            opacity: 0.9;
+        }
+        .revision-item .resource-code { font-size: 10px; }
         .coming-soon {
             opacity: 0.7;
             background: #fef9e6;
@@ -1327,6 +1339,19 @@
     }
 
     // ======================== RENDER FUNCTIONS ========================
+    
+    // يستخرج رمز الملف من الرابط للعرض فقط (لا يغيّر الروابط)
+    function examCodeFromLink(link) {
+        if (!link || link === '#') return '';
+        let s = String(link).split('#')[0].split('?')[0];
+        const slash = Math.max(s.lastIndexOf('/'), s.lastIndexOf('\\'));
+        if (slash >= 0) s = s.slice(slash + 1);
+        s = s.replace(/\.html$/i, '');
+        // اعرض الرمز فقط إن بدا كرمز اختبار (فيه حروف/أرقام وشرطة سفلية غالباً)
+        if (!s || !/[A-Za-z]/.test(s) || s.length < 4) return '';
+        return s;
+    }
+
     function renderRevision(panelId, revisionData, title, isFirstRevision) {
         let gridClass = isFirstRevision ? "revision-grid-3" : "revision-grid-4";
         let html = `<div class="unit-card">
@@ -1342,9 +1367,13 @@
             unit.items.forEach(item => {
                 let isActive = item.link !== "#";
                 let extraClass = isActive ? "" : "coming-soon";
+                const code = examCodeFromLink(item.link);
                 html += `<a href="${item.link}" class="revision-item ${extraClass}" target="_blank">
                     <span>${item.icon}</span>
-                    <span class="revision-title">${item.title}</span>
+                    <span class="resource-text">
+                        <span class="revision-title">${item.title}</span>
+                        ${code ? `<span class="resource-code">${code}</span>` : ''}
+                    </span>
                 </a>`;
             });
             html += `</div>`;
@@ -1367,9 +1396,13 @@
             items.forEach(item => {
                 let isActive = item.link !== "#";
                 let extraClass = isActive ? "" : "coming-soon";
+                const code = examCodeFromLink(item.link);
                 html += `<a href="${item.link}" class="resource-link ${extraClass}" target="_blank">
                     <span>${item.icon}</span>
-                    <div class="resource-title">${item.title}</div>
+                    <div class="resource-text">
+                        <div class="resource-title">${item.title}</div>
+                        ${code ? `<div class="resource-code">${code}</div>` : ''}
+                    </div>
                 </a>`;
             });
             html += `</div></div></div>`;
