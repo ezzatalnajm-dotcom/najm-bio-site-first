@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="app-version" content="2026-10-21-a">
+<meta name="app-version" content="2026-10-21-f">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <title>لوحة تقدمي — أ. عزت نجم الأحياء</title>
@@ -53,6 +53,11 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
 .b-ac .bh{background:rgba(255,160,60,.22);color:#ffc27a}
 .b-lo .bh{background:rgba(255,90,90,.2);color:#ff9d9d}
 .b-no .bh{background:rgba(255,255,255,.1);color:var(--mut)}
+.top{border:2px solid var(--gold);border-radius:14px;background:rgba(245,197,66,.1);padding:8px 12px;margin-top:10px}.top .th{font-weight:900;color:var(--gold);margin-bottom:4px}.top .tr{display:flex;gap:8px;align-items:center;padding:6px 0;font-weight:700;font-size:15px}.top .tr b{font-size:20px}.top .tr span{flex:1}.top .tr i{font-style:normal;color:var(--gold);font-weight:900;direction:ltr}.top .tr small{color:var(--mut);font-weight:400;font-size:11px}
+.cert{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:50;overflow:auto;padding:14px}
+.cert .box{max-width:640px;margin:0 auto;background:var(--navy2);border:1px solid rgba(245,197,66,.4);border-radius:16px;padding:12px}
+.cert img{width:100%;border-radius:10px;display:block}
+.cb{width:auto;margin:0;padding:4px 10px;font-size:13px;border-radius:10px;background:rgba(245,197,66,.18);color:var(--gold);border:1px solid rgba(245,197,66,.4)}
 .sumline{font-size:13px;color:var(--mut);margin:8px 0 2px}
 .upd{position:fixed;bottom:12px;left:12px;right:12px;background:var(--gold);color:var(--navy);font-weight:800;text-align:center;padding:10px;border-radius:12px;z-index:9;display:none}
 </style>
@@ -85,6 +90,8 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
       <div style="font-weight:900;color:var(--gold)">👨‍🏫 المجموعات حسب التقدير</div>
       <div class="chips" id="tchips"></div>
       <div class="sumline" id="tsum"></div>
+      <div id="tcertall"></div>
+      <div id="ttop"></div>
       <div id="tbands"></div>
     </div>
     <button class="sec" onclick="tGo(true)">🔄 تحديث البيانات</button>
@@ -97,10 +104,18 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
       <div class="p" id="pc"></div><div class="g" id="gr"></div><div class="t" id="tp"></div><div class="prog" id="prog"></div><div class="s" id="tk"></div>
     </div>
     <div class="card"><div style="font-weight:900;color:var(--gold);margin-bottom:4px">📊 أعلى نتيجة في كل اختبار</div><div id="list"></div></div>
+    <button id="certBtn" class="hide" onclick="certOpen()">🎓 شهادة تقديري</button>
+    <div class="hint hide" id="certHint" style="text-align:center"></div>
     <button class="wa" onclick="share()">📲 شارك النتيجة مع ولي الأمر</button>
     <button class="sec" onclick="out()">تسجيل خروج</button>
   </div>
 </div>
+<div class="cert hide" id="cert"><div class="box">
+  <img id="certImg" alt="شهادة تقدير">
+  <button onclick="certShare()">📤 مشاركة (مجموعة / ولي الأمر / الطالب)</button>
+  <button class="sec" onclick="certSave()">⬇ حفظ الصورة</button>
+  <button class="sec" onclick="certClose()">إغلاق</button>
+</div></div>
 <div class="upd" id="upd">⏳ جاري تحديث الصفحة لآخر نسخة...</div>
 
 <script>
@@ -156,6 +171,7 @@ async function go(){
 function render(){
   $('login').classList.add('hide');$('dash').classList.remove('hide');
   $('nm').textContent='👤 '+(D.name||'طالب');
+  wmSet(D.name,U&&U.phone);{const nS=Math.max(1,(+D.totalExams||0)-1),okS=D.overall!=null&&D.overall>=45&&(+D.taken||0)>=nS;$('certBtn').classList.toggle('hide',!okS);const hn=$('certHint');hn.classList.toggle('hide',!(D.overall!=null&&D.overall>=45&&!okS));hn.textContent='🎓 تظهر شهادتك بعد إنجاز '+nS+' '+exW(nS)+' (أنجزت '+(+D.taken||0)+')';}
   if(D.overall==null){
     $('pc').textContent='—';$('gr').textContent='لا توجد نتائج بعد';$('tp').textContent='';$('tk').textContent='ابدأ بحل أحد بنوك الأسئلة وستظهر نتيجتك هنا';progBox();
     $('list').innerHTML='<div class="hint">لم تسجل أي نتيجة حتى الآن.</div>';return;
@@ -175,10 +191,80 @@ function share(){
   D.exams.forEach(e=>t+=`• ${e.title}: ${e.percent.toFixed(1)}%\n`);
   window.open('https://wa.me/'+U.parent+'?text='+encodeURIComponent(t),'_blank');
 }
-function out(){try{localStorage.removeItem('najm_progress_user')}catch(e){}U=D=null;$('dash').classList.add('hide');$('login').classList.remove('hide')}
+function out(){wmSet('','');try{localStorage.removeItem('najm_progress_user')}catch(e){}U=D=null;$('dash').classList.add('hide');$('login').classList.remove('hide')}
+
+/* ===== علامة مائية باسم الطالب ورقمه (محايدة تظهر في الفاتح والغامق) ===== */
+function wmSet(n,p){
+  let el=document.getElementById('najmWM');
+  if(!p){if(el)el.remove();return}
+  const c=s=>String(s||'').replace(/[&<>"'\\]/g,'');
+  const svg="<svg xmlns='http://www.w3.org/2000/svg' width='360' height='220'><g transform='rotate(-28 180 110)' font-family='sans-serif' font-weight='700' text-anchor='middle'><text x='180' y='100' font-size='17' fill='#808080' fill-opacity='.2'>"+c(n||'طالب')+"</text><text x='180' y='126' font-size='15' fill='#808080' fill-opacity='.2'>+"+c(p)+"</text></g></svg>";
+  const css='position:fixed;inset:0;pointer-events:none;z-index:2147483000;background-repeat:repeat;background-image:url("data:image/svg+xml;utf8,'+encodeURIComponent(svg)+'")';
+  window._wm={n:n,p:p};
+  if(!el){el=document.createElement('div');el.id='najmWM';document.body.appendChild(el)}
+  el.style.cssText=css;
+}
+setInterval(()=>{if(window._wm&&D&&!document.getElementById('najmWM'))wmSet(window._wm.n,window._wm.p)},1000);
+
+/* ===== شهادة التقدير (بالتقدير فقط بدون نسبة) ===== */
+let CERT=null,CM={};
+function star5(x,cx,cy,R,r){x.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r:R;x.lineTo(cx+rr*Math.cos(a),cy+rr*Math.sin(a))}x.closePath();x.fill()}
+async function certDraw(name,overall){
+  try{await document.fonts.load('900 80px Cairo');await document.fonts.load('700 30px Cairo')}catch(e){}
+  const W=1600,H=1130,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  x.direction='rtl';x.textAlign='center';x.textBaseline='middle';
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0b1a3b');g.addColorStop(1,'#13285a');x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.strokeStyle='#f5c542';x.lineWidth=10;x.strokeRect(40,40,W-80,H-80);x.lineWidth=3;x.strokeRect(64,64,W-128,H-128);
+  x.fillStyle='#f5c542';star5(x,W/2,185,62,26);
+  x.font='900 100px Cairo, sans-serif';x.fillText('شهادة تقدير',W/2,330);
+  x.fillStyle='#d9e0f5';x.font='700 38px Cairo, sans-serif';x.fillText('تتشرف أ. عزت نجم الأحياء بمنح الطالب / الطالبة',W/2,445);
+  let nm=name||'الطالب',fs=88;x.fillStyle='#ffffff';
+  do{x.font='900 '+fs+'px Cairo, sans-serif';fs-=4}while(x.measureText(nm).width>1200&&fs>36);
+  x.fillText(nm,W/2,570);
+  x.fillStyle='#d9e0f5';x.font='700 38px Cairo, sans-serif';x.fillText('تقديرًا لأدائه في بنوك أسئلة مادة الأحياء، وقد حصل على تقدير',W/2,675);
+  const gr=grade(overall),tw=560,th=130,tx=(W-tw)/2,ty=745;
+  x.fillStyle='#f5c542';x.beginPath();x.roundRect?x.roundRect(tx,ty,tw,th,65):x.rect(tx,ty,tw,th);x.fill();
+  x.fillStyle='#0b1a3b';x.font='900 84px Cairo, sans-serif';x.fillText(gr,W/2,ty+th/2+4);
+  x.fillStyle='#aeb9d6';x.font='700 32px Cairo, sans-serif';
+  x.textAlign='right';x.fillText('أ. عزت نجم الأحياء',W-130,H-130);
+  x.textAlign='left';x.fillText(new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'}),130,H-130);
+  return c;
+}
+async function certOpen(){
+  if(!D||D.overall==null||D.overall<45||(+D.taken||0)<Math.max(1,(+D.totalExams||0)-1)) return;
+  CERT=await certDraw(D.name,D.overall);CM={name:D.name||'الطالب',grade:grade(D.overall),phone:U&&U.parent};$('certImg').src=CERT.toDataURL('image/png');$('cert').classList.remove('hide');
+}
+function certClose(){$('cert').classList.add('hide')}
+function certBlob(){return new Promise(r=>CERT.toBlob(r,'image/png'))}
+async function certSave(){const b=await certBlob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='شهادة_'+(CM.name||'طالب')+'.png';a.click()}
+async function certShare(){
+  const blob=await certBlob(),file=new File([blob],'شهادة_تقدير.png',{type:'image/png'});
+  const text='🎓 شهادة تقدير — '+CM.name+'\nالتقدير: '+CM.grade+'\nأ. عزت نجم الأحياء';
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return}}catch(e){if(e&&e.name==='AbortError')return}
+  await certSave();
+  window.open('https://wa.me/'+(CM.phone||'')+'?text='+encodeURIComponent(text),'_blank');
+}
+/* من لوحة المعلم: شهادة طالب واحد، أو كل شهادات المجموعة دفعة واحدة */
+async function tCert(i){
+  const s=TD[i];if(!s||!eligT(s))return;
+  CERT=await certDraw(s.name,s.overall);CM={name:s.name||'الطالب',grade:grade(+s.overall),phone:''};
+  $('certImg').src=CERT.toDataURL('image/png');$('cert').classList.remove('hide');
+}
+async function tCertAll(){
+  const list=TD.filter(s=>(s.group||'بدون مجموعة')===TG&&eligT(s)).sort((a,b)=>b.overall-a.overall);
+  if(!list.length)return;
+  const btn=$('tcertall').querySelector('button');btn.textContent='⏳ جاري تجهيز '+list.length+' شهادة...';
+  const files=[];
+  for(const s of list){const c=await certDraw(s.name,s.overall);const b=await new Promise(r=>c.toBlob(r,'image/png'));files.push(new File([b],'شهادة_'+(s.name||'طالب')+'.png',{type:'image/png'}))}
+  btn.textContent='📤 شهادات المجموعة ('+list.length+')';
+  try{if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files,text:'🎓 شهادات تقدير — '+TG+'\nأ. عزت نجم الأحياء'});return}}catch(e){if(e&&e.name==='AbortError')return}
+  for(const f of files){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();await new Promise(r=>setTimeout(r,400))}
+}
 
 /* ===== شاشة المعلم: المجموعات حسب التقدير ===== */
-let TD=null,TG='';
+let TD=null,TG='',TT=0;
+const needT=()=>Math.max(1,(TT||0)-1);
+const eligT=s=>s.overall!=null&&s.overall>=45&&(s.taken||0)>=needT();
 const BANDS=[['b-ex','ممتاز',p=>p>=85],['b-vg','جيد جدًا',p=>p>=75&&p<85],['b-g','جيد',p=>p>=60&&p<75],['b-ac','مقبول',p=>p>=45&&p<60],['b-lo','يحتاج إلى دعم',p=>p<45]];
 function tShow(){$('login').classList.add('hide');$('tlogin').classList.remove('hide');$('tkey').value=sessionStorage.getItem('najm_tkey')||''}
 function tBack(){$('tlogin').classList.add('hide');$('login').classList.remove('hide')}
@@ -192,7 +278,7 @@ async function tGo(again){
     const d=await r.json();
     if(!d.ok||!Array.isArray(d.students)) throw new Error(d.error==='unauthorized'?'ua':'x');
     try{sessionStorage.setItem('najm_tkey',k)}catch(_){}
-    TD=d.students;
+    TD=d.students;TT=+d.totalExams||0;
     if(!TG||!TD.some(s=>(s.group||'بدون مجموعة')===TG)) TG='';
     $('tlogin').classList.add('hide');$('login').classList.add('hide');$('tview').classList.remove('hide');tRender();
   }catch(x){
@@ -208,7 +294,11 @@ function tRender(){
   const list=TG===''?TD:gs[TG];
   const has=list.filter(s=>s.overall!=null),no=list.filter(s=>s.overall==null);
   $('tsum').textContent=BANDS.map(b=>b[1]+': '+has.filter(s=>b[2](+s.overall)).length).join(' · ')+(no.length?' · بدون نتائج: '+no.length:'');
-  const row=s=>'<div class="st"><div>'+esc(s.name||'—')+(TG===''&&s.group?'<small>'+esc(s.group)+'</small>':'')+'</div><i>'+(s.overall==null?'—':(+s.overall).toFixed(1)+'%')+'</i></div>';
+  const row=s=>'<div class="st"><div>'+esc(s.name||'—')+'<small>'+(TG===''&&s.group?esc(s.group)+' · ':'')+(s.taken||0)+(TT?' من '+TT:'')+' اختبار</small></div><div style="display:flex;gap:8px;align-items:center">'+(eligT(s)?'<button class="cb" data-i="'+TD.indexOf(s)+'" onclick="tCert(+this.dataset.i)">🎓</button>':'')+'<i>'+(s.overall==null?'—':(+s.overall).toFixed(1)+'%')+'</i></div></div>';
+  const nCert=TG===''?0:list.filter(eligT).length;
+  $('tcertall').innerHTML=nCert?'<button class="sec" onclick="tCertAll()" style="color:var(--gold);border-color:var(--gold)">📤 شهادات المجموعة ('+nCert+')</button>':'';
+  const top=has.filter(s=>(s.taken||0)>=needT()).sort((x,y)=>(y.overall-x.overall)||((y.taken||0)-(x.taken||0))).slice(0,3),med=['🥇','🥈','🥉'];
+  $('ttop').innerHTML=top.length?'<div class="top"><div class="th">🏆 الأوائل'+(TG===''?' (الكل)':' — '+esc(TG))+'</div>'+top.map((s,i)=>'<div class="tr"><b>'+med[i]+'</b><span>'+esc(s.name||'—')+(TG===''&&s.group?' <small>'+esc(s.group)+'</small>':'')+'</span><i>'+(+s.overall).toFixed(1)+'%</i><small>'+(s.taken||0)+' اختبار</small></div>').join('')+'</div>':'';
   let h='';
   BANDS.forEach(b=>{const L=has.filter(s=>b[2](+s.overall)).sort((x,y)=>y.overall-x.overall);
     h+='<div class="band '+b[0]+'"><div class="bh">'+b[1]+'<span>'+L.length+'</span></div>'+(L.length?L.map(row).join(''):'<div class="st" style="color:var(--mut)">لا يوجد</div>')+'</div>'});

@@ -355,7 +355,7 @@
   body:not(.exam-done):not(.teacher-mode) .btn-evaluate { display: none !important; }
 
 </style>
-<meta name="app-version" content="2026-10-21-c">
+<meta name="app-version" content="2026-10-21-d">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 </head>
 <body>
@@ -2355,6 +2355,37 @@ if(!questions || !questions.length){
   }
   check(true);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)check(false)});
+})();
+</script>
+<script>
+/* najmWM: علامة مائية باسم الطالب ورقمه لتتبع التسريب — رمادية محايدة تظهر في الوضعين الفاتح والغامق */
+(function(){
+  var last='',css='';
+  function val(id){var e=document.getElementById(id);return e&&e.value?String(e.value).trim():''}
+  function clean(s){return String(s).replace(/[&<>"'\\]/g,'')}
+  function ident(){
+    var p='',n='';
+    try{if(typeof studentPhone!=='undefined'&&studentPhone)p=String(studentPhone)}catch(e){}
+    try{if(typeof studentName!=='undefined'&&studentName)n=String(studentName)}catch(e){}
+    if(!p){var d=val('studentPhone').replace(/\D/g,'');if(d.length>=6){var cc=val('countryCode').replace(/\D/g,'')||'974';p=(d.indexOf(cc)===0&&d.length>8)?d:cc+d}}
+    if(!n)n=val('studentName');
+    return{p:p,n:n};
+  }
+  function build(n,p){
+    var svg="<svg xmlns='http://www.w3.org/2000/svg' width='360' height='220'><g transform='rotate(-28 180 110)' font-family='sans-serif' font-weight='700' text-anchor='middle'><text x='180' y='100' font-size='17' fill='#808080' fill-opacity='.2'>"+clean(n||'طالب')+"</text><text x='180' y='126' font-size='15' fill='#808080' fill-opacity='.2'>+"+clean(p)+"</text></g></svg>";
+    return 'position:fixed;inset:0;pointer-events:none;z-index:2147483000;background-repeat:repeat;background-image:url("data:image/svg+xml;utf8,'+encodeURIComponent(svg)+'")';
+  }
+  function apply(){
+    var id=ident(),el=document.getElementById('najmWM');
+    if(!id.p){if(el)el.remove();last='';return}
+    var key=id.n+'|'+id.p;
+    if(key!==last){last=key;css=build(id.n,id.p)}
+    if(!el){el=document.createElement('div');el.id='najmWM';document.body.appendChild(el)}
+    if(el.style.cssText!==css)el.style.cssText=css;
+  }
+  setInterval(apply,1000);
+  try{new MutationObserver(function(){if(!document.getElementById('najmWM'))apply()}).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
+  apply();
 })();
 </script>
 </body>
