@@ -352,6 +352,8 @@
   body:not(.exam-done):not(.teacher-mode) .btn-evaluate { display: none !important; }
 
 </style>
+<meta name="app-version" content="2026-10-21-c">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 </head>
 <body>
 
@@ -2376,6 +2378,42 @@ document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveAtte
 window.addEventListener('pagehide', saveAttempt);
 tryResumeAttempt();
 
+</script>
+<script>
+/* تحديث تلقائي: يمنع ظهور النسخة القديمة (يقارن رقم النسخة + بصمة الملف) */
+(function(){
+  var cur=(document.querySelector('meta[name="app-version"]')||{}).content||'';
+  var HK='najm_h_'+location.pathname;
+  function banner(v,h){
+    if(document.getElementById('najmUpd')) return;
+    var b=document.createElement('div');b.id='najmUpd';
+    b.style.cssText='position:fixed;bottom:12px;left:12px;right:12px;z-index:99999;background:#f5c542;color:#0b1a3b;font:800 15px sans-serif;text-align:center;padding:12px;border-radius:12px;cursor:pointer;direction:rtl';
+    b.textContent='🔄 يوجد تحديث جديد — اضغط هنا للتحديث';
+    b.onclick=function(){go(v,h)};document.body.appendChild(b);
+  }
+  function go(v,h){
+    try{localStorage.setItem(HK,h)}catch(e){}
+    try{ if(navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister()})}); }catch(e){}
+    try{ if(window.caches) caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})}); }catch(e){}
+    setTimeout(function(){location.replace(location.pathname+'?v='+encodeURIComponent(v))},150);
+  }
+  function hash(t){var x=5381,i=t.length;while(i)x=(x*33)^t.charCodeAt(--i);return String(x>>>0)}
+  function check(auto){
+    try{
+      fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
+        var m=t.match(/<meta name="app-version" content="([^"]+)"/),h=hash(t),old=null;
+        try{old=localStorage.getItem(HK)}catch(e){}
+        var changed=(m&&m[1]!==cur)||(old&&old!==h);
+        if(!changed){ if(!old){try{localStorage.setItem(HK,h)}catch(e){}} return; }
+        var tag=(m?m[1]:'x')+'-'+h, v=h;
+        if(auto&&sessionStorage.getItem('najm_upd_done')!==tag){sessionStorage.setItem('najm_upd_done',tag);go(v,h);}
+        else if(sessionStorage.getItem('najm_upd_done')!==tag||!auto) banner(v,h);
+      }).catch(function(){});
+    }catch(e){}
+  }
+  check(true);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)check(false)});
+})();
 </script>
 </body>
 </html>

@@ -48,11 +48,15 @@
  *  - السكربت يسجّل أول ظهور لكل ملف جديد (شيت "سجل المحتوى"؛ الملفات الموجودة وقت التفعيل تُعتبر قديمة ولا يُذكَّر بها).
  *  - شيت "تذكيرات الأسبوع": كل طالب مرّ أسبوع على ملف لم يفتحه، مع نص الرسالة وزر واتساب جاهز؛ ✔ أمام الاسم = أُرسل.
  *  - للتفعيل: القائمة 📊 نجم ← تفعيل تذكير الأسبوع (يوميًا).
+ *
+ * تحديث 2026-10-21 (أ): شاشة المعلم في لوحة تقدمي (?action=groups&key=الرمز):
+ *  - ترجع كل مشترك (الحالة 2) باسمه ومجموعته (العمود C) ونسبته العامة، والموقع يقسّمها: ممتاز / جيد جدًا / جيد / مقبول.
+ *  - محمية برمز المعلم المحفوظ داخل السكربت (القائمة 📊 نجم ← 🔑 تعيين رمز المعلم) — لا يُكتب الرمز في أي ملف.
  */
 
 var RESULTS_SHEET = 'النتائج';
 var LOG_SHEET = 'سجل الطلبات';
-var VERSION = '2026-10-19-f';
+var VERSION = '2026-10-21-a';
 var DUP_COLOR = '#ea9999';
 var DUP_SHEET = 'أرقام متكررة';
 var DUP_SHEET_OLD = 'الأرقام المكررة';
@@ -75,6 +79,9 @@ function doGet(e) {
   }
   if (p.action === 'progress') {
     return json_(progress_(p.phone, p.parent));
+  }
+  if (p.action === 'groups') {
+    return json_(groups_(p.key));
   }
   if (p.action === 'login') {
     return json_(login_(p.phone, p.parent));
@@ -295,6 +302,54 @@ function progress_(phone, parent) {
   var totalExams = 0;
   try { totalExams = examItems_().items.length; } catch (e) { totalExams = 0; }
   return { ok: true, name: me.name, exams: exams, overall: mine.pct === null ? null : Math.round(mine.pct * 100) / 100, taken: mine.taken, totalExams: totalExams, topPct: topPct, n: n };
+}
+
+// ---------- شاشة المعلم: كل المشتركين بمجموعاتهم ونسبهم (محمية برمز المعلم) ----------
+function setTeacherKey() {
+  var ui = SpreadsheetApp.getUi();
+  var r = ui.prompt('رمز المعلم', 'اكتب الرمز الذي ستدخل به شاشة المعلم في لوحة تقدمي (8 أحرف/أرقام على الأقل):', ui.ButtonSet.OK_CANCEL);
+  if (r.getSelectedButton() !== ui.Button.OK) return;
+  var k = String(r.getResponseText() || '').trim();
+  if (k.length < 8) { ui.alert('الرمز قصير — اكتب 8 أحرف/أرقام على الأقل'); return; }
+  PropertiesService.getScriptProperties().setProperty('TEACHER_KEY', k);
+  ui.alert('تم حفظ الرمز ✅');
+}
+
+function groups_(key) {
+  var saved = PropertiesService.getScriptProperties().getProperty('TEACHER_KEY');
+  if (!saved || String(key || '') !== saved) return { ok: false, error: 'unauthorized' };
+  var ss = SpreadsheetApp.getActiveSpreadsheet(), sh = ss.getSheetByName('الطلاب');
+  if (!sh || sh.getLastRow() < 2) return { ok: true, students: [] };
+  var v = sh.getDataRange().getValues(), h = v[0].map(function (x) { return (x + '').trim(); }), c = studentCols_(h);
+  // أفضل محاولة لكل طالب في كل اختبار (نفس منطق لوحة الطالب)
+  var best = {}, rs = ss.getSheetByName(RESULTS_SHEET);
+  if (rs && rs.getLastRow() > 1) {
+    var rv = rs.getRange(2, 1, rs.getLastRow() - 1, 11).getValues();
+    for (var i = 0; i < rv.length; i++) {
+      var k = key_(rv[i][2]), ex = normExam_(rv[i][4]), pct = Number(rv[i][8]);
+      if (!k || !ex) continue;
+      best[k] = best[k] || {};
+      var cur = best[k][ex];
+      if (!cur || pct > cur.percent) best[k][ex] = { percent: pct, score: Number(rv[i][6]), total: Number(rv[i][7]) };
+    }
+  }
+  var out = [], seen = {};
+  for (var r = 1; r < v.length; r++) {
+    var row = v[r];
+    var st = c.status > -1 ? String(row[c.status] == null ? '' : row[c.status]).trim() : '';
+    if (st !== '2') continue; // المشتركون فقط
+    var pk = c.phone > -1 ? key_(row[c.phone]) : '';
+    if (!pk || seen[pk]) continue; seen[pk] = 1;
+    var s0 = 0, t0 = 0, n = 0, b = best[pk] || {};
+    for (var e in b) { s0 += b[e].score; t0 += b[e].total; n++; }
+    out.push({
+      name: c.name > -1 ? String(row[c.name] || '').trim() : '',
+      group: c.group > -1 ? String(row[c.group] || '').trim() : '',
+      overall: t0 ? Math.round(s0 / t0 * 10000) / 100 : null,
+      taken: n
+    });
+  }
+  return { ok: true, students: out };
 }
 
 // ---------- تسجيل الدخول: يتحقق من الرقمين والحالة ويرجع الاسم فقط ----------
@@ -827,7 +882,7 @@ function refreshReminders() {
 
 // ---------- للمعلم: قائمة 📊 نجم ← تحديث إحصاء الأسئلة (شيت "إحصاء الأسئلة") ----------
 function onOpen() {
-  try { SpreadsheetApp.getUi().createMenu('📊 نجم').addItem('تحديث إحصاء الأسئلة', 'buildQuestionStats').addItem('فحص الأرقام المكررة', 'checkDuplicates').addItem('حذف المكرر (احتفظ بالمُحدّد ✔)', 'applyDuplicateChoices').addItem('تفعيل تذكير الأسبوع (يوميًا)', 'installReminderTrigger').addItem('تحديث تذكيرات الأسبوع الآن', 'refreshReminders').addToUi(); } catch (e) {}
+  try { SpreadsheetApp.getUi().createMenu('📊 نجم').addItem('تحديث إحصاء الأسئلة', 'buildQuestionStats').addItem('فحص الأرقام المكررة', 'checkDuplicates').addItem('حذف المكرر (احتفظ بالمُحدّد ✔)', 'applyDuplicateChoices').addItem('تفعيل تذكير الأسبوع (يوميًا)', 'installReminderTrigger').addItem('تحديث تذكيرات الأسبوع الآن', 'refreshReminders').addItem('🔑 تعيين رمز المعلم', 'setTeacherKey').addToUi(); } catch (e) {}
   try { // تنبيه عند فتح الملف إن وُجد تكرار
     var gs = dupGroups_();
     if (gs.length) SpreadsheetApp.getActiveSpreadsheet().toast('⚠️ يوجد ' + gs.length + ' رقم/أرقام مكررة في شيت الطلاب — افتح 📊 نجم ← فحص الأرقام المكررة', 'نجم — تنبيه', 20);
@@ -871,4 +926,3 @@ function buildQuestionStats() {
   out.setFrozenRows(1);
   out.getRange(1, 1, 1, 7).setFontWeight('bold');
 }
- 
