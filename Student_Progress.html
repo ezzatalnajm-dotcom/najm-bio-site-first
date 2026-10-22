@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="app-version" content="2026-10-21-f">
+<meta name="app-version" content="2026-10-22-labels">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <title>لوحة تقدمي — أ. عزت نجم الأحياء</title>
@@ -29,6 +29,10 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
 .ex{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
 .ex:last-child{border:0}.ex .n{flex:1;font-weight:700;font-size:14px}.ex .d{font-size:11px;color:var(--mut);font-weight:400}
 .ex .pc{font-weight:900;color:var(--gold);min-width:56px;text-align:left;direction:ltr}
+.ex .code{font-size:11px;color:var(--mut);font-weight:700;direction:ltr;margin-top:2px;letter-spacing:.3px}
+.pend{margin-top:4px}.pend .ex{opacity:.92}
+.pend .n a{color:var(--gold);text-decoration:none;font-weight:800}
+.sec-title{font-weight:900;color:var(--gold);margin-bottom:4px}
 .bar{height:6px;border-radius:4px;background:rgba(255,255,255,.1);margin-top:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
 .rv{margin-top:8px}.rv summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:12px}.rv .w{background:rgba(0,0,0,.25);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:12px;line-height:1.7;font-weight:400}.rv .a{color:#ff9d9d}.rv .c{color:#8ee6a8}.rv .ok{font-size:12px;color:#8ee6a8;margin-top:6px}
 .wa{background:linear-gradient(150deg,#25d366,#128c4a);color:#fff}
@@ -103,7 +107,8 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
       <div id="nm" style="font-weight:800;margin-bottom:6px"></div>
       <div class="p" id="pc"></div><div class="g" id="gr"></div><div class="t" id="tp"></div><div class="prog" id="prog"></div><div class="s" id="tk"></div>
     </div>
-    <div class="card"><div style="font-weight:900;color:var(--gold);margin-bottom:4px">📊 أعلى نتيجة في كل اختبار</div><div id="list"></div></div>
+    <div class="card"><div class="sec-title">✅ ما أنجزته</div><div id="list"></div></div>
+    <div class="card hide" id="pendCard"><div class="sec-title">⏳ متبقي عليك</div><div class="pend" id="pend"></div></div>
     <button id="certBtn" class="hide" onclick="certOpen()">🎓 شهادة تقديري</button>
     <div class="hint hide" id="certHint" style="text-align:center"></div>
     <button class="wa" onclick="share()">📲 شارك النتيجة مع ولي الأمر</button>
@@ -174,21 +179,57 @@ function render(){
   wmSet(D.name,U&&U.phone);{const nS=Math.max(1,(+D.totalExams||0)-1),okS=D.overall!=null&&D.overall>=45&&(+D.taken||0)>=nS;$('certBtn').classList.toggle('hide',!okS);const hn=$('certHint');hn.classList.toggle('hide',!(D.overall!=null&&D.overall>=45&&!okS));hn.textContent='🎓 تظهر شهادتك بعد إنجاز '+nS+' '+exW(nS)+' (أنجزت '+(+D.taken||0)+')';}
   if(D.overall==null){
     $('pc').textContent='—';$('gr').textContent='لا توجد نتائج بعد';$('tp').textContent='';$('tk').textContent='ابدأ بحل أحد بنوك الأسئلة وستظهر نتيجتك هنا';progBox();
-    $('list').innerHTML='<div class="hint">لم تسجل أي نتيجة حتى الآن.</div>';return;
+    $('list').innerHTML='<div class="hint">لم تسجل أي نتيجة حتى الآن.</div>';
+    (function(){
+      const pend=Array.isArray(D.pending)?D.pending:[];
+      const pc=$('pendCard'), pe=$('pend');
+      if(!pc||!pe)return;
+      if(!pend.length){pc.classList.add('hide');pe.innerHTML='';return;}
+      pc.classList.remove('hide');
+      pe.innerHTML=pend.map(e=>{
+        const code=e.code||e.exam||'';
+        const title=esc(e.title||code);
+        const link=e.link&&e.link!=='#'?`<a href="${esc(e.link)}" target="_blank" rel="noopener">${title}</a>`:title;
+        return `<div class="ex"><div class="n">${link}${code?`<div class="code">${esc(code)}</div>`:''}<div class="d">لم يُحل بعد</div></div><div class="pc">—</div></div>`;
+      }).join('');
+    })();
+    return;
   }
   $('pc').textContent=D.overall.toFixed(1)+'%';
   $('gr').textContent=grade(D.overall);
   $('tp').textContent=(D.n>=20&&D.topPct<=20)?'🏅 ضمن أفضل '+D.topPct+'% من الطلاب':'';
   progBox();$('tk').textContent='التقدير العام = مجموع الدرجات ÷ مجموع الدرجات الكلية';
-  $('list').innerHTML=D.exams.map(e=>{
-    const dt=e.at?new Date(e.at).toLocaleDateString('ar-EG'):'';
-    return `<div class="ex"><div class="n">${esc(e.title)}<div class="d">${dt} · ${e.score}/${e.total} · ${e.attempts} محاولة</div><div class="bar"><i style="width:${Math.min(100,e.percent)}%"></i></div>${review(e)}</div><div class="pc">${e.percent.toFixed(1)}%</div></div>`;
-  }).join('');
+  const label=e=>{
+    const code=e.code||e.exam||'';
+    return esc(e.title||code)+(code?`<div class="code">${esc(code)}</div>`:'');
+  };
+  if(!D.exams||!D.exams.length){
+    $('list').innerHTML='<div class="hint">لم تسجل أي نتيجة حتى الآن.</div>';
+  } else {
+    $('list').innerHTML=D.exams.map(e=>{
+      const dt=e.at?new Date(e.at).toLocaleDateString('ar-EG'):'';
+      return `<div class="ex"><div class="n">${label(e)}<div class="d">${dt} · ${e.score}/${e.total} · ${e.attempts} محاولة</div><div class="bar"><i style="width:${Math.min(100,e.percent)}%"></i></div>${review(e)}</div><div class="pc">${e.percent.toFixed(1)}%</div></div>`;
+    }).join('');
+  }
+  const pend=Array.isArray(D.pending)?D.pending:[];
+  const pc=$('pendCard'), pe=$('pend');
+  if(pc&&pe){
+    if(!pend.length){pc.classList.add('hide');pe.innerHTML='';}
+    else{
+      pc.classList.remove('hide');
+      pe.innerHTML=pend.map(e=>{
+        const code=e.code||e.exam||'';
+        const title=esc(e.title||code);
+        const link=e.link&&e.link!=='#'?`<a href="${esc(e.link)}" target="_blank" rel="noopener">${title}</a>`:title;
+        return `<div class="ex"><div class="n">${link}${code?`<div class="code">${esc(code)}</div>`:''}<div class="d">لم يُحل بعد</div></div><div class="pc">—</div></div>`;
+      }).join('');
+    }
+  }
 }
 
 function share(){
   let t=`*نتيجة ${D.name||'الطالب'} في بنوك الأسئلة — أ. عزت نجم الأحياء*\nالتقدير العام: ${D.overall==null?'—':grade(D.overall)+' ('+D.overall.toFixed(1)+'%)'}\nالاختبارات المنجزة: ${(()=>{const l=examsLine();return l.pct==null?(+D.taken||0):l.taken+' من أصل '+l.total})()}\n`;
-  D.exams.forEach(e=>t+=`• ${e.title}: ${e.percent.toFixed(1)}%\n`);
+  D.exams.forEach(e=>{const c=e.code||e.exam||'';t+=`• ${e.title}`+(c?` (${c})`:'')+`: ${e.percent.toFixed(1)}%\n`;});
   window.open('https://wa.me/'+U.parent+'?text='+encodeURIComponent(t),'_blank');
 }
 function out(){wmSet('','');try{localStorage.removeItem('najm_progress_user')}catch(e){}U=D=null;$('dash').classList.add('hide');$('login').classList.remove('hide')}
