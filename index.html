@@ -218,6 +218,23 @@
             opacity: 0.9;
         }
         .revision-item .resource-code { font-size: 10px; }
+        .exam-status {
+            flex-shrink: 0;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .exam-status.done {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        .exam-status.todo {
+            background: #feebc8;
+            color: #9c4221;
+        }
+        .resource-link.has-status { justify-content: space-between; }
         .coming-soon {
             opacity: 0.7;
             background: #fef9e6;
@@ -1174,6 +1191,7 @@
         renderSharedPanel();
         checkForNewItems();
         checkPending();
+        loadSolvedExams();
     }
 
     // ======================== التسجيل الذاتي ========================
@@ -1236,6 +1254,7 @@
 
     function logout() {
         currentUser = null;
+        solvedExamKeys = null;
         localStorage.removeItem('najm_shared_user');
         updateHeaderAuth();
         switchTab('public');
@@ -1279,6 +1298,7 @@
                 if (document.getElementById('sharedPanel').classList.contains('active-panel')) renderSharedPanel();
             } else if (d && d.ok) {
                 checkPending();
+                loadSolvedExams();
             }
         } catch (e) {}
     })();
@@ -1352,6 +1372,41 @@
         return s;
     }
 
+    // تمييز المحلول / غير المحلول للمسجّلين فقط (من progress — لا يغيّر الروابط)
+    let solvedExamKeys = null;
+    function normExamId(id) {
+        return String(id == null ? '' : id).replace(/^(U\d+L\d+)_P1_(P[23])_/i, '$1_$2_');
+    }
+    function examStatusBadge(link, panelId) {
+        if (panelId !== 'shared' || !currentUser || !solvedExamKeys) return '';
+        const code = examCodeFromLink(link);
+        if (!code) return '';
+        const k = normExamId(code);
+        if (solvedExamKeys.has(k)) return '<span class="exam-status done" title="تم الحل">✓ تم</span>';
+        if (/mcq/i.test(link) || /mcq/i.test(code)) return '<span class="exam-status todo" title="لم يُحل بعد">لم يُحل</span>';
+        return '';
+    }
+    async function loadSolvedExams() {
+        solvedExamKeys = null;
+        if (!currentUser || !currentUser.phone || !currentUser.parent) return;
+        if (GOOGLE_SCRIPT_URL.includes('XXXXXXXX')) return;
+        try {
+            const r = await fetch(GOOGLE_SCRIPT_URL + '?action=progress&phone=' + encodeURIComponent(currentUser.phone) + '&parent=' + encodeURIComponent(currentUser.parent) + '&t=' + Date.now());
+            const d = await r.json();
+            const set = new Set();
+            if (d && d.ok && Array.isArray(d.exams)) {
+                d.exams.forEach(function (e) {
+                    const c = normExamId(e.code || e.exam || '');
+                    if (c) set.add(c);
+                });
+            }
+            if (d && d.ok) solvedExamKeys = set;
+        } catch (e) {
+            solvedExamKeys = null;
+        }
+        if (currentUser && document.getElementById('sharedPanel')) renderSharedPanel();
+    }
+
     function renderRevision(panelId, revisionData, title, isFirstRevision) {
         let gridClass = isFirstRevision ? "revision-grid-3" : "revision-grid-4";
         let html = `<div class="unit-card">
@@ -1397,12 +1452,14 @@
                 let isActive = item.link !== "#";
                 let extraClass = isActive ? "" : "coming-soon";
                 const code = examCodeFromLink(item.link);
-                html += `<a href="${item.link}" class="resource-link ${extraClass}" target="_blank">
+                const badge = examStatusBadge(item.link, panelId);
+                html += `<a href="${item.link}" class="resource-link ${extraClass}${badge ? ' has-status' : ''}" target="_blank">
                     <span>${item.icon}</span>
                     <div class="resource-text">
                         <div class="resource-title">${item.title}</div>
                         ${code ? `<div class="resource-code">${code}</div>` : ''}
                     </div>
+                    ${badge}
                 </a>`;
             });
             html += `</div></div></div>`;
