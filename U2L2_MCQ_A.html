@@ -355,7 +355,7 @@
   body:not(.exam-done):not(.teacher-mode) .btn-evaluate { display: none !important; }
 
 </style>
-<meta name="app-version" content="2026-10-21-d">
+<meta name="app-version" content="2026-10-21-f">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 </head>
 <body>
@@ -2342,8 +2342,11 @@ if(!questions || !questions.length){
   function hash(t){var x=5381,i=t.length;while(i)x=(x*33)^t.charCodeAt(--i);return String(x>>>0)}
   function check(auto){
     try{
-      fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
-        var m=t.match(/<meta name="app-version" content="([^"]+)"/),h=hash(t),old=null;
+      if(!/^https?:$/.test(location.protocol))return;
+      fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
+        var m=t.match(/<meta name="app-version" content="([^"]+)"/);
+        if(!m)return; /* ليست صفحة الاختبار الحقيقية (خطأ/معاينة) — لا تحديث */
+        var h=hash(t),old=null;
         try{old=localStorage.getItem(HK)}catch(e){}
         var changed=(m&&m[1]!==cur)||(old&&old!==h);
         if(!changed){ if(!old){try{localStorage.setItem(HK,h)}catch(e){}} return; }
@@ -2386,6 +2389,37 @@ if(!questions || !questions.length){
   setInterval(apply,1000);
   try{new MutationObserver(function(){if(!document.getElementById('najmWM'))apply()}).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
   apply();
+})();
+</script>
+<script>
+/* najmSearch: عدسة بحث في الأسئلة (تظهر للمعلم فقط) */
+(function(){
+  function norm(s){return String(s||'').replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).toLowerCase()}
+  var box=null,inp=null,cnt=null,q='';
+  function cards(){var c=document.getElementById('questionsContainer');return c?[].slice.call(c.querySelectorAll('.question-card')):[]}
+  function text(el){var t=el.innerText||el.textContent||'';[].forEach.call(el.querySelectorAll('input,textarea'),function(i){if(i.type!=='number'&&i.type!=='checkbox'&&i.type!=='radio')t+=' '+i.value});return norm(t)}
+  function run(){
+    var w=norm(q).split(/\s+/).filter(Boolean),cs=cards(),n=0;
+    cs.forEach(function(c){var t=text(c),ok=!w.length||w.every(function(x){return t.indexOf(x)>-1});c.style.display=ok?'':'none';if(ok)n++});
+    if(cnt)cnt.textContent=w.length?('النتائج: '+n+' من '+cs.length):'';
+  }
+  function make(){
+    var c=document.getElementById('questionsContainer');if(!c||box)return;
+    box=document.createElement('div');box.id='najmSearch';
+    box.style.cssText='display:none;position:sticky;top:0;z-index:30;margin:8px 14px;padding:8px 12px;background:#fff;border:2px solid #f5c542;border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.12);direction:rtl;align-items:center;gap:8px';
+    box.innerHTML='<span style="font-size:20px">🔍</span><input type="search" placeholder="ابحث في الأسئلة بكلمة أو رقم..." style="flex:1;min-width:0;border:0;outline:0;font-weight:700;font-size:15px;font-family:inherit;background:transparent;color:#0b1a3b;direction:rtl"><span class="najmCnt" style="font-weight:700;font-size:12px;color:#667"></span>';
+    c.parentNode.insertBefore(box,c);
+    inp=box.querySelector('input');cnt=box.querySelector('.najmCnt');
+    inp.addEventListener('input',function(){q=inp.value;run()});
+    try{new MutationObserver(function(){if(q)run()}).observe(c,{childList:true})}catch(e){}
+  }
+  setInterval(function(){
+    make();if(!box)return;
+    var c=document.getElementById('questionsContainer');
+    var show=(typeof TEACHER_MODE!=='undefined'&&TEACHER_MODE)&&c&&!c.classList.contains('hidden-qs');
+    box.style.display=show?'flex':'none';
+    if(!show&&q){q='';inp.value='';run()}
+  },800);
 })();
 </script>
 </body>
