@@ -258,7 +258,7 @@ async function certDraw(name,overall){
   x.strokeStyle='#f5c542';x.lineWidth=10;x.strokeRect(40,40,W-80,H-80);x.lineWidth=3;x.strokeRect(64,64,W-128,H-128);
   x.fillStyle='#f5c542';star5(x,W/2,185,62,26);
   x.font='900 100px Cairo, sans-serif';x.fillText('شهادة تقدير',W/2,330);
-  x.fillStyle='#d9e0f5';x.font='700 38px Cairo, sans-serif';x.fillText('تتشرف أ. عزت نجم الأحياء بمنح الطالب / الطالبة',W/2,445);
+  x.fillStyle='#d9e0f5';x.font='700 38px Cairo, sans-serif';x.fillText('يتشرف أ. عزت نجم الأحياء بمنح الطالب / الطالبة',W/2,445);
   let nm=name||'الطالب',fs=88;x.fillStyle='#ffffff';
   do{x.font='900 '+fs+'px Cairo, sans-serif';fs-=4}while(x.measureText(nm).width>1200&&fs>36);
   x.fillText(nm,W/2,570);
