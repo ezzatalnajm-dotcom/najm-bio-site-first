@@ -56,7 +56,7 @@
 
 var RESULTS_SHEET = 'النتائج';
 var LOG_SHEET = 'سجل الطلبات';
-var VERSION = '2026-10-21-a';
+var VERSION = '2026-10-22-labels';
 var DUP_COLOR = '#ea9999';
 var DUP_SHEET = 'أرقام متكررة';
 var DUP_SHEET_OLD = 'الأرقام المكررة';
@@ -261,6 +261,26 @@ function examItems_() {
 }
 
 // ---------- لوحة التقدم: تتحقق من الرقمين ثم ترجع بيانات هذا الطالب فقط ----------
+// يستخرج رمز الملف من الرابط (مثل U2L1_P2_MCQ_B.html → U2L1_P2_MCQ_B) — لا يغيّر الروابط
+function examCodeFromLink_(link) {
+  var s = String(link == null ? '' : link).trim().split('#')[0].split('?')[0];
+  var slash = Math.max(s.lastIndexOf('/'), s.lastIndexOf('\\'));
+  if (slash >= 0) s = s.slice(slash + 1);
+  return s.replace(/\.html$/i, '');
+}
+
+// خريطة رمز الاختبار الموحّد → عنوان عربي + رمز + رابط من شيت المحتوى (للعرض فقط — لا يمس شيت النتائج)
+function contentExamMap_() {
+  var map = {};
+  examItems_().items.forEach(function (r) {
+    var code = examCodeFromLink_(r.link);
+    var k = normExam_(code);
+    if (!k) return;
+    if (!map[k]) map[k] = { title: r.title, code: code, link: r.link };
+  });
+  return map;
+}
+
 function progress_(phone, parent) {
   var pk = key_(phone), qk = key_(parent);
   if (!pk || !qk) return { ok: false, error: 'bad input' };
@@ -288,9 +308,37 @@ function progress_(phone, parent) {
     for (var ex in b) { s += b[ex].score; t += b[ex].total; c++; }
     return { pct: t ? s / t * 100 : null, taken: c };
   }
+
+  // عرض فقط: عنوان عربي من شيت المحتوى + الرمز — دون تعديل شيت النتائج
+  var cmap = {};
+  try { cmap = contentExamMap_(); } catch (e) { cmap = {}; }
+  var totalExams = 0;
+  try { totalExams = examItems_().items.length; } catch (e) { totalExams = 0; }
+
   var mine = overall(pk), exams = [];
-  for (var ex in (best[pk] || {})) { var o = best[pk][ex]; o.attempts = attempts[ex] || 1; exams.push(o); }
+  for (var ex in (best[pk] || {})) {
+    var o = best[pk][ex];
+    o.attempts = attempts[ex] || 1;
+    var meta = cmap[ex];
+    if (meta) {
+      o.code = meta.code;
+      o.title = meta.title; // للعرض في اللوحة فقط
+      o.link = meta.link;
+    } else {
+      o.code = o.exam;
+    }
+    exams.push(o);
+  }
   exams.sort(function (a, b) { return a.exam < b.exam ? -1 : 1; });
+
+  // اختبارات ظاهرة في المحتوى ولم يُنجزها هذا الطالب بعد
+  var pending = [];
+  for (var ck in cmap) {
+    if (!(best[pk] && best[pk][ck])) {
+      pending.push({ exam: ck, title: cmap[ck].title, code: cmap[ck].code, link: cmap[ck].link });
+    }
+  }
+  pending.sort(function (a, b) { return a.exam < b.exam ? -1 : 1; });
 
   var topPct = null, n = 0;
   if (mine.pct !== null) {
@@ -299,9 +347,17 @@ function progress_(phone, parent) {
     for (var k2 in best) { if (!activeKeys[k2]) continue; var o2 = overall(k2); if (o2.pct === null) continue; n++; if (k2 !== pk && o2.pct > mine.pct + 1e-9) higher++; }
     topPct = Math.ceil((higher + 1) / n * 100);
   }
-  var totalExams = 0;
-  try { totalExams = examItems_().items.length; } catch (e) { totalExams = 0; }
-  return { ok: true, name: me.name, exams: exams, overall: mine.pct === null ? null : Math.round(mine.pct * 100) / 100, taken: mine.taken, totalExams: totalExams, topPct: topPct, n: n };
+  return {
+    ok: true,
+    name: me.name,
+    exams: exams,
+    pending: pending,
+    overall: mine.pct === null ? null : Math.round(mine.pct * 100) / 100,
+    taken: mine.taken,
+    totalExams: totalExams,
+    topPct: topPct,
+    n: n
+  };
 }
 
 // ---------- شاشة المعلم: كل المشتركين بمجموعاتهم ونسبهم (محمية برمز المعلم) ----------

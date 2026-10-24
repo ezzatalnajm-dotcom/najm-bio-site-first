@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="app-version" content="2026-10-22-labels">
+<meta name="app-version" content="2026-10-23-devices">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <title>لوحة تقدمي — أ. عزت نجم الأحياء</title>
@@ -98,6 +98,13 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
       <div id="ttop"></div>
       <div id="tbands"></div>
     </div>
+    <div class="card">
+      <div style="font-weight:900;color:var(--gold)">🔓 إعادة تشغيل حساب طالب (بعد إيقافه لتعدد الأجهزة)</div>
+      <label>هاتف الطالب</label>
+      <div class="row"><input class="cc" id="rc1" value="974" inputmode="numeric" maxlength="4" oninput="this.value=en(this.value).replace(/\D/g,'')"><input class="num" id="rp1" type="tel" inputmode="numeric" placeholder="50123456"></div>
+      <button onclick="tReset()">إعادة تشغيل الحساب</button>
+      <div class="hint" id="trs"></div>
+    </div>
     <button class="sec" onclick="tGo(true)">🔄 تحديث البيانات</button>
     <button class="sec" onclick="tOut()">خروج المعلم</button>
   </div>
@@ -126,11 +133,59 @@ button.sec{background:transparent;color:var(--mut);border:1px solid rgba(255,255
 <script>
 const URL_="https://script.google.com/macros/s/AKfycbzpVJBVOa_ewqV4K0hyeiTaeIZFbXGZLvYoD4at-9FLim98C-YHw18XZa_M_PSIeM9_kA/exec";
 const $=id=>document.getElementById(id);
+function najmDeviceId(){
+var k='najm_device_id',v='';
+try{ v=localStorage.getItem(k)||''; }catch(e){}
+if(!v){
+    v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,10));
+    try{ localStorage.setItem(k,v); }catch(e){}
+}
+return v;
+}
+
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const plain=s=>String(s==null?'':s).replace(/<[^>]*>/g,' ').replace(/<[^>]*$/,'').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
+const OKH='<div class="ok">🌟 أجبت كل الأسئلة بشكل صحيح</div>';
+const RVD={};let RVN=0;
+function rvItems(L){return L.map(w=>'<div class="w">'+esc(plain(w.q))+'<br><span class="a">إجابتك: '+(w.a?esc(plain(w.a)):'لم تُجب')+'</span><br><span class="c">الصحيحة: '+esc(plain(w.c))+'</span></div>').join('')}
 function review(e){
   if(!Array.isArray(e.wrong)) return '';
-  if(!e.wrong.length) return '<div class="ok">🌟 أجبت كل الأسئلة بشكل صحيح</div>';
-  return '<details class="rv"><summary>📝 راجع أخطائي ('+e.wrong.length+')</summary>'+e.wrong.map(w=>'<div class="w">'+esc(w.q)+'<br><span class="a">إجابتك: '+(w.a?esc(w.a):'لم تُجب')+'</span><br><span class="c">الصحيحة: '+esc(w.c)+'</span></div>').join('')+'</details>';
+  if(!e.wrong.length) return OKH;
+  const id='rv'+(++RVN);RVD[id]={e:e,done:false};
+  return '<details class="rv" id="'+id+'" ontoggle="rvOpen(this)"><summary>📝 راجع أخطائي ('+e.wrong.length+')</summary><div class="rvb">'+rvItems(e.wrong)+'</div></details>';
+}
+/* عند فتح «راجع أخطائي»: تُقارن إجابة الطالب بمفتاح الإجابة الحالي في ملف البنك؛
+   لو الأستاذ صحّح الإجابة وكان الطالب محقًا يُحذف السؤال من الأخطاء، ولو تغيّرت الصحيحة تُعرض الصحيحة الجديدة */
+const KEYS={};
+function bankKey(code){
+  if(!code) return Promise.resolve(null);
+  if(KEYS[code]) return KEYS[code];
+  return KEYS[code]=fetch(encodeURIComponent(code)+'.html').then(r=>r.ok?r.text():'').then(t=>{
+    const k='\nconst RAW_QUESTIONS = ',i=t.indexOf(k);if(i<0)return null;
+    const j=t.indexOf('];\n',i);if(j<0)return null;
+    const arr=JSON.parse(t.slice(i+k.length,j+1)),m={};
+    arr.forEach(q=>{
+      if((q.type||'')!=='mcq'||!Array.isArray(q.choices))return;
+      const ci=typeof q.correctIndex==='number'?q.correctIndex:0,c=q.choices[ci];if(c==null)return;
+      m[plain(String(q.text||'').slice(0,200)).slice(0,100)]={c:plain(c),c100:plain(String(c).slice(0,100))};
+    });
+    return m;
+  }).catch(()=>null);
+}
+async function rvOpen(el){
+  if(!el.open)return;const r=RVD[el.id];if(!r||r.done)return;r.done=true;
+  const m=await bankKey(r.e.code||r.e.exam||'');if(!m)return;
+  const keep=[];let changed=false;
+  r.e.wrong.forEach(w=>{
+    const cur=m[plain(w.q).slice(0,100)];
+    if(cur&&w.a&&plain(w.a)===cur.c100){changed=true;return;}
+    if(cur&&cur.c!==plain(w.c)){keep.push(Object.assign({},w,{c:cur.c}));changed=true;return;}
+    keep.push(w);
+  });
+  if(!changed)return;
+  if(!keep.length){el.outerHTML=OKH;return;}
+  el.querySelector('summary').textContent='📝 راجع أخطائي ('+keep.length+')';
+  el.querySelector('.rvb').innerHTML=rvItems(keep);
 }
 const en=s=>String(s==null?'':s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 let U=null,D=null;
@@ -163,13 +218,13 @@ async function go(){
   $('err').style.display='none';
   const b=document.querySelector('#login button');b.textContent='⏳ جاري التحميل...';
   try{
-    const r=await fetch(URL_+'?action=progress&phone='+phone+'&parent='+parent+'&t='+Date.now());
+    const r=await fetch(URL_+'?action=progress&phone='+phone+'&parent='+parent+'&device='+encodeURIComponent(najmDeviceId())+'&t='+Date.now());
     const d=await r.json();
-    if(!d.ok) throw new Error(d.error==='pending'?'pd':d.error==='not found'?'nf':'x');
+    if(!d.ok) throw new Error(d.error==='pending'?'pd':d.error==='not found'?'nf':(d.error==='devices'||d.error==='blocked')?'dv':'x');
     U={phone,parent};D=d;
     try{localStorage.setItem('najm_progress_user',JSON.stringify(U))}catch(e){}
     render();
-  }catch(e){showErr(e.message==='pd'?'⏳ طلبك قيد المراجعة وسيتم تفعيله قريبًا.':e.message==='nf'?'❌ الرقمان غير مسجلين. تواصل مع الأستاذ.':'❌ تعذر الاتصال، حاول مرة أخرى.')}
+  }catch(e){showErr(e.message==='dv'?'⛔ تم إيقاف الحساب للدخول من أكثر من جهاز — تواصل مع المعلم':e.message==='pd'?'⏳ طلبك قيد المراجعة وسيتم تفعيله قريبًا.':e.message==='nf'?'❌ الرقمان غير مسجلين. تواصل مع الأستاذ.':'❌ تعذر الاتصال، حاول مرة أخرى.')}
   b.textContent='عرض نتائجي';
 }
 
@@ -347,6 +402,18 @@ function tRender(){
   $('tbands').innerHTML=h;
 }
 function tPick(g){TG=g;tRender()}
+async function tReset(){
+  const o=$('trs'),p=full($('rc1').value,$('rp1').value),k=sessionStorage.getItem('najm_tkey')||'';
+  if(!ok(p)){o.style.color='#ff8a8a';o.textContent='❌ تأكد من رقم الطالب';return}
+  if(!confirm('إعادة تشغيل حساب '+p+' ومسح أجهزته المسجلة؟'))return;
+  o.style.color='';o.textContent='⏳ جاري التنفيذ...';
+  try{
+    const r=await fetch(URL_+'?action=resetDevices&key='+encodeURIComponent(k)+'&phone='+p+'&t='+Date.now());
+    const d=await r.json();
+    if(d&&d.ok){o.style.color='#8ee6a8';o.textContent='✅ تم تشغيل الحساب — يمكن للطالب الدخول من جديد (٤ أجهزة)'}
+    else{o.style.color='#ff8a8a';o.textContent=d&&d.error==='unauthorized'?'❌ رمز المعلم غير صحيح':'❌ لم يتم — تأكد أن السكربت على جوجل محدَّث لدعم الأجهزة'}
+  }catch(x){o.style.color='#ff8a8a';o.textContent='❌ تعذر الاتصال'}
+}
 
 /* ===== تحديث تلقائي: يمنع ظهور النسخة القديمة للطلاب ===== */
 const APP_V=(document.querySelector('meta[name=app-version]')||{}).content||'';

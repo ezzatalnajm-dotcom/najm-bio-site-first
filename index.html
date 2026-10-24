@@ -1145,6 +1145,15 @@
         }
     }
 
+    function najmDeviceId(){
+        var k='najm_device_id',v='';
+        try{ v=localStorage.getItem(k)||''; }catch(e){}
+        if(!v){
+            v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,10));
+            try{ localStorage.setItem(k,v); }catch(e){}
+        }
+        return v;
+    }
     async function doLogin() {
         const phone = buildFullPhone(document.getElementById('loginPhoneCode').value, document.getElementById('loginPhone').value);
         const parent = buildFullPhone(document.getElementById('loginParentCode').value, document.getElementById('loginParent').value);
@@ -1161,11 +1170,13 @@
         // التحقق يتم داخل السكربت (لا تُحمَّل قائمة الطلاب في المتصفح)
         let d;
         try {
-            const r = await fetch(GOOGLE_SCRIPT_URL + '?action=login&phone=' + phone + '&parent=' + parent + '&t=' + Date.now());
+            const r = await fetch(GOOGLE_SCRIPT_URL + '?action=login&phone=' + phone + '&parent=' + parent + '&device=' + encodeURIComponent(najmDeviceId()) + '&t=' + Date.now());
             d = await r.json();
         } catch (e) { err.textContent = "❌ تعذر الاتصال، حاول مرة أخرى."; err.style.color = "#e53e3e"; return; }
         if (!d || !d.ok) {
-            err.textContent = (d && d.error === 'pending')
+            err.textContent = (d && (d.error === 'devices' || d.error === 'blocked'))
+                ? "⛔ تم إيقاف الحساب للدخول من أكثر من جهاز — تواصل مع المعلم"
+                : (d && d.error === 'pending')
                 ? "⏳ طلبك قيد المراجعة وسيتم تفعيله قريبًا. يمكنك تصفح المحتوى العام الآن."
                 : "❌ هذا الرقم غير مسجل. يمكنك التسجيل الآن من زر «تسجيل جديد».";
             err.style.color = "#e53e3e";
@@ -1291,9 +1302,10 @@
     (async function verifySession() {
         if (!currentUser) return;
         try {
-            const r = await fetch(GOOGLE_SCRIPT_URL + '?action=login&phone=' + currentUser.phone + '&parent=' + currentUser.parent + '&t=' + Date.now());
+            const r = await fetch(GOOGLE_SCRIPT_URL + '?action=login&phone=' + currentUser.phone + '&parent=' + currentUser.parent + '&device=' + encodeURIComponent(najmDeviceId()) + '&t=' + Date.now());
             const d = await r.json();
             if (d && d.ok === false) {
+                if (d.error === 'devices' || d.error === 'blocked') { try { alert("⛔ تم إيقاف الحساب للدخول من أكثر من جهاز — تواصل مع المعلم"); } catch (e) {} }
                 currentUser = null; localStorage.removeItem('najm_shared_user'); updateHeaderAuth();
                 if (document.getElementById('sharedPanel').classList.contains('active-panel')) renderSharedPanel();
             } else if (d && d.ok) {
