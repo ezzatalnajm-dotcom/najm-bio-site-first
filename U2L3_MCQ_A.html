@@ -2640,8 +2640,10 @@ tryResumeAttempt();
 </script>
 <script>
 /* najmSend (2026-10-23): إرسال النتيجة بشكل آمن + شريط حالة واضح + إعادة إرسال */
+/* v2 (2026-10-25): النتيجة الجديدة تُرسل فورًا بطلب مستقل ولا تنتظر طابور النتائج القديمة */
 (function(){
   var flushing=null, CUR=null, bar=null, lastErr='', hideT=null;
+  var inflight={}, done=false; /* نتائج قيد الإرسال الآن — لمنع الإرسال المزدوج بين الطلب المستقل والدورة الخلفية */
   function ensureBar(){
     if(bar) return bar;
     bar=document.createElement('div'); bar.id='najmSendBar';
@@ -2654,11 +2656,16 @@ tryResumeAttempt();
     else if(kind==='ok'){ b.style.background='#0f5a34'; b.style.color='#fff'; b.style.border='1px solid #2fbf71'; b.innerHTML='<span>✅ تم تسجيل نتيجتك في لوحة تقدمي</span>'; hideT=setTimeout(function(){ b.style.display='none'; },9000); }
     else { b.style.background='#7a1f1f'; b.style.color='#fff'; b.style.border='1px solid #e06666';
       b.innerHTML='<span>⚠️ لم تصل نتيجتك بعد — تأكد من الإنترنت، وستُرسل تلقائياً أول ما يتوفر.'+(lastErr?' <small style="opacity:.8">('+lastErr+')</small>':'')+'</span><button type="button" id="najmSendRetry" style="background:#f5c542;color:#222;border:0;border-radius:10px;padding:6px 12px;font-family:inherit;font-weight:900;cursor:pointer;white-space:nowrap">🔄 إعادة الإرسال</button>';
-      var r=document.getElementById('najmSendRetry'); if(r) r.onclick=function(){ show('sending'); window.flushPendingResults(); };
+      var r=document.getElementById('najmSendRetry'); if(r) r.onclick=function(){
+        var item=_pendingGet().filter(function(x){ return x.id===CUR; })[0];
+        if(item && !inflight[item.id]){ show('sending'); sendNow(item); }
+        window.flushPendingResults();
+      };
     }
   }
   function refresh(){
-    if(!CUR) return;
+    if(!CUR || done) return;
+    if(inflight[CUR]) return; /* لسه بتتبعت — ما نغيّر الشريط */
     var still=_pendingGet().some(function(x){ return x.id===CUR; });
     show(still?'fail':'ok');
   }
@@ -2673,18 +2680,33 @@ tryResumeAttempt();
     }catch(e){ lastErr=(e&&e.name==='AbortError')?'انتهت مهلة الاتصال':'تعذر الاتصال بالإنترنت'; return false; }
     finally{ clearTimeout(tm); }
   }
-  /* بديل آمن لدالة الإرسال القديمة: قفل واحد، ولا يمسح أي نتيجة جديدة أضيفت أثناء الإرسال */
+  /* إرسال مستقل لنتيجة واحدة: لا يمر على القفل ولا ينتظر الطابور */
+  async function sendNow(item){
+    inflight[item.id]=1;
+    var ok=false;
+    try{ ok=await post(item); }catch(e){ ok=false; }
+    if(ok){ _pendingSet(_pendingGet().filter(function(x){ return x.id!==item.id; })); }
+    delete inflight[item.id];
+    if(CUR===item.id){ done=ok; show(ok?'ok':'fail'); }
+    return ok;
+  }
+  /* الدورة الخلفية للنتائج القديمة: قفل واحد، تتخطى أي نتيجة قيد الإرسال، ولا تمسح نتيجة جديدة أضيفت أثناءها */
   window.flushPendingResults=function(){
     if(flushing) return flushing;
     flushing=(async function(){
       try{
         var tried={};
         for(;;){
-          var q=_pendingGet().filter(function(x){ return !tried[x.id]; });
+          var q=_pendingGet().filter(function(x){ return !tried[x.id] && !inflight[x.id]; });
           if(!q.length) break;
           for(var k=0;k<q.length;k++){
             var item=q[k]; tried[item.id]=1;
-            if(await post(item)){ _pendingSet(_pendingGet().filter(function(x){ return x.id!==item.id; })); }
+            if(inflight[item.id]) continue;
+            inflight[item.id]=1;
+            var ok=false;
+            try{ ok=await post(item); }catch(e){ ok=false; }
+            if(ok){ _pendingSet(_pendingGet().filter(function(x){ return x.id!==item.id; })); }
+            delete inflight[item.id];
           }
         }
       }catch(e){}
@@ -2697,7 +2719,9 @@ tryResumeAttempt();
     var item={ action:'saveResult', id:EXAM_ID+'|'+a.phone+'|'+a.at, at:a.at, phone:a.phone, name:a.name||'',
       exam:EXAM_ID, title:(document.title||EXAM_ID).replace(/^بنك اختياري\s*[—-]\s*/,''), score:a.score, total:a.total, time:a.time||'', answered:a.answered, mode:a.mode, wrong:(wrongList||[]) };
     var q=_pendingGet().filter(function(x){ return x.id!==item.id; }); q.push(item); _pendingSet(q);
-    CUR=item.id; lastErr=''; show('sending'); window.flushPendingResults();
+    CUR=item.id; lastErr=''; done=false; show('sending');
+    sendNow(item);                 /* النتيجة الجديدة: فورًا وبطلب مستقل */
+    window.flushPendingResults();  /* النتائج القديمة: في الخلفية بدون ما تأثر على الشريط */
   };
   window.addEventListener('online',function(){ if(_pendingGet().length) window.flushPendingResults(); });
   setInterval(function(){ if(_pendingGet().length) window.flushPendingResults(); },20000);

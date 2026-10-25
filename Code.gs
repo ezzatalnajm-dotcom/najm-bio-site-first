@@ -52,11 +52,16 @@
  * تحديث 2026-10-21 (أ): شاشة المعلم في لوحة تقدمي (?action=groups&key=الرمز):
  *  - ترجع كل مشترك (الحالة 2) باسمه ومجموعته (العمود C) ونسبته العامة، والموقع يقسّمها: ممتاز / جيد جدًا / جيد / مقبول.
  *  - محمية برمز المعلم المحفوظ داخل السكربت (القائمة 📊 نجم ← 🔑 تعيين رمز المعلم) — لا يُكتب الرمز في أي ملف.
+ *
+ * تحديث 2026-10-25: تسريع تسجيل النتائج وتقليل الزحام:
+ *  - التحقق من تفعيل الطالب في saveResult_ يستخدم كاش 10 دقائق (المفعّلون فقط)؛ لو الطالب ليس في الكاش يُقرأ الشيت كما كان تمامًا.
+ *  - open_ (تسجيل فتح الملف) لم يعد ينتظر القفل أكثر من ثانيتين ويتخطى التسجيل لو القفل مشغول، حتى لا يؤخر النتائج.
+ *  - مهلة قفل saveResult_ من 15 إلى 30 ثانية لتقليل احتمال ضياع نتيجة وقت الزحمة.
  */
 
 var RESULTS_SHEET = 'النتائج';
 var LOG_SHEET = 'سجل الطلبات';
-var VERSION = '2026-10-22-labels';
+var VERSION = '2026-10-25-fast-save';
 var DUP_COLOR = '#ea9999';
 var DUP_SHEET = 'أرقام متكررة';
 var DUP_SHEET_OLD = 'الأرقام المكررة';
@@ -200,14 +205,30 @@ function parseWrong_(c) {
   try { var a = JSON.parse(c); return Array.isArray(a) ? a : null; } catch (e) { return null; }
 }
 
+// ---------- تحقق سريع أن الطالب مفعّل (كاش 10 دقائق للمفعّلين فقط) ----------
+// يرجع {name} إن كان مفعّلًا، وإلا null. غير الموجود في الكاش يُقرأ من الشيت كما كان (فالتفعيل الجديد يعمل فورًا).
+function activeStudent_(k) {
+  if (!k) return null;
+  var cache = null, ck = 'act_' + k;
+  try {
+    cache = CacheService.getScriptCache();
+    var c = cache.get(ck);
+    if (c !== null) return { name: JSON.parse(c).n || '' };
+  } catch (e) { cache = null; }
+  var st = students_().filter(function (s) { return s.phone === k; })[0];
+  if (!st || !st.active) return null;
+  try { if (cache) cache.put(ck, JSON.stringify({ n: st.name }), 600); } catch (e2) {}
+  return { name: st.name };
+}
+
 // ---------- حفظ نتيجة (من ملفات الامتحانات) ----------
 function saveResult_(d) {
   var phone = digits_(d.phone), score = Number(d.score), total = Number(d.total);
   if (!d.id || !d.exam || !phone || !isFinite(score) || !isFinite(total) || total <= 0) return { ok: false, error: 'bad data' };
-  var st = students_().filter(function (s) { return s.phone === key_(phone); })[0];
-  if (!st || !st.active) return { ok: true }; // لا نخزّن إلا المفعّلين
+  var st = activeStudent_(key_(phone));
+  if (!st) return { ok: true }; // لا نخزّن إلا المفعّلين
   var lock = LockService.getScriptLock();
-  lock.waitLock(15000);
+  lock.waitLock(30000);
   try {
     var sh = resultsSheet_(), n = sh.getLastRow();
     if (n > 1) {
@@ -853,7 +874,7 @@ function open_(d) {
   contentRows_().forEach(function (r) { if (r.key === key) valid = true; });
   if (!valid) return { ok: true };                       // ليس من محتوى الموقع: نتجاهله
   var ss = SpreadsheetApp.getActiveSpreadsheet(), lock = LockService.getScriptLock();
-  lock.waitLock(15000);
+  if (!lock.tryLock(2000)) return { ok: true }; // القفل مشغول: نتخطى تسجيل الفتح (تتبّع فقط) ولا نؤخر النتائج
   try {
     var sh = ss.getSheetByName(OPENS_SHEET);
     if (!sh) { sh = ss.insertSheet(OPENS_SHEET); sh.appendRow(['هاتف الطالب', 'المفتاح', 'أول فتح', 'العنوان']); sh.getRange('A:B').setNumberFormat('@'); sh.setFrozenRows(1); }
