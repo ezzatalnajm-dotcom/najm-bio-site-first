@@ -2641,7 +2641,7 @@ tryResumeAttempt();
 <script>
 /* najmSend (2026-10-23): إرسال النتيجة بشكل آمن + شريط حالة واضح + إعادة إرسال */
 (function(){
-  var flushing=null, CUR=null, bar=null, lastErr='', hideT=null;
+  var flushing=null, CUR=null, bar=null, lastErr='', hideT=null, inflight={};
   function ensureBar(){
     if(bar) return bar;
     bar=document.createElement('div'); bar.id='najmSendBar';
@@ -2659,6 +2659,7 @@ tryResumeAttempt();
   }
   function refresh(){
     if(!CUR) return;
+    if(inflight[CUR]) return; /* نتيجتك الحالية لسه بتُرسل: لا نغيّر الشريط */
     var still=_pendingGet().some(function(x){ return x.id===CUR; });
     show(still?'fail':'ok');
   }
@@ -2673,6 +2674,19 @@ tryResumeAttempt();
     }catch(e){ lastErr=(e&&e.name==='AbortError')?'انتهت مهلة الاتصال':'تعذر الاتصال بالإنترنت'; return false; }
     finally{ clearTimeout(tm); }
   }
+  /* إرسال نتيجة واحدة (بدون انتظار طابور): لو نفس النتيجة بتُرسل الآن نستنى نفس الطلب ولا نكرره، ولو اتسلّمت بالفعل لا نعيد إرسالها */
+  function sendOne(item){
+    if(inflight[item.id]) return inflight[item.id];
+    if(!_pendingGet().some(function(x){ return x.id===item.id; })) return Promise.resolve(true);
+    var p=(async function(){
+      var ok=await post(item);
+      if(ok){ _pendingSet(_pendingGet().filter(function(x){ return x.id!==item.id; })); }
+      return ok;
+    })();
+    inflight[item.id]=p;
+    p.then(function(){ delete inflight[item.id]; },function(){ delete inflight[item.id]; });
+    return p;
+  }
   /* بديل آمن لدالة الإرسال القديمة: قفل واحد، ولا يمسح أي نتيجة جديدة أضيفت أثناء الإرسال */
   window.flushPendingResults=function(){
     if(flushing) return flushing;
@@ -2684,7 +2698,7 @@ tryResumeAttempt();
           if(!q.length) break;
           for(var k=0;k<q.length;k++){
             var item=q[k]; tried[item.id]=1;
-            if(await post(item)){ _pendingSet(_pendingGet().filter(function(x){ return x.id!==item.id; })); }
+            await sendOne(item);
           }
         }
       }catch(e){}
@@ -2697,7 +2711,11 @@ tryResumeAttempt();
     var item={ action:'saveResult', id:EXAM_ID+'|'+a.phone+'|'+a.at, at:a.at, phone:a.phone, name:a.name||'',
       exam:EXAM_ID, title:(document.title||EXAM_ID).replace(/^بنك اختياري\s*[—-]\s*/,''), score:a.score, total:a.total, time:a.time||'', answered:a.answered, mode:a.mode, wrong:(wrongList||[]) };
     var q=_pendingGet().filter(function(x){ return x.id!==item.id; }); q.push(item); _pendingSet(q);
-    CUR=item.id; lastErr=''; show('sending'); window.flushPendingResults();
+    CUR=item.id; lastErr=''; show('sending');
+    var _id=item.id;
+    /* نتيجتك تُرسل فورًا بطلب مستقل، والنتائج القديمة العالقة (إن وُجدت) تُرسل في الخلفية دون أن تؤخرها */
+    sendOne(item).then(function(){ if(CUR===_id) refresh(); });
+    window.flushPendingResults();
   };
   window.addEventListener('online',function(){ if(_pendingGet().length) window.flushPendingResults(); });
   setInterval(function(){ if(_pendingGet().length) window.flushPendingResults(); },20000);
