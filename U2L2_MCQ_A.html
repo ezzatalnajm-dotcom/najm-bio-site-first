@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>بنك اختياري — الوحدة 2 الدرس 2 | أ — U2L2_MCQ_A</title>
+<title>بنك اختياري — القلب والدورة الدموية أ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -41,7 +41,8 @@
   .hero-title-block h1{font-size:16px;font-weight:900;margin:0 0 2px;color:#fff;line-height:1.25;letter-spacing:.2px;}
   .hero-title-block h1 span{background:linear-gradient(90deg,var(--gold-400),var(--gold-600));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
   .hero-title-block .unit-line{font-size:11.5px;font-weight:700;color:rgba(255,255,255,.85);line-height:1.4;}
-  .hero-title-block .unit-line small{font-size:9.5px;color:rgba(240,201,72,.75);font-weight:600;letter-spacing:.3px;margin-inline-start:4px;}
+  .hero-title-block .unit-line small{display:none;}
+  .hero-title-block .eng-line{display:block;font-size:12.5px;font-weight:800;color:rgba(240,201,72,.95);letter-spacing:.6px;margin-top:4px;font-family:system-ui,Segoe UI,sans-serif;}
   .contact-mini{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:150px;}
   .contact-mini a{padding:6px 9px;border-radius:999px;font-size:10.5px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:3px;transition:.2s;white-space:nowrap;border:none;cursor:pointer;}
   .contact-mini a:hover{transform:translateY(-1px);}
@@ -265,6 +266,8 @@
   .float-finish:hover{transform:scale(1.05);}
   .mode-avatar{width:36px;height:36px;border-radius:50%;border:2px solid rgba(240,201,72,.5);background:rgba(255,255,255,.12);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:20px;transition:.25s;flex-shrink:0;user-select:none;}
   .mode-avatar:hover{transform:scale(1.08);border-color:var(--gold-400);}
+  .teacher-only-btn{display:none!important;}
+  body.teacher-active .teacher-only-btn{display:inline-flex!important;}
   .mode-avatar.teacher{border-color:var(--gold-400);background:linear-gradient(135deg,rgba(224,182,47,.25),rgba(199,154,31,.15));box-shadow:0 0 12px rgba(240,201,72,.35);}
   .estimate-note{margin-top:10px;padding:9px 12px;background:rgba(217,130,43,.12);border:1.5px dashed rgba(217,130,43,.45);border-radius:8px;font-size:11.5px;line-height:1.7;color:var(--warn);font-weight:700;}
   .self-correct-hint{margin-top:8px;padding:9px 12px;background:rgba(28,66,102,.08);border:1.5px dashed rgba(28,66,102,.35);border-radius:8px;font-size:11.5px;line-height:1.8;color:var(--navy-700);font-weight:700;}
@@ -347,7 +350,13 @@
   .float-finish.hidden-finish,.float-export.hidden-export{display:none !important;}
 
   textarea.answer-ta[readonly]{opacity:.85;cursor:not-allowed;background:rgba(10,27,46,.06);}
+  u.kw-u, .q-text u, .para-text-editable u, .mcq-option u{text-decoration:underline;text-decoration-color:var(--gold-500);text-underline-offset:3px;}
+
+  body:not(.exam-done):not(.teacher-mode) .btn-evaluate { display: none !important; }
+
 </style>
+<meta name="app-version" content="2026-10-23-a">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 </head>
 <body>
 
@@ -363,15 +372,15 @@
         <button class="tool-mini teal hidden" id="undoBtn" onclick="undoAction()">↩️</button>
         <button class="tool-mini teal hidden" id="redoBtn" onclick="redoAction()">↪️</button>
         <button class="tool-mini danger" id="resetSavedBtn" onclick="resetSavedData()" title="مسح كل التعديلات">🗑️</button>
-        <button class="tool-mini gold" id="printBtn" onclick="printWorksheet()" title="طباعة الملزمة">🖨️ طباعة</button>
+        <button class="tool-mini gold teacher-only-btn hidden" id="printBtn" onclick="printWorksheet()" title="طباعة الملزمة" class="print-btn teacher-only">🖨️ طباعة</button>
         <button class="tool-mini" id="themeBtn" onclick="toggleTheme()">🌓</button>
         <span class="mode-avatar" id="modeAvatar" onclick="onModeAvatarClick()" title="اضغط 3 مرات لتغيير الوضع">👨‍🎓</span><span class="mode-label" id="modeLabel">طالب</span>
       </div>
     </div>
     <div class="hero-title-row">
       <div class="hero-title-block">
-        <h1 id="mainTitle">بنك اختياري <span>الوحدة 2 — الدرس 2 (أ)</span></h1>
-        <div class="unit-line" id="unitName">الوحدة الثالثة — النقل في النبات: النقل في النبات<small>Unit 3 · MCQ Bank</small></div>
+        <h1 id="mainTitle">بنك اختياري <span>الوحدة 2</span></h1>
+        <div class="unit-line" id="unitName">الدرس 2-2 القلب والدورة الدموية</div><div class="eng-line" id="engLine">UNIT 2 · U2L2 MCQ BANK (A)</div>
       </div>
       <div class="contact-mini">
         <a class="cm-wa" href="https://wa.me/97477107247" target="_blank" id="contactWa">💬 واتساب</a>
@@ -411,35 +420,33 @@
 
   <div id="resultContainer" class="hidden"></div>
 
-  <div id="startScreen" class="start-screen">
+    <div id="startScreen" class="start-screen">
     <h2>🎯 ابدأ الاختبار</h2>
-    <p>سجّل رقم هاتفك ثم اختر طريقة عرض الأسئلة</p>
-    
+    <p>سجّل رقم هاتفك ثم ابدأ الاختبار</p>
     <div class="phone-box" style="margin:14px 0 18px;text-align:right;">
       <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;opacity:.9;">📱 رقم هاتف الطالب</label>
-      <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border-radius:10px;padding:10px 12px;border:1.5px solid rgba(224,182,47,.4);">
-        <span style="font-weight:800;font-size:15px;opacity:.85;min-width:42px;">+974</span>
-        <input type="tel" id="studentPhone" inputmode="numeric" maxlength="8" placeholder="XXXX XXXX"
-          style="flex:1;border:none;background:transparent;font-size:16px;font-weight:700;outline:none;font-family:inherit;direction:ltr;text-align:left;"
+      <div style="display:flex;align-items:center;gap:8px;direction:ltr;justify-content:center;">
+        <input type="tel" id="countryCode" value="974" maxlength="4" inputmode="numeric"
+          style="width:52px;padding:10px 4px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);
+          background:rgba(0,0,0,.25);color:#fff;font-size:15px;font-weight:800;font-family:inherit;text-align:center;"
+          title="رمز الدولة (افتراضي 974) — قابل للتعديل" oninput="onCountryCodeInput()">
+        <input type="tel" id="studentPhone" inputmode="numeric" maxlength="12" placeholder="XXXXXXXX"
+          style="flex:1;max-width:180px;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);
+          background:rgba(0,0,0,.25);color:#fff;font-size:16px;font-weight:700;font-family:inherit;letter-spacing:1px;text-align:center;"
           oninput="onStudentPhoneInput()" onblur="onStudentPhoneInput()">
       </div>
-      <div id="phoneHint" style="font-size:11px;opacity:.7;margin-top:6px;">أدخل 8 أرقام (مثال: 33123456 أو ٣٣١٢٣٤٥٦) — مطلوب</div>
-      <label style="display:block;font-size:13px;font-weight:700;margin:12px 0 6px;opacity:.9;">👤 اسم الطالب <span style="font-weight:500;opacity:.7;">(اختياري)</span></label>
-      <input type="text" id="studentName" placeholder="يظهر تلقائياً من السجل إن وُجد"
-        style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(224,182,47,.4);background:rgba(255,255,255,.12);font-size:14px;font-weight:600;outline:none;font-family:inherit;">
+      <div id="phoneHint" style="font-size:11px;opacity:.7;margin-top:6px;">أدخل رقم الهاتف (رمز الدولة قابل للتعديل — افتراضي 974)</div>
+      <label style="display:block;font-size:13px;font-weight:700;margin:14px 0 6px;opacity:.9;">👤 الاسم <span style="font-weight:500;opacity:.65;">(اختياري)</span></label>
+      <input type="text" id="studentName" placeholder="اسم الطالب"
+        style="width:100%;max-width:260px;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);
+        background:rgba(0,0,0,.25);color:#fff;font-size:15px;font-weight:600;font-family:inherit;text-align:right;display:block;margin:0 auto;"
+        autocomplete="name">
       <div style="font-size:11px;opacity:.65;margin-top:5px;">يظهر في النتيجة — الهاتف هو المعرّف لجمع النتائج لاحقاً</div>
     </div>
-
     <div class="start-opts">
-      <button type="button" class="start-opt fixed" onclick="startExam('fixed')">
-        <span class="ico">📋</span>
-        <span class="lbl">ترتيب ثابت</span>
-        <span class="desc">الأسئلة بنفس الترتيب الأصلي</span>
-      </button>
-      <button type="button" class="start-opt random" onclick="startExam('random')">
-        <span class="ico">🔀</span>
-        <span class="lbl">ترتيب عشوائي</span>
-        <span class="desc">الأسئلة بترتيب مختلف في كل مرة</span>
+      <button type="button" class="start-opt fixed" style="max-width:260px" onclick="startExam()">
+        <span class="ico">🚀</span>
+        <span class="lbl">ابدأ الاختبار</span>
       </button>
     </div>
   </div>
@@ -465,8 +472,7 @@
 <input type="file" id="hiddenImgInput" accept="image/*" style="display:none">
 
 <script>
-const STORAGE_KEY = 'quiz_u2l2_mcq_a_v2';
-const EXAM_ID = 'U2L2_MCQ_A';
+const STORAGE_KEY = "quiz_u2l2_mcq_a_v2";
 const STORAGE_THEME = "essayLang_theme";
 
 function svgUrl(svg){ return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); }
@@ -491,9 +497,9 @@ const SYNONYMS = { 'وظيفة':['دور','عمل'], 'تركيب':['بنية','�
 
 let questions = [], evaluations = {}, transcripts = {}, editMode = {}, retryEditMode = {};
 let examStarted = false, orderMode = 'fixed', baseQuestions = [];
+let resultsHistory = [];
 let studentPhone = "";
 let studentName = "";
-let resultsHistory = [];
 const HISTORY_KEY = (typeof STORAGE_KEY!=='undefined'?STORAGE_KEY:'quiz') + '_history';
 let examSubmitted = false, timerInterval = null, seconds = 0;
 let isRecording = false, recordingIndex = null, retryRecordingIndex = null, recognition = null;
@@ -726,7 +732,7 @@ function onModeAvatarClick(){
   teacherClickTimer=setTimeout(()=>{teacherClickCount=0;},2000);
   if(teacherClickCount>=3){
     teacherClickCount=0;
-    TEACHER_MODE=!TEACHER_MODE;
+    TEACHER_MODE=!TEACHER_MODE; try{ if(TEACHER_MODE) document.body.classList.add('teacher-mode'); else document.body.classList.remove('teacher-mode'); }catch(e){}; try{ if(TEACHER_MODE) document.body.classList.add('teacher-mode'); else document.body.classList.remove('teacher-mode'); }catch(e){};
     $('teacherPanel').classList.toggle('hidden',!TEACHER_MODE);
     $('undoBtn').classList.toggle('hidden',!TEACHER_MODE);
     $('redoBtn').classList.toggle('hidden',!TEACHER_MODE);
@@ -745,7 +751,7 @@ function onModeAvatarClick(){
     toast(`${teacherClickCount}/3`);
   }
 }
-function exitTeacherMode(){ TEACHER_MODE=false; $('teacherPanel').classList.add('hidden'); $('undoBtn').classList.add('hidden'); $('redoBtn').classList.add('hidden'); updateModeAvatar(); toast('🔒 وضع المعلم مغلق'); renderQuestions(); }
+function exitTeacherMode(){ TEACHER_MODE=false; try{document.body.classList.remove('teacher-mode')}catch(e){}; try{document.body.classList.remove('teacher-mode')}catch(e){}; document.body.classList.remove('teacher-active'); $('teacherPanel').classList.add('hidden'); $('undoBtn').classList.add('hidden'); $('redoBtn').classList.add('hidden'); updateModeAvatar(); toast('🔒 وضع المعلم مغلق'); renderQuestions(); }
 
 function applyDefaultWeight(){ const v=parseFloat($('defaultWeight').value)||2; snapshot('درجة افتراضية'); questions.forEach(q=>q.weight=v); saveQuestions(); renderQuestions(); toast('✅ '+v); }
 function applyExamTotal(){ const v=$('examTotalOverride').value.trim(); EXAM_TOTAL_OVERRIDE = v===''?null:parseFloat(v); toast(EXAM_TOTAL_OVERRIDE?'✅ '+EXAM_TOTAL_OVERRIDE:'✅ تلقائي'); }
@@ -769,7 +775,7 @@ function renderQuestions(){
     const isEval=ev!==null;
     const isEdit=editMode[idx]||false;
     let scoreBadge='';
-    if(isEval){ const p=ev.percentage; let sc='poor'; if(p>=60) sc='good'; else if(p>=40) sc='average'; const earned=Math.round(ev.score*10)/10; scoreBadge=`<span class="score-display ${sc}"><span style="opacity:.85;">درجتك:</span><span class="score-value">${earned}</span><span class="score-total">/ ${q.weight}</span><span style="font-size:10.5px;opacity:.8;">(${p}%)</span></span>`; }
+    if(isEval && TEACHER_MODE){ const p=ev.percentage; let sc='poor'; if(p>=60) sc='good'; else if(p>=40) sc='average'; const earned=Math.round(ev.score*10)/10; scoreBadge=`<span class="score-display ${sc}"><span style="opacity:.85;">درجتك:</span><span class="score-value">${earned}</span><span class="score-total">/ ${q.weight}</span><span style="font-size:10.5px;opacity:.8;">(${p}%)</span></span>`; }
     let resultHtml=''; let cardClass='';
     if(isEval){
       const p=ev.percentage;
@@ -844,6 +850,7 @@ let qa='';
       <button class="q-btn delete" onclick="delQ(${idx})">🗑️ حذف</button>
       <button class="q-btn img" onclick="setPasteTarget(${idx});addImgQ(${idx})" title="إرفاق ملف">🖼️ ملف</button>
       <button class="q-btn img" onclick="pasteImgToQuestion(${idx})" title="لصق صورة من الحافظة">📋 لصق</button>
+      <button class="q-btn" onclick="duplicateQuestion(${idx})" title="تكرار هذا السؤال" style="background:linear-gradient(135deg,#7b1fa2,#6a1b9a);color:#fff;border:none;font-weight:800;">📋 تكرار</button>
       <button class="q-btn" onclick="insertQuestionAfter(${idx},'mcq')" title="إضافة سؤال اختياري بعد هذا" style="background:linear-gradient(135deg,#00897b,#00695c);color:#fff;border:none;font-weight:800;">+ اختياري</button>
       <button class="q-btn" onclick="insertQuestionAfter(${idx},'essay')" title="إضافة سؤال مقالي بعد هذا" style="font-weight:800;">+ مقالي</button>
     </div>`;
@@ -853,7 +860,7 @@ let qa='';
     if(TEACHER_MODE) wIn=`<div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><label style="font-size:11.5px;color:var(--gold-600);font-weight:800;">⚖️ الدرجة:</label><input type="number" value="${q.weight}" min="0" step="0.5" style="width:70px;padding:4px 8px;border-radius:8px;border:1px solid rgba(10,27,46,.15);background:var(--card);color:var(--ink);font-weight:700;text-align:center;font-family:inherit;font-size:12px;" onchange="setW(${idx},this.value)"></div>`;
     const isPlay=playingState[idx]===true;
     const hp=hasRec?`<button class="btn-headphones ${isPlay?'playing':''}" onclick="togglePlayback(${idx})">${isPlay?'🎧 يعمل...':'🎧 اسمع'}</button>`:`<button class="btn-headphones" disabled>🎧 اسمع</button>`;
-    html+=`<div class="question-card ${cardClass}" data-qi="${idx}" onclick="if(TEACHER_MODE)setPasteTarget(${idx})"><div class="q-header"><span class="q-num">${idx+1}</span>${q.type==='mcq'?`<span class="badge" style="background:rgba(0,137,123,.18);color:#00897b;">اختيار</span>`:''}${scoreBadge}<span class="weight-badge">⚖️ ${q.weight}</span></div>${qa}<div class="question-text">${q.text}</div>${imgs}${wIn}${isMcq?'' : `<div class="voice-area"><button class="btn-voice" id="vb-${idx}" onclick="if(evaluations[${idx}])return;toggleRec(${idx})" ontouchend="event.preventDefault();toggleRec(${idx});">🎤 تسجيل</button>${hp}<button class="btn-evaluate" onclick="evalQ(${idx})" ${evalDis?'disabled':''}>📊 تقييم</button><span class="status-text ${tr?'done':''}" id="vs-${idx}">${tr?'✅ تم التسجيل':'⏳ في انتظار التسجيل'}</span></div>`}<div class="transcript-box"><span class="label">${isMcq?'📝 اختر الإجابة الصحيحة:':'📝 إجابتك:'}</span>${trHtml}</div>${isMcq && !isEval && (typeof transcripts[idx]==='string' && transcripts[idx].startsWith('MCQ:')) ? `<div style="margin:8px 0;"><button class="btn-evaluate" onclick="evalQ(${idx})">📊 تقييم</button></div>`:''}${resultHtml}</div>`;
+    html+=`<div class="question-card ${cardClass}" data-qi="${idx}" onclick="if(TEACHER_MODE)setPasteTarget(${idx})"><div class="q-header"><span class="q-num">${idx+1}</span>${q.type==='mcq'?`<span class="badge" style="background:rgba(0,137,123,.18);color:#00897b;">اختيار</span>`:''}${scoreBadge}<span class="weight-badge">⚖️ ${q.weight}</span></div>${qa}<div class="question-text">${q.text}</div>${imgs}${wIn}${isMcq?'' : `<div class="voice-area"><button class="btn-voice" id="vb-${idx}" onclick="if(evaluations[${idx}])return;toggleRec(${idx})" ontouchend="event.preventDefault();toggleRec(${idx});">🎤 تسجيل</button>${hp}${(examSubmitted||TEACHER_MODE)?`${(examSubmitted||TEACHER_MODE)?`<button class="btn-evaluate" onclick="evalQ(${idx})" ${evalDis?'disabled':''}>📊 تقييم</button>`:``}`:``}<span class="status-text ${tr?'done':''}" id="vs-${idx}">${tr?'✅ تم التسجيل':'⏳ في انتظار التسجيل'}</span></div>`}<div class="transcript-box"><span class="label">${isMcq?'📝 اختر الإجابة الصحيحة:':'📝 إجابتك:'}</span>${trHtml}</div>${isMcq && !isEval && (typeof transcripts[idx]==='string' && transcripts[idx].startsWith('MCQ:')) ? `<div style="margin:8px 0;">${(examSubmitted||TEACHER_MODE)?`${(examSubmitted||TEACHER_MODE)?`<button class="btn-evaluate" onclick="evalQ(${idx})">📊 تقييم</button>`:``}`:``}</div>`:''}${resultHtml}</div>`;
   });
   c.innerHTML=html; updateProgress();
 }
@@ -875,6 +882,42 @@ function extractBoldKeywords(html){
   });
   return kws;
 }
+
+function toggleUnderlineOnSelection(){
+  const sel=window.getSelection();
+  if(!sel || sel.rangeCount===0 || sel.isCollapsed) return;
+  const range=sel.getRangeAt(0);
+  let node=range.commonAncestorContainer;
+  if(node.nodeType===3) node=node.parentElement;
+  const uParent = node && node.closest ? node.closest('u') : null;
+  if(uParent && uParent.isContentEditable){
+    const parent=uParent.parentNode;
+    while(uParent.firstChild) parent.insertBefore(uParent.firstChild, uParent);
+    parent.removeChild(uParent);
+    parent.normalize();
+  } else {
+    try{
+      const u=document.createElement('u'); u.className='kw-u';
+      range.surroundContents(u);
+    }catch(e){
+      // fallback: extract and wrap
+      const frag=range.extractContents();
+      const u=document.createElement('u'); u.className='kw-u'; u.appendChild(frag);
+      range.insertNode(u);
+    }
+  }
+  sel.removeAllRanges();
+}
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey||e.metaKey) && e.key==='u'){
+    const t=e.target;
+    if(t && (t.isContentEditable || t.closest && t.closest('[contenteditable=true]'))){
+      e.preventDefault();
+      toggleUnderlineOnSelection();
+    }
+  }
+});
+
 function toggleBoldOnSelection(){
   const sel=window.getSelection();
   if(!sel || sel.rangeCount===0 || sel.isCollapsed) return;
@@ -942,7 +985,7 @@ function reEval(idx){
     const chosen = parseInt(tr.slice(4));
     const correct = (typeof q.correctIndex==='number') ? q.correctIndex : 0;
     const ok = chosen === correct;
-    const earned = ok ? (q.weight||1) : 0;
+    const earned = ok ? (typeof q.weight==='number' ? q.weight : 1) : 0;
     const pct = ok ? 100 : 0;
     const letters = ['أ','ب','ج','د','ه','و'];
     const fb = ok ? '🌟 إجابة صحيحة!' : `❌ إجابة خاطئة. الصحيحة: (${letters[correct]||correct}) ${(q.choices||[])[correct]||''}`;
@@ -1083,6 +1126,7 @@ function selectMcq(idx, ci){
   // في وضع المعلم: الضغط على الخيارات لا يُسجَّل كإجابة طالب
   if(typeof TEACHER_MODE !== 'undefined' && TEACHER_MODE) return;
   transcripts[idx] = 'MCQ:' + ci;
+  saveAttempt();
   if(evaluations[idx]) delete evaluations[idx];
   renderQuestions();
   updateProgress();
@@ -1184,6 +1228,29 @@ function moveQ(idx, delta){
     if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
   }, 50);
 }
+
+function duplicateQuestion(idx){
+  if(typeof TEACHER_MODE==='undefined' || !TEACHER_MODE) return;
+  if(idx<0 || idx>=questions.length) return;
+  snapshot('تكرار سؤال');
+  const src = questions[idx];
+  const q = JSON.parse(JSON.stringify(src));
+  // clear student-facing state if any
+  const at = Math.min(idx+1, questions.length);
+  questions.splice(at, 0, q);
+  const shiftUp = (obj)=>{
+    Object.keys(obj).map(Number).filter(n=>!isNaN(n)).sort((a,b)=>b-a).forEach(k=>{
+      if(k>=at){ obj[k+1]=obj[k]; delete obj[k]; }
+    });
+  };
+  shiftUp(evaluations); shiftUp(transcripts); shiftUp(editMode);
+  if(typeof retryEditMode!=='undefined') shiftUp(retryEditMode);
+  saveQuestions();
+  renderQuestions();
+  toast('✅ تم تكرار السؤال');
+  setTimeout(()=>openEditQ(at), 200);
+}
+
 function insertQuestionAfter(idx, type){
   if(typeof TEACHER_MODE==='undefined' || !TEACHER_MODE) return;
   snapshot('إدراج سؤال');
@@ -1687,7 +1754,7 @@ function submitExam(){
   if(typeof renderQuestions==='function') renderQuestions();
   const t=questions.length;
   const e=Object.keys(evaluations).filter(k=>evaluations[k]).length;
-  examSubmitted=true;
+  examSubmitted=true; clearAttempt(); try{document.body.classList.add('exam-done')}catch(e){}; try{document.body.classList.add('exam-done')}catch(e){};
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
   // الإبقاء على زر الإنهاء ظاهراً لإعادة عرض النتيجة
   const _fb=$('finishBtn'); if(_fb){ _fb.classList.remove('hidden-finish'); _fb.classList.add('show'); _fb.textContent='📊 النتيجة'; }
@@ -1712,12 +1779,21 @@ function submitExam(){
     answered: e,
     questions: t,
     time: time,
+    mode: orderMode || 'fixed',
     phone: studentPhone || '',
-    name: studentName || '',
-    mode: orderMode || 'fixed'
+    name: studentName || ''
   };
   resultsHistory.push(attempt);
   saveResultsHistory();
+  try{
+    const wrongDetails = wrong.map(i=>{
+      const q=questions[i]||{}; const tr=transcripts[i]||''; let chosen='';
+      if(q.type==='mcq' && tr.startsWith('MCQ:')){ chosen=(q.choices||[])[parseInt(tr.slice(4))]||''; }
+      const cr = q.type==='mcq' ? ((q.choices||[])[typeof q.correctIndex==='number'?q.correctIndex:0]||'') : (q.modelAnswer||'');
+      return { q:String(q.text||'').slice(0,200), a:String(chosen).slice(0,100), c:String(cr).slice(0,100) };
+    });
+    sendResultToSheet(attempt, wrongDetails);
+  }catch(e){}
   // بناء عرض السجل
   let histHtml = '';
   if(resultsHistory.length > 1){
@@ -1729,7 +1805,7 @@ function submitExam(){
       const ds = d ? (d.toLocaleDateString('ar-EG')+' '+d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})) : '';
       const isLast = i===0;
       histHtml += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px;'+(isLast?'font-weight:800;':'opacity:.85;')+'">';
-      histHtml += '<span>'+(isLast?'🔹 ':'')+'محاولة '+(resultsHistory.length-i)+' · '+ds+'</span>';
+      histHtml += '<span>'+(isLast?'🔹 ':'')+'محاولة '+(resultsHistory.length-i)+' · '+ds+(a.name?' · '+a.name:'')+(a.phone?' · <span dir="ltr">+'+a.phone+'</span>':'')+'</span>';
       histHtml += '<span>'+a.score+' / '+a.total+' <span style="opacity:.8;">('+a.percent+'%)</span></span>';
       histHtml += '</div>';
     });
@@ -1744,7 +1820,9 @@ function submitExam(){
     <div class="detail">📊 النسبة: <span>${p}%</span></div>
     <div class="detail">✅ الأسئلة المُجابة: <span>${e}/${t}</span></div>
     <div class="detail">⏱️ الوقت: <span>${time}</span></div>
-    ${studentPhone ? '<div class="detail">📱 الهاتف: <span dir="ltr">+'+studentPhone+'</span></div>' : ''}${studentName ? '<div class="detail">👤 الاسم: '+studentName+'</div>' : ''}<div class="detail">🔀 الترتيب: <span>${(orderMode==='random')?'عشوائي':'ثابت'}</span></div>
+    <div class="detail">🔀 الترتيب: <span>${(orderMode==='random')?'عشوائي':'ثابت'}</span></div>
+    ${studentName ? '<div class="detail">👤 الاسم: <span>'+studentName+'</span></div>' : ''}
+    ${studentPhone ? '<div class="detail">📱 الهاتف: <span dir="ltr">+'+studentPhone+'</span></div>' : ''}
     <div style="margin-top:15px;font-size:14px;">${p>=85?'🏆 ممتاز!':p>=60?'👍 مقبول!':'📚 راجع الأسئلة المتدنية (<60%)'}</div>
     <div style="margin-top:12px;font-size:11.5px;color:rgba(255,255,255,.75);line-height:1.8;">⚠️ التصحيح تقديري — لإشراف أدق راجع معلّمك</div>
     ${histHtml}
@@ -1757,7 +1835,7 @@ function submitExam(){
     controls.classList.remove('hidden');
     controls.classList.remove('hidden-ctrls');
   }
-  if(wrong.length) setupRetry(wrong); else { const rt=$('retryContainer'); if(rt) rt.classList.add('hidden'); }
+  retryPick={}; if(wrong.length) setupRetry(wrong); else { const rt=$('retryContainer'); if(rt) rt.classList.add('hidden'); }
   // انتقال فوري لأعلى الصفحة — النتيجة أول ما يظهر
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;
@@ -1766,17 +1844,61 @@ function submitExam(){
 }
 
 
+var retryPick = {}, retryList = [];
 function setupRetry(wi){
+  retryList = wi.slice();
   const c=$('retryContainer'); c.classList.remove('hidden');
-  c.innerHTML=`<h3>🔁 إعادة المحاولة (${wi.length})</h3><div id="retryQ"></div><div class="center mt-20"><button class="btn" onclick="checkRetry()">📊 فحص التقدم</button><button class="btn btn-secondary" onclick="resetRetry()">🔄 إعادة</button></div><div id="retryR" class="hidden mt-20"></div>`;
-  const cont=$('retryQ'); let h='';
-  wi.forEach((oi,ri)=>{ const q=questions[oi]; const ev=evaluations[oi]||null; const tr=transcripts[oi]||''; const isE=ev!==null; const isEdit=retryEditMode[ri]||false;
-    let sb='',rh='',cc='';
-    if(isE){ const p=ev.percentage; cc=p>=60?'evaluated':'poor'; const sc=p>=60?'good':(p>=60?'average':'poor'); const e2=Math.round(ev.score*10)/10; sb=`<span class="score-display ${sc}">درجتك: <span class="score-value">${e2}</span><span class="score-total">/ ${q.weight}</span></span>`; rh=`<div class="result-box show"><div class="score-row"><div><span class="badge ${ev.gradeClass==='good'?'badge-good':ev.gradeClass==='average'?'badge-average':'badge-poor'}">${ev.percentage}%</span></div><div class="score-value ${ev.gradeClass}">${e2} / ${q.weight}</div></div><div class="model-answer"><div class="label">📖 الإجابة:</div><div class="answer">${ev.modelAnswer}</div></div></div>`; }
-    const ed=isE||!tr||tr.trim().length<5; const hr=!!audioUrls[oi]; const ip=playingState[oi]===true;
-    let th=`<textarea id="retry-ta-${ri}" class="answer-ta" placeholder="اكتب إجابتك..." oninput="transcripts[${oi}]=cleanText(this.value);const eb=this.closest('.question-card')?.querySelector('.btn-evaluate');if(eb)eb.disabled=!(this.value||'').trim().length>5;">${tr||''}</textarea>`;
-    const hp=hr?`<button class="btn-headphones ${ip?'playing':''}" onclick="togglePlayback(${oi})">${ip?'🎧 يعمل':'🎧 اسمع'}</button>`:`<button class="btn-headphones" disabled>🎧 اسمع</button>`;
-    h+=`<div class="question-card ${cc}" data-qi="${idx}" onclick="if(TEACHER_MODE)setPasteTarget(${idx})"><div class="q-header"><span class="q-num">R${ri+1}</span>${sb}<span class="weight-badge">⚖️ ${q.weight}</span></div><div class="question-text">${q.text}</div><div class="voice-area"><button class="btn-voice" id="retry-vb-${ri}" onclick="toggleRetryRec(${ri},${oi})">🎤 تسجيل</button>${hp}<button class="btn-evaluate" onclick="evalRetry(${ri},${oi})" ${ed?'disabled':''}>📊 تقييم</button></div><div class="transcript-box"><span class="label">📝 إجابتك:</span>${th}</div>${rh}</div>`; });
+  c.innerHTML=`<h3>🔁 إعادة أخطائك (${wi.length})</h3><div id="retryQ"></div><div class="center mt-20"><button class="btn" onclick="checkRetry()">📊 فحص التقدم</button><button class="btn btn-secondary" onclick="resetRetry()">🔄 إعادة</button></div><div id="retryR" class="hidden mt-20"></div>`;
+  renderRetryQs(); showRetryBig(wi.length);
+}
+function showRetryBig(n){
+  try{
+    let b=$('retryBigBtn');
+    if(!b){
+      b=document.createElement('button'); b.id='retryBigBtn'; b.type='button';
+      b.setAttribute('style','display:block;width:calc(100% - 28px);margin:14px;padding:18px 12px;font-size:22px;font-weight:900;font-family:inherit;color:#0b1f4d;background:linear-gradient(135deg,#ffd75e,#f0a800);border:3px solid #fff3c4;border-radius:16px;box-shadow:0 6px 18px rgba(240,168,0,.45);cursor:pointer;');
+      b.onclick=function(){ const r=$('retryContainer'); if(r) r.scrollIntoView({behavior:'smooth',block:'start'}); };
+      const rc=$('resultContainer'); if(rc&&rc.parentNode) rc.parentNode.insertBefore(b, rc.nextSibling); else document.body.appendChild(b);
+    }
+    b.textContent='🔁 إعادة أخطائي ('+n+')';
+  }catch(e){}
+}
+function hideRetryBig(){ try{ const b=$('retryBigBtn'); if(b&&b.parentNode) b.parentNode.removeChild(b); }catch(e){} }
+function pickRetry(oi,ci){
+  if(typeof retryPick[oi]==='number') return; // بعد الاختيار تظهر النتيجة مباشرة
+  retryPick[oi]=ci;
+  renderRetryQs();
+}
+function renderRetryQs(){
+  const cont=$('retryQ'); if(!cont) return;
+  const letters=['أ','ب','ج','د','ه','و'];
+  let h='';
+  retryList.forEach((oi,ri)=>{
+    const q=questions[oi]; if(!q) return;
+    let imgs=''; if(q.images&&q.images.length) q.images.forEach(src=>{ imgs+=`<div class="img-wrap"><img src="${src}" class="question-img" alt=""></div>`; });
+    if(q.type==='mcq'){
+      const picked=(typeof retryPick[oi]==='number')?retryPick[oi]:-1;
+      const correct=(typeof q.correctIndex==='number')?q.correctIndex:0;
+      let opts='';
+      (q.choices||[]).forEach((ch,ci)=>{
+        let mark='';
+        if(picked>=0){ if(ci===correct) mark='correct'; else if(ci===picked) mark='wrong'; }
+        opts+=`<label class="mcq-option ${picked===ci?'selected':''} ${mark}" onclick="pickRetry(${oi},${ci});return false;"><span class="opt-letter">${letters[ci]||(ci+1)}</span><span>${ch}</span></label>`;
+      });
+      let fb='';
+      if(picked>=0){
+        fb = picked===correct
+          ? `<div class="result-box show"><div class="score-row"><span class="badge badge-good">🌟 أحسنت! إجابة صحيحة</span></div></div>`
+          : `<div class="result-box show"><div class="score-row"><span class="badge badge-poor">❌ خاطئة</span></div><div class="model-answer"><div class="label">📖 الصحيحة:</div><div class="answer">(${letters[correct]||correct}) ${(q.choices||[])[correct]||''}</div></div></div>`;
+      }
+      const cc = picked<0 ? '' : (picked===correct ? 'evaluated' : 'poor');
+      h+=`<div class="question-card ${cc}"><div class="q-header"><span class="q-num">R${ri+1}</span><span class="weight-badge">⚖️ ${typeof q.weight==='number'?q.weight:1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="mcq-options">${opts}</div>${fb}</div>`;
+    } else {
+      const ev=evaluations[oi]||null; const tr=transcripts[oi]||'';
+      const rh = ev ? `<div class="result-box show"><div class="model-answer"><div class="label">📖 الإجابة:</div><div class="answer">${ev.modelAnswer}</div></div></div>` : '';
+      h+=`<div class="question-card"><div class="q-header"><span class="q-num">R${ri+1}</span><span class="weight-badge">⚖️ ${typeof q.weight==='number'?q.weight:1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="transcript-box"><span class="label">📝 إجابتك:</span><textarea id="retry-ta-${ri}" class="answer-ta" placeholder="اكتب إجابتك..." oninput="transcripts[${oi}]=cleanText(this.value);">${tr}</textarea></div><div class="voice-area"><button class="btn-evaluate" onclick="evalRetry(${ri},${oi})">📊 تقييم</button></div>${rh}</div>`;
+    }
+  });
   cont.innerHTML=h;
 }
 function toggleRetryRec(ri,oi){
@@ -1791,8 +1913,15 @@ function saveRetryEdit(ri,oi){ const ta=$(`retry-ta-${ri}`); if(ta){ transcripts
 function cancelRetryEdit(ri){ retryEditMode[ri]=false; refreshRetry(); }
 function refreshRetry(){ const w=[]; questions.forEach((q,i)=>{ if(!evaluations[i]||evaluations[i].percentage<60) w.push(i); }); setupRetry(w); }
 function evalRetry(ri,oi){ const t=(transcripts[oi]||'').trim(); if(!t||t.length<3) return; reEval(oi); refreshRetry(); }
-function checkRetry(){ const w=[]; questions.forEach((q,i)=>{ if(!evaluations[i]||evaluations[i].percentage<60) w.push(i); }); const rd=$('retryR'); rd.classList.remove('hidden'); if(!w.length) rd.innerHTML=`<div class="final-result" style="background:linear-gradient(150deg,var(--ok),#1e7a44);"><div style="font-size:30px;color:#fff;font-weight:900;">🎉 تم الاجتياز!</div></div>`; else rd.innerHTML=`<div class="final-result"><div style="font-size:22px;color:var(--gold-400);font-weight:900;">${w.length} أسئلة أقل من 60%</div><div class="detail">استمر في التدريب!</div></div>`; rd.scrollIntoView({behavior:'smooth',block:'center'}); }
-function resetRetry(){ const w=[]; questions.forEach((q,i)=>{ if(!evaluations[i]||evaluations[i].percentage<60) w.push(i); }); if(!w.length){ $('retryContainer').classList.add('hidden'); return; } retryEditMode={}; setupRetry(w); }
+function checkRetry(){
+  const rd=$('retryR'); if(!rd) return; rd.classList.remove('hidden');
+  let ok=0, bad=0, left=0;
+  retryList.forEach(oi=>{ const q=questions[oi]||{}; if(q.type!=='mcq'){ return; } const p=retryPick[oi]; if(typeof p!=='number') left++; else if(p===((typeof q.correctIndex==='number')?q.correctIndex:0)) ok++; else bad++; });
+  if(!bad && !left) rd.innerHTML=`<div class="final-result" style="background:linear-gradient(150deg,var(--ok),#1e7a44);"><div style="font-size:30px;color:#fff;font-weight:900;">🎉 تم الاجتياز!</div></div>`;
+  else rd.innerHTML=`<div class="final-result"><div style="font-size:22px;color:var(--gold-400);font-weight:900;">✅ ${ok} صحيحة · ❌ ${bad} خاطئة · ⏳ ${left} لم تُجَب</div><div class="detail">استمر في التدريب!</div></div>`;
+  rd.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function resetRetry(){ retryPick={}; retryEditMode={}; const rd=$('retryR'); if(rd) rd.classList.add('hidden'); if(!retryList.length){ $('retryContainer').classList.add('hidden'); return; } renderRetryQs(); }
 
 
 function shuffleArr(arr){
@@ -1805,7 +1934,7 @@ function shuffleArr(arr){
 }
 function showStartScreen(){
   examStarted = false;
-  examSubmitted = false;
+  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; try{document.body.classList.remove('exam-done')}catch(e){};
   const ss = $('startScreen');
   const qc = $('questionsContainer');
   const cc = $('controlsContainer');
@@ -1828,6 +1957,32 @@ function hideStartScreen(){
 
 // —— أرقام عربية ↔ إنجليزية + جلب الاسم من شيت Google ——
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpVJBVOa_ewqV4K0hyeiTaeIZFbXGZLvYoD4at-9FLim98C-YHw18XZa_M_PSIeM9_kA/exec";
+// —— إرسال النتيجة لشيت Google (لوحة التقدم) مع إعادة المحاولة عند ضعف الإنترنت ——
+const EXAM_ID = "U2L2_MCQ_A";
+const PENDING_KEY = 'najm_pending_results_v1';
+function _pendingGet(){ try{ return JSON.parse(localStorage.getItem(PENDING_KEY)||'[]'); }catch(e){ return []; } }
+function _pendingSet(a){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(a.slice(-100))); }catch(e){} }
+async function flushPendingResults(){
+  let q = _pendingGet(); if(!q.length) return;
+  const rest = [];
+  for(const item of q){
+    try{
+      const res = await fetch(GOOGLE_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(item) });
+      const j = await res.json();
+      if(!j || j.ok !== true) rest.push(item);
+    }catch(e){ rest.push(item); }
+  }
+  _pendingSet(rest);
+}
+function sendResultToSheet(a, wrongList){
+  if(!a || !a.phone) return;
+  const item = { action:'saveResult', id: EXAM_ID+'|'+a.phone+'|'+a.at, at:a.at, phone:a.phone, name:a.name||'',
+    exam:EXAM_ID, title:(document.title||EXAM_ID).replace(/^بنك اختياري\s*[—-]\s*/,''), score:a.score, total:a.total, time:a.time||'', answered:a.answered, mode:a.mode, wrong:(wrongList||[]) };
+  const q = _pendingGet(); q.push(item); _pendingSet(q);
+  flushPendingResults();
+}
+setTimeout(function(){ flushPendingResults(); }, 3000);
+
 function toEnglishDigits(s){
   if(!s) return '';
   const ar='٠١٢٣٤٥٦٧٨٩';
@@ -1835,42 +1990,44 @@ function toEnglishDigits(s){
                   .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
 }
 function normalizePhoneDigits(raw){
+  // يقبل عربي أو إنجليزي، يُرجع أرقاماً إنجليزية فقط
   return toEnglishDigits(raw||'').replace(/\D/g,'');
 }
-async function lookupStudentName(phone8){
-  try{
-    if(!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('XXXXXXXX')) return null;
-    const res = await fetch(GOOGLE_SCRIPT_URL + '?sheet=users&t=' + Date.now());
-    const data = await res.json();
-    if(!Array.isArray(data)) return null;
-    const target = phone8;
-    for(const u of data){
-      let up = String(u.phone || u['هاتف الطالب'] || u['الهاتف'] || '').trim();
-      up = normalizePhoneDigits(up);
-      if(up.startsWith('974')) up = up.slice(3);
-      if(up === target){
-        return (u.name || u['اسم الطالب'] || u['الاسم'] || u['الطالب'] || '').trim() || null;
-      }
-    }
-  }catch(e){ console.warn('lookup name failed', e); }
-  return null;
-}
+async function lookupStudentName(){ return null; } // أُلغي البحث عن الاسم حفاظًا على خصوصية الطلاب
 let _nameLookupTimer = null;
+
+function onCountryCodeInput(){
+  const inp = document.getElementById('countryCode');
+  if(!inp) return;
+  let d = (typeof toEnglishDigits==='function' ? toEnglishDigits(inp.value) : inp.value).replace(/\D/g,'');
+  if(d.length > 4) d = d.slice(0,4);
+  if(inp.value !== d) inp.value = d;
+  if(typeof onStudentPhoneInput==='function') onStudentPhoneInput();
+}
+function getFullPhone(){
+  const cc = (document.getElementById('countryCode')||{}).value || '974';
+  const local = (document.getElementById('studentPhone')||{}).value || '';
+  const digits = (typeof normalizePhoneDigits==='function' ? normalizePhoneDigits : (s=>String(s||'').replace(/\D/g,'')))(cc + local);
+  return digits;
+}
+
 function onStudentPhoneInput(){
   const inp = document.getElementById('studentPhone');
   if(!inp) return;
-  const digits = normalizePhoneDigits(inp.value);
+  const raw = inp.value;
+  const digits = normalizePhoneDigits(raw);
+  // أظهر الأرقام بالإنجليزية دائماً داخل الحقل (لا نغيّر للعربي)
   if(inp.value !== digits){
     const pos = inp.selectionStart;
-    inp.value = digits.slice(0,8);
+    inp.value = digits.slice(0,12);
     try{ inp.setSelectionRange(Math.min(pos, inp.value.length), Math.min(pos, inp.value.length)); }catch(e){}
-  } else if(digits.length > 8){
-    inp.value = digits.slice(0,8);
+  } else if(digits.length > 12){
+    inp.value = digits.slice(0,12);
   }
   const nameInp = document.getElementById('studentName');
   const hint = document.getElementById('phoneHint');
   if(digits.length === 8){
-    if(hint) hint.textContent = '⏳ جاري البحث عن الاسم في السجل...';
+    if(hint) hint.textContent = '';
     clearTimeout(_nameLookupTimer);
     _nameLookupTimer = setTimeout(async ()=>{
       const nm = await lookupStudentName(digits);
@@ -1878,29 +2035,38 @@ function onStudentPhoneInput(){
         nameInp.value = nm;
         studentName = nm;
         if(hint) hint.textContent = '✅ تم التعرف: ' + nm;
-        if(typeof toast==='function') toast('👤 ' + nm);
+        toast('👤 ' + nm);
       } else {
-        if(hint) hint.textContent = 'يمكنك كتابة الاسم يدوياً إن لم يظهر تلقائياً';
+        if(hint) hint.textContent = digits.length===8 ? 'اكتب اسمك (اختياري)' : 'أدخل 8 أرقام (عربي أو إنجليزي)';
       }
     }, 350);
   } else {
-    if(hint) hint.textContent = 'أدخل 8 أرقام (مثال: 33123456 أو ٣٣١٢٣٤٥٦) — مطلوب';
+    if(hint) hint.textContent = 'أدخل رقم الهاتف (رمز الدولة قابل للتعديل — افتراضي 974)';
   }
 }
 
-function startExam(mode){
-  orderMode = mode || 'fixed';
+async function startExam(mode){
+  if(!TEACHER_MODE){ try{ if(!(await najmDeviceGate())) return; }catch(e){} }
+  _startExamCore(mode);
+}
+function _startExamCore(mode){
+  orderMode = 'fixed';
+  // رقم الهاتف مطلوب للطالب — يقبل عربي أو إنجليزي
   if(!TEACHER_MODE){
     const inp = document.getElementById('studentPhone');
     const rawTyped = (inp && inp.value) ? inp.value : '';
-    const digits = normalizePhoneDigits(rawTyped).slice(0,8);
-    if(digits.length !== 8){
+    const ccEl = document.getElementById('countryCode');
+    const cc = normalizePhoneDigits((ccEl && ccEl.value) || '974') || '974';
+    let digits = normalizePhoneDigits(rawTyped);
+    if(cc === '974' && /^974\d{8}$/.test(digits)) digits = digits.slice(3);
+    digits = digits.slice(0, cc === '974' ? 8 : 12);
+    if(cc === '974' ? digits.length !== 8 : digits.length < 6){
       const shown = rawTyped.trim() || '(فارغ)';
       toast('⚠️ الرقم المدخل «' + shown + '» غير مكتمل — يجب 8 أرقام بعد +974 (عربي أو إنجليزي)');
       if(inp){ inp.focus(); inp.style.borderColor='#ff5252'; }
       return;
     }
-    studentPhone = '974' + digits;
+    studentPhone = cc + digits;
     if(inp){ inp.value = digits; inp.style.borderColor=''; }
     const nameInp = document.getElementById('studentName');
     studentName = (nameInp && nameInp.value) ? nameInp.value.trim() : '';
@@ -1908,7 +2074,7 @@ function startExam(mode){
     studentPhone = '';
     studentName = '';
   }
-  examStarted = true;
+  examStarted = true; clearAttempt(); hideRetryBig();
   // rebuild from base
   const src = (baseQuestions && baseQuestions.length) ? baseQuestions : buildQuestions();
   baseQuestions = src.map(q => Object.assign({}, q, {
@@ -1917,6 +2083,7 @@ function startExam(mode){
     images: (q.images||[]).slice(),
     keywords: (q.keywords||[]).slice()
   }));
+  orderMode = najmPickOrder(baseQuestions);
   if(orderMode === 'random' && !TEACHER_MODE){
     questions = shuffleArr(baseQuestions);
     toast('🔀 ترتيب عشوائي');
@@ -1931,11 +2098,11 @@ function startExam(mode){
     else toast('📋 ترتيب ثابت');
   }
   evaluations = {}; transcripts = {}; editMode = {}; retryEditMode = {};
-  examSubmitted = false;
+  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; try{document.body.classList.remove('exam-done')}catch(e){};
   hideStartScreen();
   const rc=$('resultContainer'); if(rc){ rc.classList.add('hidden'); rc.innerHTML=''; }
   const qc=$('questionsContainer'); if(qc) qc.classList.remove('hidden-qs');
-  examSubmitted = false;
+  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; try{document.body.classList.remove('exam-done')}catch(e){};
   const fb=$('finishBtn'); if(fb){ fb.textContent='📊 إنهاء'; fb.classList.remove('hidden-finish'); fb.classList.add('show'); }
   renderQuestions();
   startTimer();
@@ -1944,6 +2111,7 @@ function startExam(mode){
 }
 
 function resetExam(){
+  hideRetryBig();
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
   stopAllAudio(); seconds=0; const td=$('timerDisplay'); if(td) td.textContent='00:00';
   baseQuestions = buildQuestions();
@@ -1953,7 +2121,7 @@ function resetExam(){
   Object.keys(audioUrls).forEach(k=>{try{URL.revokeObjectURL(audioUrls[k]);}catch(e){} delete audioUrls[k];});
   Object.keys(audioPlayers).forEach(k=>{try{audioPlayers[k].pause();}catch(e){} delete audioPlayers[k];});
   Object.keys(playingState).forEach(k=>delete playingState[k]);
-  examSubmitted=false; historyStack=[]; historyPointer=-1;
+  examSubmitted=false; try{document.body.classList.remove('exam-done')}catch(e){}; try{document.body.classList.remove('exam-done')}catch(e){}; historyStack=[]; historyPointer=-1;
   const rc=$('resultContainer'); if(rc) rc.classList.add('hidden');
   const rty=$('retryContainer'); if(rty) rty.classList.add('hidden');
   const hb=$('homeBtn'); if(hb) hb.classList.add('show');
@@ -1981,6 +2149,20 @@ window.addEventListener('scroll',()=>{
 setTimeout(()=>{ const fb=$('finishBtn'); if(fb && !examSubmitted){ fb.classList.add('show'); fb.classList.remove('hidden-finish'); } const hb=$('homeBtn'); if(hb) hb.classList.add('show'); }, 100);
 
 
+
+
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')){
+    const sel = window.getSelection();
+    if(!sel || sel.rangeCount===0) return;
+    const node = sel.anchorNode;
+    if(!node) return;
+    const editable = (node.nodeType===1?node:node.parentElement);
+    if(!editable || !editable.isContentEditable) return;
+    e.preventDefault();
+    document.execCommand('underline', false, null);
+  }
+});
 
 function exportModel(){
   try{
@@ -2102,7 +2284,7 @@ function printWorksheet(){
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>بنك اختياري — الوحدة 2 الدرس 2 | أ — U2L2_MCQ_A</title>
+<title>طباعة — ${title}</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;}
@@ -2138,6 +2320,7 @@ function printWorksheet(){
     .no-print{display:none !important;}
     .wm{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   }
+  u.kw-u, .q-text u, .para-text-editable u, .mcq-option u{text-decoration:underline;text-decoration-color:var(--gold-500);text-underline-offset:3px;}
 </style>
 </head>
 <body>
@@ -2188,6 +2371,360 @@ if(!questions || !questions.length){
 }
 
 
+
+/* ===== حفظ تلقائي للمحاولة + استعادتها ===== */
+const ATTEMPT_KEY = STORAGE_KEY + '_attempt';
+function _qSig(q){ return (q.text||'') + '|' + (q.choices||[]).join('|'); }
+function saveAttempt(){
+  try{
+    if(TEACHER_MODE || !examStarted || examSubmitted) return;
+    if(!Object.keys(transcripts).length) return;
+    localStorage.setItem(ATTEMPT_KEY, JSON.stringify({
+      t: Date.now(), phone: studentPhone, name: studentName, mode: orderMode, seconds: seconds,
+      order: questions.map(_qSig),
+      answers: questions.map((q,i)=> (transcripts[i]===undefined ? null : transcripts[i]))
+    }));
+  }catch(e){}
+}
+function clearAttempt(){ try{ localStorage.removeItem(ATTEMPT_KEY); }catch(e){} }
+function tryResumeAttempt(){
+  try{
+    if(TEACHER_MODE) return;
+    let a=null; try{ a=JSON.parse(localStorage.getItem(ATTEMPT_KEY)||'null'); }catch(e){ a=null; }
+    if(!a || !Array.isArray(a.order) || !Array.isArray(a.answers)) return;
+    if(Date.now() - (a.t||0) > 3*24*3600*1000){ clearAttempt(); return; }
+    const done = a.answers.filter(x=>x!==null && x!==undefined).length;
+    if(!done){ clearAttempt(); return; }
+    // أعد بناء نفس ترتيب الأسئلة
+    const pool = baseQuestions.map((q,i)=>({sig:_qSig(q), i:i, used:false}));
+    const idxs = [];
+    for(const sig of a.order){
+      const m = pool.find(p=>!p.used && p.sig===sig);
+      if(!m){ clearAttempt(); return; } // الأسئلة تغيّرت — لا يمكن الاستعادة
+      m.used = true; idxs.push(m.i);
+    }
+    if(!confirm('لديك محاولة غير منتهية (' + done + ' من ' + a.order.length + ' سؤالًا).\n\nموافق = المتابعة من حيث توقفت\nإلغاء = البدء من جديد')){ clearAttempt(); return; }
+    questions = idxs.map(i => { const q=baseQuestions[i]; return Object.assign({}, q, {
+      paragraphs:(q.paragraphs||[]).map(p=>Object.assign({},p)), choices:(q.choices||[]).slice(),
+      images:(q.images||[]).slice(), keywords:(q.keywords||[]).slice() }); });
+    studentPhone = a.phone || ''; studentName = a.name || ''; orderMode = a.mode || 'fixed';
+    examStarted = true; examSubmitted = false;
+    evaluations = {}; transcripts = {}; editMode = {}; retryEditMode = {};
+    a.answers.forEach((v,i)=>{ if(v!==null && v!==undefined) transcripts[i]=v; });
+    seconds = a.seconds || 0;
+    hideStartScreen();
+    const rc=$('resultContainer'); if(rc){ rc.classList.add('hidden'); rc.innerHTML=''; }
+    const rty=$('retryContainer'); if(rty) rty.classList.add('hidden');
+    const qc=$('questionsContainer'); if(qc) qc.classList.remove('hidden-qs');
+    const fb=$('finishBtn'); if(fb){ fb.textContent='📊 إنهاء'; fb.classList.remove('hidden-finish'); fb.classList.add('show'); }
+    renderQuestions(); startTimer(); updateProgress();
+    window.scrollTo(0,0);
+    toast('↩️ تمت استعادة محاولتك — أكمل ثم اضغط إنهاء', 4000);
+  }catch(e){ console.error('resume failed', e); }
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) saveAttempt(); });
+window.addEventListener('pagehide', saveAttempt);
+tryResumeAttempt();
+
+</script>
+<script>
+/* تحديث تلقائي: يمنع ظهور النسخة القديمة (يقارن رقم النسخة + بصمة الملف) */
+(function(){
+  var cur=(document.querySelector('meta[name="app-version"]')||{}).content||'';
+  var HK='najm_h_'+location.pathname;
+  function banner(v,h){
+    if(document.getElementById('najmUpd')) return;
+    var b=document.createElement('div');b.id='najmUpd';
+    b.style.cssText='position:fixed;bottom:12px;left:12px;right:12px;z-index:99999;background:#f5c542;color:#0b1a3b;font:800 15px sans-serif;text-align:center;padding:12px;border-radius:12px;cursor:pointer;direction:rtl';
+    b.textContent='🔄 يوجد تحديث جديد — اضغط هنا للتحديث';
+    b.onclick=function(){go(v,h)};document.body.appendChild(b);
+  }
+  function go(v,h){
+    try{localStorage.setItem(HK,h)}catch(e){}
+    try{ if(navigator.serviceWorker) navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister()})}); }catch(e){}
+    try{ if(window.caches) caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})}); }catch(e){}
+    setTimeout(function(){location.replace(location.pathname+'?v='+encodeURIComponent(v))},150);
+  }
+  function hash(t){var x=5381,i=t.length;while(i)x=(x*33)^t.charCodeAt(--i);return String(x>>>0)}
+  function check(auto){
+    try{
+      if(!/^https?:$/.test(location.protocol))return;
+      fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).then(function(t){
+        var m=t.match(/<meta name="app-version" content="([^"]+)"/);
+        if(!m)return; /* ليست صفحة الاختبار الحقيقية (خطأ/معاينة) — لا تحديث */
+        var h=hash(t),old=null;
+        try{old=localStorage.getItem(HK)}catch(e){}
+        var changed=(m&&m[1]!==cur)||(old&&old!==h);
+        if(!changed){ if(!old){try{localStorage.setItem(HK,h)}catch(e){}} return; }
+        var tag=(m?m[1]:'x')+'-'+h, v=h;
+        if(auto&&sessionStorage.getItem('najm_upd_done')!==tag){sessionStorage.setItem('najm_upd_done',tag);go(v,h);}
+        else if(sessionStorage.getItem('najm_upd_done')!==tag||!auto) banner(v,h);
+      }).catch(function(){});
+    }catch(e){}
+  }
+  check(true);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)check(false)});
+})();
+</script>
+<script>
+/* najmWM: علامة مائية (اسم الطالب + رقمه + اسم المعلم + تحذير النشر) — رمادية محايدة تظهر في الوضعين الفاتح والغامق */
+(function(){
+  var last='',css='';
+  function val(id){var e=document.getElementById(id);return e&&e.value?String(e.value).trim():''}
+  function clean(s){return String(s).replace(/[&<>"'\\]/g,'')}
+  function ident(){
+    var p='',n='';
+    try{if(typeof studentPhone!=='undefined'&&studentPhone)p=String(studentPhone)}catch(e){}
+    try{if(typeof studentName!=='undefined'&&studentName)n=String(studentName)}catch(e){}
+    if(!p){var d=val('studentPhone').replace(/\D/g,'');if(d.length>=6){var cc=val('countryCode').replace(/\D/g,'')||'974';p=(d.indexOf(cc)===0&&d.length>8)?d:cc+d}}
+    if(!n)n=val('studentName');
+    return{p:p,n:n};
+  }
+  function build(n,p){
+    var T="<svg xmlns='http://www.w3.org/2000/svg' width='360' height='220'><g transform='rotate(-28 180 110)' font-family='sans-serif' font-weight='700' text-anchor='middle'><text x='180' y='94' font-size='17' fill='#808080' fill-opacity='.2'>"+clean(n||'طالب')+"</text><text x='180' y='119' font-size='15' fill='#808080' fill-opacity='.2'>+"+clean(p)+"</text><text x='180' y='144' font-size='14' fill='#808080' fill-opacity='.2'>أ. عزت نجم الأحياء</text></g></svg>";
+    var W="<svg xmlns='http://www.w3.org/2000/svg' width='720' height='440'><g transform='rotate(-28 180 220)' font-family='sans-serif' font-weight='700' text-anchor='middle'><text x='180' y='224' font-size='14' fill='#808080' fill-opacity='.17'>نشر المحتوى قد يوقف حسابك</text></g></svg>";
+    return 'position:fixed;inset:0;pointer-events:none;z-index:2147483000;background-repeat:repeat;background-size:360px 220px,720px 440px;background-image:url("data:image/svg+xml;utf8,'+encodeURIComponent(T)+'"),url("data:image/svg+xml;utf8,'+encodeURIComponent(W)+'")';
+  }
+  function apply(){
+    var id=ident(),el=document.getElementById('najmWM');
+    if(!id.p){if(el)el.remove();last='';return}
+    var key=id.n+'|'+id.p;
+    if(key!==last){last=key;css=build(id.n,id.p)}
+    if(!el){el=document.createElement('div');el.id='najmWM';document.body.appendChild(el)}
+    if(el.style.cssText!==css)el.style.cssText=css;
+  }
+  setInterval(apply,1000);
+  try{new MutationObserver(function(){if(!document.getElementById('najmWM'))apply()}).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
+  apply();
+})();
+</script>
+<script>
+/* najmSearch: عدسة بحث في الأسئلة (تظهر للمعلم فقط) */
+(function(){
+  function norm(s){return String(s||'').replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)}).toLowerCase()}
+  var box=null,inp=null,cnt=null,q='';
+  function cards(){var c=document.getElementById('questionsContainer');return c?[].slice.call(c.querySelectorAll('.question-card')):[]}
+  function text(el){var t=el.innerText||el.textContent||'';[].forEach.call(el.querySelectorAll('input,textarea'),function(i){if(i.type!=='number'&&i.type!=='checkbox'&&i.type!=='radio')t+=' '+i.value});return norm(t)}
+  function run(){
+    var w=norm(q).split(/\s+/).filter(Boolean),cs=cards(),n=0;
+    cs.forEach(function(c){var t=text(c),ok=!w.length||w.every(function(x){return t.indexOf(x)>-1});c.style.display=ok?'':'none';if(ok)n++});
+    if(cnt)cnt.textContent=w.length?('النتائج: '+n+' من '+cs.length):'';
+  }
+  function make(){
+    var c=document.getElementById('questionsContainer');if(!c||box)return;
+    box=document.createElement('div');box.id='najmSearch';
+    box.style.cssText='display:none;position:sticky;top:0;z-index:30;margin:8px 14px;padding:8px 12px;background:#fff;border:2px solid #f5c542;border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.12);direction:rtl;align-items:center;gap:8px';
+    box.innerHTML='<span style="font-size:20px">🔍</span><input type="search" placeholder="ابحث في الأسئلة بكلمة أو رقم..." style="flex:1;min-width:0;border:0;outline:0;font-weight:700;font-size:15px;font-family:inherit;background:transparent;color:#0b1a3b;direction:rtl"><span class="najmCnt" style="font-weight:700;font-size:12px;color:#667"></span>';
+    c.parentNode.insertBefore(box,c);
+    inp=box.querySelector('input');cnt=box.querySelector('.najmCnt');
+    inp.addEventListener('input',function(){q=inp.value;run()});
+    try{new MutationObserver(function(){if(q)run()}).observe(c,{childList:true})}catch(e){}
+  }
+  setInterval(function(){
+    make();if(!box)return;
+    var c=document.getElementById('questionsContainer');
+    var show=(typeof TEACHER_MODE!=='undefined'&&TEACHER_MODE)&&c&&!c.classList.contains('hidden-qs');
+    box.style.display=show?'flex':'none';
+    if(!show&&q){q='';inp.value='';run()}
+  },800);
+})();
+</script>
+<script>
+/* najmCore (2026-10-23): ترتيب تلقائي + حد الأجهزة + تسطير في محرر الأسئلة */
+(function(){
+  /* ——— 1) الترتيب: أول مرة ثابت، وبعدها عشوائي (إلا لو فيه سؤال مقالي → ثابت دائماً) ——— */
+  window.najmPickOrder=function(list){
+    try{
+      if(typeof TEACHER_MODE!=='undefined' && TEACHER_MODE) return 'fixed';
+      if((list||[]).some(function(q){ return (q.type||'essay')!=='mcq'; })) return 'fixed';
+      var k='najm_seen_'+EXAM_ID+'_'+(studentPhone||'');
+      var seen=localStorage.getItem(k);
+      localStorage.setItem(k,String(Date.now()));
+      return seen?'random':'fixed';
+    }catch(e){ return 'fixed'; }
+  };
+
+  /* ——— 2) حد الأجهزة (٤ أجهزة لكل طالب — يُفرض من السكربت على جوجل) ——— */
+  window.najmDeviceId=function(){
+    var k='najm_device_id',v='';
+    try{ v=localStorage.getItem(k)||''; }catch(e){}
+    if(!v){
+      v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('d'+Date.now().toString(36)+Math.random().toString(36).slice(2,10));
+      try{ localStorage.setItem(k,v); }catch(e){}
+    }
+    return v;
+  };
+  function showBlocked(){
+    if(document.getElementById('najmBlocked')) return;
+    var d=document.createElement('div'); d.id='najmBlocked';
+    d.style.cssText='position:fixed;inset:0;z-index:2147483600;background:rgba(5,12,28,.92);display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl;font-family:Cairo,sans-serif';
+    d.innerHTML='<div style="max-width:380px;background:#13285a;border:2px solid #f5c542;border-radius:18px;padding:24px;text-align:center;color:#fff">'
+      +'<div style="font-size:44px">⛔</div>'
+      +'<div style="font-size:17px;font-weight:900;line-height:1.9;margin:8px 0 16px">تم إيقاف الحساب للدخول من أكثر من جهاز<br>تواصل مع المعلم</div>'
+      +'<a href="https://wa.me/97477107247" target="_blank" rel="noopener" style="display:block;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;text-decoration:none;font-weight:800;padding:12px;border-radius:12px;margin-bottom:8px">💬 تواصل واتساب</a>'
+      +'<button type="button" onclick="document.getElementById(\'najmBlocked\').remove()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:#cfd8ee;border-radius:12px;padding:9px 18px;font-family:inherit;font-weight:700;cursor:pointer">إغلاق</button>'
+      +'</div>';
+    document.body.appendChild(d);
+  }
+  window.najmDeviceGate=async function(){
+    try{
+      var inp=document.getElementById('studentPhone'), ccEl=document.getElementById('countryCode');
+      var cc=normalizePhoneDigits((ccEl&&ccEl.value)||'974')||'974';
+      var digits=normalizePhoneDigits((inp&&inp.value)||'');
+      if(cc==='974' && /^974\d{8}$/.test(digits)) digits=digits.slice(3);
+      digits=digits.slice(0, cc==='974'?8:12);
+      if(cc==='974' ? digits.length!==8 : digits.length<6) return true; /* الرقم ناقص: التحقق العادي في startExam يتولى الرسالة */
+      var phone=cc+digits;
+      var ctl=('AbortController' in window)?new AbortController():null;
+      var tm=setTimeout(function(){ try{ctl&&ctl.abort()}catch(e){} },7000);
+      var r=await fetch(GOOGLE_SCRIPT_URL+'?action=device&phone='+encodeURIComponent(phone)+'&device='+encodeURIComponent(najmDeviceId())+'&t='+Date.now(),ctl?{signal:ctl.signal}:{});
+      clearTimeout(tm);
+      var d=await r.json();
+      if(d && d.ok===false && (d.error==='devices'||d.error==='blocked')){ showBlocked(); return false; }
+      return true;
+    }catch(e){ return true; } /* لا نمنع الطالب بسبب ضعف الإنترنت */
+  };
+
+  /* ——— 3) التسطير: حدّد كلمة أو أكثر ثم Ctrl+U أو زر «تسطير» (في كل حقول تعديل السؤال) ——— */
+  function wrapField(el){
+    var s=el.selectionStart,e=el.selectionEnd; if(s==null||s===e) return false;
+    var v=el.value,sel=v.slice(s,e),b=v.slice(0,s),a=v.slice(e),m=sel.match(/^<u>([\s\S]*)<\/u>$/);
+    if(m){ el.value=b+m[1]+a; el.setSelectionRange(s,s+m[1].length); }
+    else if(b.slice(-3)==='<u>' && a.slice(0,4)==='</u>'){ el.value=b.slice(0,-3)+sel+a.slice(4); el.setSelectionRange(s-3,s-3+sel.length); }
+    else { el.value=b+'<u>'+sel+'</u>'+a; el.setSelectionRange(s,e+7); }
+    try{ el.dispatchEvent(new Event('input',{bubbles:true})); }catch(_){}
+    var a1=el.selectionStart,b1=el.selectionEnd; setTimeout(function(){ try{ el.focus(); el.setSelectionRange(a1,b1); }catch(_){} },0);
+    return true;
+  }
+  function toggleEditable(){
+    var sel=window.getSelection(); if(!sel||sel.rangeCount===0||sel.isCollapsed) return false;
+    var range=sel.getRangeAt(0), node=range.commonAncestorContainer; if(node.nodeType===3) node=node.parentElement;
+    var up=node&&node.closest?node.closest('u'):null;
+    if(up && up.isContentEditable){ var p=up.parentNode; while(up.firstChild) p.insertBefore(up.firstChild,up); p.removeChild(up); p.normalize(); }
+    else { var u=document.createElement('u'); u.className='kw-u'; try{ range.surroundContents(u); }catch(x){ var f=range.extractContents(); u.appendChild(f); range.insertNode(u); } }
+    sel.removeAllRanges(); return true;
+  }
+  var lastField=null;
+  function isEditorField(t){ return t && t.closest && t.closest('#editM') && (t.tagName==='TEXTAREA' || (t.tagName==='INPUT' && t.type==='text') || t.isContentEditable); }
+  document.addEventListener('focusin',function(e){ if(isEditorField(e.target)) lastField=e.target; });
+  function applyU(t){
+    if(!t) return false;
+    if(t.isContentEditable || (t.closest && t.closest('[contenteditable=true]'))) return toggleEditable();
+    return wrapField(t);
+  }
+  document.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey) && (e.code==='KeyU' || (e.key||'').toLowerCase()==='u')){
+      var t=e.target;
+      if(isEditorField(t) || (t&&t.closest&&t.closest('[contenteditable=true]'))){
+        e.preventDefault(); e.stopImmediatePropagation(); applyU(t);
+      }
+    }
+  },true);
+  function injectBtn(){
+    var m=document.querySelector('#editM .modal'); if(!m||m.querySelector('.najm-u-row')) return;
+    var row=document.createElement('div'); row.className='najm-u-row';
+    row.style.cssText='display:flex;align-items:center;gap:8px;margin:-6px 0 12px;flex-wrap:wrap';
+    row.innerHTML='<button type="button" class="najm-u-btn" style="background:rgba(224,182,47,.18);color:var(--gold-600);border:1px solid rgba(224,182,47,.5);border-radius:999px;padding:5px 14px;font-family:inherit;font-weight:900;font-size:12.5px;cursor:pointer"><u>تسطير</u></button><span style="font-size:11px;color:var(--muted);font-weight:700">حدّد كلمة أو أكثر ثم اضغط الزر (أو Ctrl+U) — وللإلغاء حدّدها واضغط مرة ثانية</span>';
+    var h2=m.querySelector('h2'); if(h2&&h2.nextSibling) m.insertBefore(row,h2.nextSibling); else m.appendChild(row);
+    var b=row.querySelector('button');
+    b.addEventListener('mousedown',function(e){ e.preventDefault(); });
+    b.addEventListener('click',function(){ if(!applyU(lastField)) { try{ toast('⚠️ اضغط داخل النص وحدّد الكلمة أولاً'); }catch(e){} } });
+  }
+  var _oe=window.openEditQ;
+  if(typeof _oe==='function'){ window.openEditQ=function(){ var r=_oe.apply(this,arguments); try{ lastField=null; injectBtn(); }catch(e){} return r; }; }
+  var st=document.createElement('style');
+  st.textContent='u, u.kw-u{text-decoration:underline;text-decoration-color:var(--gold-500);text-underline-offset:3px;text-decoration-thickness:2px}';
+  document.head.appendChild(st);
+})();
+</script>
+<script>
+/* najmSend (2026-10-23): إرسال النتيجة بشكل آمن + شريط حالة واضح + إعادة إرسال */
+/* v2 (2026-10-25): النتيجة الجديدة تُرسل فورًا بطلب مستقل ولا تنتظر طابور النتائج القديمة */
+(function(){
+  var flushing=null, CUR=null, bar=null, lastErr='', hideT=null;
+  var inflight={}, done=false; /* نتائج قيد الإرسال الآن — لمنع الإرسال المزدوج بين الطلب المستقل والدورة الخلفية */
+  function ensureBar(){
+    if(bar) return bar;
+    bar=document.createElement('div'); bar.id='najmSendBar';
+    bar.style.cssText='position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483100;max-width:94vw;direction:rtl;font-family:Cairo,sans-serif;font-size:13px;font-weight:800;line-height:1.7;padding:9px 14px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.35);display:none;align-items:center;gap:10px;text-align:center';
+    document.body.appendChild(bar); return bar;
+  }
+  function show(kind){
+    var b=ensureBar(); clearTimeout(hideT); b.style.display='flex';
+    if(kind==='sending'){ b.style.background='#16306e'; b.style.color='#fff'; b.style.border='1px solid #3a5bb5'; b.innerHTML='<span>⏳ جاري تسجيل نتيجتك في لوحة تقدمي… لا تُغلق الصفحة</span>'; }
+    else if(kind==='ok'){ b.style.background='#0f5a34'; b.style.color='#fff'; b.style.border='1px solid #2fbf71'; b.innerHTML='<span>✅ تم تسجيل نتيجتك في لوحة تقدمي</span>'; hideT=setTimeout(function(){ b.style.display='none'; },9000); }
+    else { b.style.background='#7a1f1f'; b.style.color='#fff'; b.style.border='1px solid #e06666';
+      b.innerHTML='<span>⚠️ لم تصل نتيجتك بعد — تأكد من الإنترنت، وستُرسل تلقائياً أول ما يتوفر.'+(lastErr?' <small style="opacity:.8">('+lastErr+')</small>':'')+'</span><button type="button" id="najmSendRetry" style="background:#f5c542;color:#222;border:0;border-radius:10px;padding:6px 12px;font-family:inherit;font-weight:900;cursor:pointer;white-space:nowrap">🔄 إعادة الإرسال</button>';
+      var r=document.getElementById('najmSendRetry'); if(r) r.onclick=function(){
+        var item=_pendingGet().filter(function(x){ return x.id===CUR; })[0];
+        if(item && !inflight[item.id]){ show('sending'); sendNow(item); }
+        window.flushPendingResults();
+      };
+    }
+  }
+  function refresh(){
+    if(!CUR || done) return;
+    if(inflight[CUR]) return; /* لسه بتتبعت — ما نغيّر الشريط */
+    var still=_pendingGet().some(function(x){ return x.id===CUR; });
+    show(still?'fail':'ok');
+  }
+  async function post(item){
+    var ctl=('AbortController' in window)?new AbortController():null;
+    var tm=setTimeout(function(){ try{ctl&&ctl.abort()}catch(e){} },20000);
+    try{
+      var res=await fetch(GOOGLE_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(item),signal:ctl?ctl.signal:undefined});
+      var j=await res.json();
+      if(j && j.ok===true) return true;
+      lastErr='رد غير متوقع من الخادم'; return false;
+    }catch(e){ lastErr=(e&&e.name==='AbortError')?'انتهت مهلة الاتصال':'تعذر الاتصال بالإنترنت'; return false; }
+    finally{ clearTimeout(tm); }
+  }
+  /* إرسال مستقل لنتيجة واحدة: لا يمر على القفل ولا ينتظر الطابور */
+  async function sendNow(item){
+    inflight[item.id]=1;
+    var ok=false;
+    try{ ok=await post(item); }catch(e){ ok=false; }
+    if(ok){ _pendingSet(_pendingGet().filter(function(x){ return x.id!==item.id; })); }
+    delete inflight[item.id];
+    if(CUR===item.id){ done=ok; show(ok?'ok':'fail'); }
+    return ok;
+  }
+  /* الدورة الخلفية للنتائج القديمة: قفل واحد، تتخطى أي نتيجة قيد الإرسال، ولا تمسح نتيجة جديدة أضيفت أثناءها */
+  window.flushPendingResults=function(){
+    if(flushing) return flushing;
+    flushing=(async function(){
+      try{
+        var tried={};
+        for(;;){
+          var q=_pendingGet().filter(function(x){ return !tried[x.id] && !inflight[x.id]; });
+          if(!q.length) break;
+          for(var k=0;k<q.length;k++){
+            var item=q[k]; tried[item.id]=1;
+            if(inflight[item.id]) continue;
+            inflight[item.id]=1;
+            var ok=false;
+            try{ ok=await post(item); }catch(e){ ok=false; }
+            if(ok){ _pendingSet(_pendingGet().filter(function(x){ return x.id!==item.id; })); }
+            delete inflight[item.id];
+          }
+        }
+      }catch(e){}
+      finally{ flushing=null; refresh(); }
+    })();
+    return flushing;
+  };
+  window.sendResultToSheet=function(a,wrongList){
+    if(!a||!a.phone) return;
+    var item={ action:'saveResult', id:EXAM_ID+'|'+a.phone+'|'+a.at, at:a.at, phone:a.phone, name:a.name||'',
+      exam:EXAM_ID, title:(document.title||EXAM_ID).replace(/^بنك اختياري\s*[—-]\s*/,''), score:a.score, total:a.total, time:a.time||'', answered:a.answered, mode:a.mode, wrong:(wrongList||[]) };
+    var q=_pendingGet().filter(function(x){ return x.id!==item.id; }); q.push(item); _pendingSet(q);
+    CUR=item.id; lastErr=''; done=false; show('sending');
+    sendNow(item);                 /* النتيجة الجديدة: فورًا وبطلب مستقل */
+    window.flushPendingResults();  /* النتائج القديمة: في الخلفية بدون ما تأثر على الشريط */
+  };
+  window.addEventListener('online',function(){ if(_pendingGet().length) window.flushPendingResults(); });
+  setInterval(function(){ if(_pendingGet().length) window.flushPendingResults(); },20000);
+})();
 </script>
 </body>
 </html>
