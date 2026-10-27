@@ -389,7 +389,7 @@
         <button class="tool-mini danger" id="resetSavedBtn" onclick="resetSavedData()" title="مسح كل التعديلات">🗑️</button>
         <button class="tool-mini gold teacher-only-btn hidden" id="printBtn" onclick="printWorksheet()" title="طباعة الملزمة" class="print-btn teacher-only">🖨️ طباعة</button>
         <button class="tool-mini" id="themeBtn" onclick="toggleTheme()">🌓</button>
-        <span class="mode-avatar" id="modeAvatar" onclick="onModeAvatarClick()" title="اضغط 3 مرات لتغيير الوضع">👨‍🎓</span><span class="mode-label" id="modeLabel">طالب</span>
+        <span class="mode-avatar" id="modeAvatar" onclick="onModeAvatarClick()" title="اضغط لدخول المعلم">👨‍🎓</span><span class="mode-label" id="modeLabel">طالب</span>
       </div>
     </div>
     <div class="hero-title-row">
@@ -726,13 +726,13 @@ function updateModeAvatar(){
   const eb=$('exportBtn');
   if(TEACHER_MODE){
     av.textContent='👨‍🏫'; av.classList.add('teacher');
-    av.title='وضع المعلم — اضغط 3 مرات للخروج';
+    av.title='وضع المعلم — اضغط للخروج';
     if(lb){ lb.textContent='معلم'; lb.classList.add('teacher'); }
     if(fb){ fb.classList.add('hidden-finish'); }
     if(eb){ eb.classList.remove('hidden-export'); eb.textContent='📤 حفظ وتصدير'; }
   } else {
     av.textContent='👨‍🎓'; av.classList.remove('teacher');
-    av.title='وضع الطالب — اضغط 3 مرات لتفعيل وضع المعلم';
+    av.title='وضع الطالب — اضغط لدخول المعلم';
     if(lb){ lb.textContent='طالب'; lb.classList.remove('teacher'); }
     if(fb){ fb.textContent='📊 إنهاء'; fb.title='إنهاء وعرض النتائج'; if(!examSubmitted) fb.classList.remove('hidden-finish'); }
     if(eb){ eb.classList.add('hidden-export'); }
@@ -740,30 +740,42 @@ function updateModeAvatar(){
 }
 
 function onModeAvatarClick(){
-  teacherClickCount++;
-  clearTimeout(teacherClickTimer);
-  teacherClickTimer=setTimeout(()=>{teacherClickCount=0;},2000);
-  if(teacherClickCount>=3){
-    teacherClickCount=0;
-    TEACHER_MODE=!TEACHER_MODE; try{ if(TEACHER_MODE) document.body.classList.add('teacher-mode'); else document.body.classList.remove('teacher-mode'); }catch(e){}; try{ if(TEACHER_MODE) document.body.classList.add('teacher-mode'); else document.body.classList.remove('teacher-mode'); }catch(e){};
-    $('teacherPanel').classList.toggle('hidden',!TEACHER_MODE);
-    $('undoBtn').classList.toggle('hidden',!TEACHER_MODE);
-    $('redoBtn').classList.toggle('hidden',!TEACHER_MODE);
-    updateHistBtn();
-    updateModeAvatar();
-    if(TEACHER_MODE){
-      toast('✅ وضع المعلم مفعّل 👨‍🏫');
-      // دائماً ثابت للمعلم
-      baseQuestions = buildQuestions();
-      startExam('fixed');
-    } else {
-      toast('🔒 وضع الطالب 👨‍🎓');
-      showStartScreen();
+  try{
+    if(typeof TEACHER_MODE!=='undefined' && TEACHER_MODE){
+      TEACHER_MODE=false;
+      try{ document.body.classList.remove('teacher-mode'); document.body.classList.remove('teacher-active'); }catch(e){}
+      try{ var p=document.getElementById('teacherPanel'); if(p) p.classList.add('hidden'); }catch(e){}
+      try{ var u=document.getElementById('undoBtn'); if(u) u.classList.add('hidden'); }catch(e){}
+      try{ var r=document.getElementById('redoBtn'); if(r) r.classList.add('hidden'); }catch(e){}
+      try{ if(typeof updateHistBtn==='function') updateHistBtn(); }catch(e){}
+      try{ if(typeof updateModeAvatar==='function') updateModeAvatar(); }catch(e){}
+      try{ if(typeof toast==='function') toast('🔒 وضع الطالب'); else alert('وضع الطالب'); }catch(e){}
+      try{ if(typeof showStartScreen==='function') showStartScreen(); }catch(e){}
+      return;
     }
-  } else {
-    toast(`${teacherClickCount}/3`);
+    var pw = window.prompt('كلمة مرور المعلم:');
+    if(pw===null) return;
+    if(pw==='Teach@1212'){
+      TEACHER_MODE=true;
+      try{ document.body.classList.add('teacher-mode'); document.body.classList.add('teacher-active'); }catch(e){}
+      try{ var p=document.getElementById('teacherPanel'); if(p) p.classList.remove('hidden'); }catch(e){}
+      try{ var u=document.getElementById('undoBtn'); if(u) u.classList.remove('hidden'); }catch(e){}
+      try{ var r=document.getElementById('redoBtn'); if(r) r.classList.remove('hidden'); }catch(e){}
+      try{ if(typeof updateHistBtn==='function') updateHistBtn(); }catch(e){}
+      try{ if(typeof updateModeAvatar==='function') updateModeAvatar(); }catch(e){}
+      try{ if(typeof toast==='function') toast('✅ وضع المعلم مفعّل'); else alert('وضع المعلم مفعّل'); }catch(e){}
+      try{ if(typeof buildQuestions==='function') baseQuestions=buildQuestions(); }catch(e){}
+      try{ if(typeof startExam==='function') startExam('fixed'); }catch(e){}
+      try{ if(typeof renderQuestions==='function') renderQuestions(); }catch(e){}
+    } else {
+      try{ if(typeof toast==='function') toast('❌ كلمة المرور غير صحيحة'); else alert('كلمة المرور غير صحيحة'); }catch(e){}
+    }
+  }catch(err){
+    console.error(err);
+    alert('خطأ: '+(err && err.message ? err.message : err));
   }
 }
+
 function exitTeacherMode(){ TEACHER_MODE=false; try{document.body.classList.remove('teacher-mode')}catch(e){}; try{document.body.classList.remove('teacher-mode')}catch(e){}; document.body.classList.remove('teacher-active'); $('teacherPanel').classList.add('hidden'); $('undoBtn').classList.add('hidden'); $('redoBtn').classList.add('hidden'); updateModeAvatar(); toast('🔒 وضع المعلم مغلق'); renderQuestions(); }
 
 function applyDefaultWeight(){ const v=parseFloat($('defaultWeight').value)||2; snapshot('درجة افتراضية'); questions.forEach(q=>q.weight=v); saveQuestions(); renderQuestions(); toast('✅ '+v); }
@@ -778,6 +790,31 @@ function updateHistBtn(){ const u=$('undoBtn'),r=$('redoBtn'); if(!u||!r) return
 function stopAllAudio(ex){ Object.keys(audioPlayers).forEach(k=>{ if(ex!=null&&String(k)===String(ex)) return; try{audioPlayers[k].pause();audioPlayers[k].currentTime=0;}catch(e){} playingState[k]=false; }); if(ex==null) currentPlayingIdx=null; }
 function togglePlayback(idx){ if(currentPlayingIdx!==null&&String(currentPlayingIdx)!==String(idx)) stopAllAudio(idx); const url=audioUrls[idx]; if(!url){toast('لا يوجد تسجيل');return;} if(!audioPlayers[idx]){ audioPlayers[idx]=new Audio(url); audioPlayers[idx].onended=()=>{playingState[idx]=false; if(String(currentPlayingIdx)===String(idx)) currentPlayingIdx=null; renderQuestions();}; } const p=audioPlayers[idx]; if(playingState[idx]){ p.pause(); p.currentTime=0; playingState[idx]=false; if(String(currentPlayingIdx)===String(idx)) currentPlayingIdx=null; } else { p.currentTime=0; const x=p.play(); if(x&&x.then) x.then(()=>{playingState[idx]=true;currentPlayingIdx=idx;}).catch(()=>{}); else {playingState[idx]=true;currentPlayingIdx=idx;} } renderQuestions(); }
 
+
+
+function studentModelParasHtml(q,ev){
+  const ps = (ev && ev.paragraphGrades && ev.paragraphGrades.length)
+    ? ev.paragraphGrades
+    : ((q && q.paragraphs) || []);
+  if(!ps.length){
+    const ans = (ev && ev.modelAnswer) || (q && q.modelAnswer) || '';
+    if(!ans) return '';
+    return '<div style="margin-top:10px;"><div style="color:var(--gold-600);font-weight:800;font-size:11.5px;margin-bottom:6px;">📋 فقرات الإجابة النموذجية:</div>'
+      +'<div class="paragraph-grade"><div class="p-text">'+ans+'</div></div></div>';
+  }
+  let html='<div style="margin-top:10px;"><div style="color:var(--gold-600);font-weight:800;font-size:11.5px;margin-bottom:6px;">📋 فقرات الإجابة النموذجية:</div>';
+  ps.forEach((p,i)=>{
+    const txt = p.text || '';
+    const sc = (typeof p.score==='number') ? p.score : null;
+    const mx = (typeof p.max==='number') ? p.max : null;
+    let scoreHtml = '';
+    if(sc!==null && mx!==null) scoreHtml = '<div class="p-score-wrap"><span class="p-score">'+sc+' / '+mx+'</span></div>';
+    else if(typeof p.score==='number' && p.max===undefined) scoreHtml = '<div class="p-score-wrap"><span class="p-score">'+p.score+'</span></div>';
+    html += '<div class="paragraph-grade"><div class="p-text"><span class="mp-n">'+(i+1)+'</span> '+txt+'</div>'+scoreHtml+'</div>';
+  });
+  html += '</div>';
+  return html;
+}
 
 function modelParasHtml(q,ev){
   const ps=(q&&q.paragraphs)||[];
@@ -810,7 +847,7 @@ function renderQuestions(){
       if(ev.paragraphGrades&&ev.paragraphGrades.length){
         const psum=ev.paragraphGrades.reduce((s,x)=>s+(x.max||0),0);
         const isAlt=psum>q.weight+0.01;
-        paraHtml='<div style="margin-top:10px;"><div style="color:var(--gold-600);font-weight:800;font-size:11.5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;"><span>📋 توزيع درجات الفقرات'+(isAlt?' <span style="color:var(--ok);">✅ بدائل</span>':'')+':</span>'+(TEACHER_MODE?`<button class="kw-add-btn" onclick="addParaFromResult(${idx})">➕ فقرة</button>`:'')+'</div>';
+        paraHtml='<div style="margin-top:10px;"><div style="color:var(--gold-600);font-weight:800;font-size:11.5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;"><span>📋 فقرات الإجابة النموذجية'+(isAlt?' <span style="color:var(--ok);">✅ بدائل</span>':'')+':</span>'+(TEACHER_MODE?`<button class="kw-add-btn" onclick="addParaFromResult(${idx})">➕ فقرة</button>`:'')+'</div>';
         ev.paragraphGrades.forEach((pg,pi)=>{
           if(TEACHER_MODE) paraHtml+=`<div class="paragraph-grade"><div class="p-text">${pg.text}</div><div class="p-score-wrap"><input type="number" class="p-edit-score" value="${pg.max}" min="0" step="0.5" title="الدرجة القصوى للفقرة" onchange="editPMax(${idx},${pi},this.value)"><span class="p-score">درجة الطالب: ${pg.score}</span><button class="p-del" onclick="delPara(${idx},${pi})" title="حذف الفقرة">×</button></div></div>`;
           else paraHtml+=`<div class="paragraph-grade"><div class="p-text">${pg.text}</div><div class="p-score-wrap"><span class="p-score">${pg.score} / ${pg.max}</span></div></div>`;
@@ -833,8 +870,8 @@ function renderQuestions(){
         <span style="font-size:11px;color:var(--muted);font-weight:700;margin-inline-start:6px;">درجتك: ${Math.round(ev.score*10)/10} / ${q.weight}</span></div>
         <div class="score-value ${ev.gradeClass}">${Math.round(ev.score*10)/10} / ${q.weight}</div>
       </div>
-      ${paraHtml}
-      <div class="model-answer"><div class="label">📖 الإجابة النموذجية الكاملة:</div><div class="answer">${modelParasHtml(q,ev)}</div></div>
+      ${paraHtml || studentModelParasHtml(q,ev)}
+      <div class="model-answer"><div class="label">📖 الإجابة النموذجية الكاملة:</div><div class="answer">${String((ev.modelAnswer||q.modelAnswer||'')).replace(/\n/g,'<br>')}</div></div>
       </div>`;
     }
     const evalDis=isEval||((q.type==='mcq') ? !(typeof transcripts[idx]==='string' && transcripts[idx].startsWith('MCQ:')) : (!tr||tr.trim().length<5));
@@ -1007,7 +1044,19 @@ function reEval(idx){
   // —— أسئلة الاختيار من متعدد ——
   if(q.type === 'mcq'){
     const tr = (transcripts[idx]||'');
-    if(!tr.startsWith('MCQ:')){ renderQuestions(); return; }
+    if(!tr.startsWith('MCQ:')){
+      const _correct = (typeof q.correctIndex==='number') ? q.correctIndex : 0;
+      const _letters = ['أ','ب','ج','د','ه','و'];
+      const _ans = (q.choices||[])[_correct] || q.modelAnswer || '';
+      evaluations[idx] = {
+        score: 0, percentage: 0,
+        feedback: '❌ لم تُجب — تُحسب خطأ. الصحيحة: ('+(_letters[_correct]||_correct)+') '+_ans,
+        gradeClass: 'poor', words: 0, keywordMatches: 0, totalKeywords: 1,
+        matchedKeywords: [], missingKeywords: ['لم تُجب'],
+        modelAnswer: _ans, modelAnswerEn: '', keywords: [], paragraphGrades: []
+      };
+      renderQuestions(); updateProgress(); return;
+    }
     const chosen = parseInt(tr.slice(4));
     const correct = (typeof q.correctIndex==='number') ? q.correctIndex : 0;
     const ok = chosen === correct;
@@ -1026,7 +1075,18 @@ function reEval(idx){
     renderQuestions(); updateProgress(); return;
   }
   const text=(transcripts[idx]||'').trim();
-  if(!text||text.length<3){renderQuestions();return;}
+  if(!text||text.length<3){
+    let paras = (q.paragraphs&&q.paragraphs.length) ? q.paragraphs : (typeof splitToParagraphs==='function' ? splitToParagraphs(q.modelAnswer||'', q.weight||2) : [{text:q.modelAnswer||'',score:q.weight||1}]);
+    const pgs = paras.map(p=>({ text:p.text, score:0, max:Math.max(0.5, typeof toHalf==='function'?toHalf(p.score||0.5):(p.score||0.5)), ratio:0, linkGroup:p.linkGroup||'', _linked:!!p.linkGroup }));
+    evaluations[idx] = {
+      score: 0, percentage: 0, feedback: '❌ لم تُجب — تُحسب خطأ.',
+      gradeClass: 'poor', words: 0, keywordMatches: 0, totalKeywords: pgs.length,
+      matchedKeywords: [], missingKeywords: pgs.map(p=>p.text).slice(0,8),
+      modelAnswer: q.modelAnswer || '', modelAnswerEn: '', keywords: q.keywords||[],
+      paragraphGrades: pgs
+    };
+    renderQuestions(); updateProgress(); return;
+  }
   const student=text.toLowerCase();
   const sw=student.split(/\s+/).filter(Boolean);
 
@@ -1389,7 +1449,7 @@ function openEditQ(idx){
 </div>
 <div id="essayFields" style="display:${q.type==='mcq'?'none':'block'}">
   <div class="field"><label>الإجابة النموذجية</label><textarea id="edMA" style="min-height:120px;">${q.modelAnswer||''}</textarea></div>
-  <div class="field"><label>📋 توزيع درجات الفقرات <small style="color:var(--muted);font-weight:600;">(نظام البدائل: مجموع الفقرات يمكن أن يزيد عن الدرجة الكلية)</small></label><div id="parEd">${parH}</div><button type="button" class="para-add-btn" onclick="addParaRow()" style="margin-top:6px;">➕ إضافة فقرة</button><div class="para-sum-info" id="paraSum"></div></div>
+  <div class="field"><label>📋 فقرات الإجابة النموذجية <small style="color:var(--muted);font-weight:600;">(نظام البدائل: مجموع الفقرات يمكن أن يزيد عن الدرجة الكلية)</small></label><div id="parEd">${parH}</div><button type="button" class="para-add-btn" onclick="addParaRow()" style="margin-top:6px;">➕ إضافة فقرة</button><div class="para-sum-info" id="paraSum"></div></div>
 </div>
 <div class="field"><div class="img-section-title"><span>🖼️ صور السؤال</span><button type="button" class="attach-img-btn" onclick="document.getElementById('hiddenImgInput').click()">📎 إرفاق صورة</button></div><div class="img-paste-zone" id="imgPZ" tabindex="0"><span class="ico">📋</span>الصق صورة بـ <kbd>Ctrl</kbd>+<kbd>V</kbd><br>أو اضغط هنا لاختيار صورة</div><div class="img-preview-grid" id="imgPG"></div></div>
 <div class="field"><label>⚖️ الدرجة الكلية</label><input type="number" id="edW" value="${q.weight}" min="0" step="0.5" oninput="updSum()"></div>
@@ -1613,7 +1673,7 @@ function addImgFromBlob(blob, idx){
 }
 function pasteImgToQuestion(idx){
   if(typeof TEACHER_MODE==='undefined' || !TEACHER_MODE){
-    toast('⚠️ فعّل وضع المعلم أولاً (3 ضغطات على الأيقونة)');
+    toast('⚠️ فعّل وضع المعلم أولاً (كلمة المرور)');
     return;
   }
   setPasteTarget(idx);
@@ -1736,7 +1796,8 @@ function toggleEdit(idx){ /* لم يعد مستخدماً — الصندوق د�
 function saveEdit(idx){ const ta=$(`edit-ta-${idx}`); if(ta){ transcripts[idx]=cleanText(ta.value.trim()); editMode[idx]=false; renderQuestions(); } }
 function cancelEdit(idx){ editMode[idx]=false; renderQuestions(); }
 function clearTr(idx){ if(evaluations[idx]){ if(typeof toast==='function')toast('🔒 السؤال مُقيَّم — لا يمكن التعديل. استخدم إعادة الاختبار.'); else alert('🔒 السؤال مُقيَّم — لا يمكن التعديل.'); return; } transcripts[idx]=''; if(evaluations[idx]) delete evaluations[idx]; if(audioUrls[idx]){try{URL.revokeObjectURL(audioUrls[idx]);}catch(e){}} delete audioUrls[idx]; delete audioBlobs[idx]; delete audioPlayers[idx]; playingState[idx]=false; renderQuestions(); updateProgress(); }
-function evalQ(idx){ const text=(transcripts[idx]||'').trim(); if(!text||text.length<3){ alert('⚠️ سجّل أو اكتب إجابة أولاً'); return; } reEval(idx); }
+function evalQ(idx){ reEval(idx); }
+
 function updateProgress(){ const t=questions.length; const e=Object.keys(evaluations).length; $('progressText').textContent=`${e}/${t}`; const p=t?(e/t)*100:0; $('progressFill').style.width=`${p}%`; }
 
 
@@ -1786,13 +1847,15 @@ function submitExam(){
   const _fb=$('finishBtn'); if(_fb){ _fb.classList.remove('hidden-finish'); _fb.classList.add('show'); _fb.textContent='📊 النتيجة'; }
   const _eb=$('exportBtn'); if(_eb) _eb.classList.add('hidden-export');
   let ts=0, tw=0; const wrong=[];
-  // الأسئلة التي لم يُجب عنها الطالب لا تؤثر في الدرجة (حل اختياري)
+  // كل الأسئلة تدخل في المجموع — الفارغ يُحسب خطأ (درجة 0)
   questions.forEach((q,i)=>{
+    if(!evaluations[i]){ try{ reEval(i); }catch(e){} }
+    const w = (typeof q.weight==='number' ? q.weight : 1);
+    tw += w;
     if(evaluations[i]){
-      tw += (typeof q.weight==='number' ? q.weight : 1);
       ts += evaluations[i].score || 0;
       if((evaluations[i].percentage||0)<60) wrong.push(i);
-    }
+    } else { wrong.push(i); }
   });
   if(typeof EXAM_TOTAL_OVERRIDE==='number' && EXAM_TOTAL_OVERRIDE>0) tw = EXAM_TOTAL_OVERRIDE;
   const time = ($('timerDisplay')&&$('timerDisplay').textContent) || '00:00';
