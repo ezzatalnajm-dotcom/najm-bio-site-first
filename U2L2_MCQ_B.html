@@ -1885,11 +1885,12 @@ function renderRetryQs(){
         if(picked>=0){ if(ci===correct) mark='correct'; else if(ci===picked) mark='wrong'; }
         opts+=`<label class="mcq-option ${picked===ci?'selected':''} ${mark}" onclick="pickRetry(${oi},${ci});return false;"><span class="opt-letter">${letters[ci]||(ci+1)}</span><span>${ch}</span></label>`;
       });
+      const ansBox=`<div class="model-answer"><div class="label">📖 الإجابة الصحيحة:</div><div class="answer">(${letters[correct]||correct}) ${(q.choices||[])[correct]||''}</div></div>`;
       let fb='';
       if(picked>=0){
         fb = picked===correct
-          ? `<div class="result-box show"><div class="score-row"><span class="badge badge-good">🌟 أحسنت! إجابة صحيحة</span></div></div>`
-          : `<div class="result-box show"><div class="score-row"><span class="badge badge-poor">❌ خاطئة</span></div><div class="model-answer"><div class="label">📖 الصحيحة:</div><div class="answer">(${letters[correct]||correct}) ${(q.choices||[])[correct]||''}</div></div></div>`;
+          ? `<div class="result-box show"><div class="score-row"><span class="badge badge-good">🌟 أحسنت! إجابة صحيحة</span></div>${ansBox}</div>`
+          : `<div class="result-box show"><div class="score-row"><span class="badge badge-poor">❌ خاطئة</span></div>${ansBox}</div>`;
       }
       const cc = picked<0 ? '' : (picked===correct ? 'evaluated' : 'poor');
       h+=`<div class="question-card ${cc}"><div class="q-header"><span class="q-num">R${ri+1}</span><span class="weight-badge">⚖️ ${q.weight||1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="mcq-options">${opts}</div>${fb}</div>`;
