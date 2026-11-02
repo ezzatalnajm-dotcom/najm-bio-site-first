@@ -63,6 +63,10 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:560px){.row2{grid-template-columns:1fr}}
 
+.phonebox{display:flex;direction:ltr;align-items:stretch;border:2px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden;max-width:300px}
+.phonebox:focus-within{border-color:var(--leaf)}
+.phonebox .cc{padding:12px 12px;background:var(--leaf-soft);color:var(--ink);font-weight:700;border-inline-end:2px solid var(--line)}
+.phonebox input{border:0!important;border-radius:0!important;background:transparent;flex:1;min-width:0;direction:ltr;letter-spacing:1px}
 /* المعرض: الشبكة */
 .sec-title{font-size:21px;color:var(--ink);margin:30px 0 12px}
 .grid{columns:3 220px;column-gap:14px}
@@ -100,32 +104,28 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
 <body>
 <div class="wrap">
 
-  <!-- شاشة الدخول -->
-  <section id="loginView" class="login hidden">
-    <div class="panel">
-      <h1>إبداعي مع النجم</h1>
-      <p>ارسم مفهومًا من دروس الأحياء وشاركه مع زملائك. ادخل بالرقمين للتأكد من اشتراكك.</p>
-      <form id="loginForm" autocomplete="off" novalidate>
-        <label for="phone">رقم هاتفك</label>
-        <input id="phone" type="tel" inputmode="numeric" dir="ltr" placeholder="5xxxxxxx">
-        <label for="parent">رقم هاتف ولي الأمر</label>
-        <input id="parent" type="tel" inputmode="numeric" dir="ltr" placeholder="5xxxxxxx">
-        <div id="loginMsg" class="msg err hidden" role="alert"></div>
-        <p style="margin-top:18px"><button class="btn" id="loginBtn" type="submit">دخول</button></p>
-      </form>
-    </div>
-  </section>
-
   <!-- الصفحة الرئيسية -->
-  <section id="mainView" class="hidden">
+  <section id="mainView">
     <div class="top">
       <div class="brand">إبداعي مع النجم<small>معرض رسومات طلاب أ. عزت</small></div>
-      <button class="linkbtn" id="logoutBtn" type="button">خروج</button>
+      <button class="linkbtn hidden" id="logoutBtn" type="button">خروج</button>
     </div>
 
     <div class="hello">
-      <h2 id="helloTxt"></h2>
+      <h2 id="helloTxt">شاهد رسومات زملائك</h2>
       <button class="btn" id="toggleUpload" type="button">ارفع رسمتك</button>
+    </div>
+
+    <div class="panel hidden" id="loginBox" style="margin-bottom:22px">
+      <form id="loginForm" autocomplete="off" novalidate>
+        <label for="phone" style="margin-top:0">للمشاركة برسمتك، اكتب رقم هاتفك المسجل</label>
+        <div class="phonebox"><span class="cc">974</span><input id="phone" type="tel" inputmode="numeric" maxlength="8" placeholder="xxxxxxxx" aria-label="رقم الهاتف بعد 974"></div>
+        <div id="loginMsg" class="msg err hidden" role="alert"></div>
+        <p style="margin:14px 0 0;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="loginBtn" type="submit">متابعة</button>
+          <button class="btn ghost" id="loginCancel" type="button">إلغاء</button>
+        </p>
+      </form>
     </div>
 
     <div class="panel upload hidden" id="uploadBox">
@@ -171,14 +171,13 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
 
 <script>
 (function(){
-  // رابط الخلفية (Apps Script)
   var API = 'https://script.google.com/macros/s/AKfycbyMnGMRYCX0mXUZBNH7G6NTYgSct3rHh_48VCkhf5egfZOD-XooiMuq7LeBWE7mfy5p/exec';
-  var KEY = 'najm_gallery_login';
+  var KEY = 'najm_gallery_phone';
   var $ = function(id){ return document.getElementById(id); };
   var session = null, pickedData = null;
 
   var ERR = {
-    not_subscriber: 'الرقمان غير مطابقين لاشتراك مفعّل. تأكد من رقمك ورقم ولي الأمر.',
+    not_subscriber: 'هذا الرقم غير مسجّل كمشترك منتظم. تأكد من الرقم.',
     bad_name: 'اكتب اسمك (حرفان على الأقل).',
     bad_image: 'الملف ليس صورة صالحة. اختر صورة JPG أو PNG.',
     too_big: 'الصورة كبيرة جدًا. جرّب صورة أخرى.',
@@ -194,33 +193,13 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
   function show(el, on){ el.classList.toggle('hidden', !on); }
   function note(el, text, ok){ el.textContent = text; el.className = 'msg ' + (ok ? 'ok' : 'err'); show(el, !!text); }
   function img(id, w){ return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w' + w; }
-
-  function save(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
-  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }
+  function save(v){ try{ localStorage.setItem(KEY, v); }catch(e){} }
+  function load(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
   function clear(){ try{ localStorage.removeItem(KEY); }catch(e){} }
 
-  function fetchList(s){
-    var u = API + '?action=gallery_list&phone=' + encodeURIComponent(s.phone) + '&parent=' + encodeURIComponent(s.parent);
-    return fetch(u).then(function(r){ return r.json(); });
-  }
-
-  function render(data){
-    $('helloTxt').textContent = data.name ? ('أهلًا ' + data.name.split(' ')[0]) : 'أهلًا بك';
-    if(!$('uName').value && data.name) $('uName').value = data.name.split(' ').slice(0,2).join(' ');
-    // رسوماتي
-    var mine = data.mine || [];
-    show($('mineBox'), mine.length > 0);
-    $('mineList').innerHTML = '';
-    mine.forEach(function(m){
-      var d = document.createElement('div'); d.className = 'm';
-      var im = document.createElement('img'); im.src = img(m.id, 120); im.alt = ''; im.loading = 'lazy';
-      var t = document.createElement('span'); t.textContent = m.title || 'رسمة';
-      var s = document.createElement('span'); s.className = 'st ' + m.status;
-      s.textContent = m.status === 'published' ? 'منشورة' : 'بانتظار الاعتماد';
-      d.appendChild(im); d.appendChild(t); d.appendChild(s); $('mineList').appendChild(d);
-    });
-    // المعرض (رسمة الأسبوع أولًا)
-    var items = (data.items || []).slice().sort(function(a,b){ return (b.weekly?1:0) - (a.weekly?1:0); });
+  // ---------- عرض المعرض (مفتوح للجميع) ----------
+  function renderGrid(list){
+    var items = (list || []).slice().sort(function(a,b){ return (b.weekly?1:0) - (a.weekly?1:0); });
     var g = $('grid'); g.innerHTML = '';
     show($('emptyMsg'), items.length === 0);
     items.forEach(function(it){
@@ -236,36 +215,64 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
       g.appendChild(b);
     });
   }
-
-  function enter(s, data){
-    session = s; save(s);
-    show($('loginView'), false); show($('mainView'), true);
-    render(data);
-  }
-  function refresh(){
-    if(!session) return Promise.resolve();
-    return fetchList(session).then(function(d){ if(d.ok) render(d); });
+  function loadPublic(){
+    fetch(API + '?action=gallery_public').then(function(r){ return r.json(); })
+      .then(function(d){ if(d.ok) renderGrid(d.items); else { $('emptyMsg').textContent = errText(d.error); show($('emptyMsg'), true); } })
+      .catch(function(){ $('emptyMsg').textContent = 'تعذر تحميل المعرض. تأكد من الإنترنت.'; show($('emptyMsg'), true); });
   }
 
-  // دخول
+  // ---------- رسوماتي (للمشترك بعد الدخول) ----------
+  function renderMine(d){
+    $('helloTxt').textContent = d.name ? ('أهلًا ' + d.name.split(' ')[0]) : 'أهلًا بك';
+    if(!$('uName').value && d.name) $('uName').value = d.name.split(' ').slice(0,2).join(' ');
+    var mine = d.mine || [];
+    show($('mineBox'), mine.length > 0);
+    $('mineList').innerHTML = '';
+    mine.forEach(function(m){
+      var el = document.createElement('div'); el.className = 'm';
+      var im = document.createElement('img'); im.src = img(m.id, 120); im.alt = ''; im.loading = 'lazy';
+      var t = document.createElement('span'); t.textContent = m.title || 'رسمة';
+      var s = document.createElement('span'); s.className = 'st ' + m.status;
+      s.textContent = m.status === 'published' ? 'منشورة' : 'بانتظار الاعتماد';
+      el.appendChild(im); el.appendChild(t); el.appendChild(s); $('mineList').appendChild(el);
+    });
+  }
+  function fetchMine(phone){
+    return fetch(API + '?action=gallery_list&phone=' + encodeURIComponent(phone)).then(function(r){ return r.json(); });
+  }
+  function setSession(phone, d){
+    session = phone; save(phone);
+    show($('logoutBtn'), true); show($('loginBox'), false);
+    renderMine(d);
+  }
+  function refreshMine(){ if(session) fetchMine(session).then(function(d){ if(d.ok) renderMine(d); }); }
+
+  // ---------- زر الرفع: يطلب الرقم أولًا إن لم يكن داخلًا ----------
+  $('toggleUpload').addEventListener('click', function(){
+    if(session){ var on = $('uploadBox').classList.contains('hidden'); show($('uploadBox'), on); if(on) $('uName').focus(); }
+    else { var o = $('loginBox').classList.contains('hidden'); show($('loginBox'), o); if(o) $('phone').focus(); }
+  });
+  $('loginCancel').addEventListener('click', function(){ show($('loginBox'), false); });
+  $('uCancel').addEventListener('click', function(){ show($('uploadBox'), false); });
+
   $('loginForm').addEventListener('submit', function(e){
     e.preventDefault();
-    var s = { phone: digits($('phone').value), parent: digits($('parent').value) };
-    if(s.phone.length < 8 || s.parent.length < 8){ note($('loginMsg'), 'اكتب الرقمين كاملين.'); return; }
+    var n = digits($('phone').value).replace(/^974/, '');
+    if(n.length !== 8){ note($('loginMsg'), 'اكتب رقمك المكوّن من 8 أرقام.'); return; }
+    var phone = '974' + n;
     $('loginBtn').disabled = true; note($('loginMsg'), '');
-    fetchList(s).then(function(d){
-      if(d.ok) enter(s, d); else note($('loginMsg'), errText(d.error));
+    fetchMine(phone).then(function(d){
+      if(d.ok){ setSession(phone, d); show($('uploadBox'), true); $('uName').focus(); }
+      else note($('loginMsg'), errText(d.error));
     }).catch(function(){ note($('loginMsg'), 'تعذر الاتصال. تأكد من الإنترنت وحاول مرة أخرى.'); })
       .then(function(){ $('loginBtn').disabled = false; });
   });
-  $('logoutBtn').addEventListener('click', function(){ clear(); session = null; show($('mainView'), false); show($('loginView'), true); $('phone').value=''; $('parent').value=''; });
+  $('logoutBtn').addEventListener('click', function(){
+    clear(); session = null; show($('logoutBtn'), false); show($('uploadBox'), false); show($('mineBox'), false);
+    $('helloTxt').textContent = 'شاهد رسومات زملائك'; $('phone').value = '';
+  });
 
-  // فتح/إغلاق نموذج الرفع
-  function setUpload(on){ show($('uploadBox'), on); if(on) $('uName').focus(); }
-  $('toggleUpload').addEventListener('click', function(){ setUpload($('uploadBox').classList.contains('hidden')); });
-  $('uCancel').addEventListener('click', function(){ setUpload(false); });
-
-  // ضغط الصورة داخل المتصفح (أقصى 1400px، JPEG)
+  // ---------- ضغط الصورة داخل المتصفح ----------
   function compress(file){
     return new Promise(function(res, rej){
       var fr = new FileReader();
@@ -298,7 +305,7 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
     });
   });
 
-  // إرسال
+  // ---------- الإرسال ----------
   $('uploadForm').addEventListener('submit', function(e){
     e.preventDefault();
     var name = $('uName').value.trim();
@@ -307,27 +314,28 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
     $('uBtn').disabled = true; note($('uMsg'), 'جاري الإرسال...', true);
     fetch(API, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // يتجنب طلب preflight مع Apps Script
-      body: JSON.stringify({ action: 'gallery_submit', phone: session.phone, parent: session.parent,
-                             name: name, title: $('uTitle').value.trim(), image: pickedData })
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'gallery_submit', phone: session, name: name, title: $('uTitle').value.trim(), image: pickedData })
     }).then(function(r){ return r.json(); }).then(function(d){
       if(d.ok){
         note($('uMsg'), 'وصلت رسمتك. ستظهر في المعرض بعد اعتماد الأستاذ.', true);
         pickedData = null; $('uFile').value = ''; $('uTitle').value = ''; show($('uPrev'), false);
         $('dropTxt').textContent = 'اضغط لاختيار صورة الرسمة';
-        refresh();
-      } else note($('uMsg'), errText(d.error));
+        refreshMine();
+      } else {
+        if(d.error === 'not_subscriber'){ clear(); session = null; show($('logoutBtn'), false); show($('uploadBox'), false); }
+        note($('uMsg'), errText(d.error));
+      }
     }).catch(function(){ note($('uMsg'), 'تعذر الإرسال. تأكد من الإنترنت وحاول مرة أخرى.'); })
       .then(function(){ $('uBtn').disabled = false; });
   });
 
-  // العرض الكبير
+  // ---------- العرض الكبير ----------
   function openLb(it){
     $('lbImg').src = img(it.id, 1400); $('lbImg').alt = it.title;
     $('lbCap').textContent = '';
-    var t = document.createTextNode(it.title); var sm = document.createElement('small');
-    sm.textContent = it.name + (it.concept ? ' — ' + it.concept : '');
-    $('lbCap').appendChild(t); $('lbCap').appendChild(sm);
+    var sm = document.createElement('small'); sm.textContent = it.name + (it.concept ? ' — ' + it.concept : '');
+    $('lbCap').appendChild(document.createTextNode(it.title)); $('lbCap').appendChild(sm);
     show($('lb'), true);
   }
   function closeLb(){ show($('lb'), false); $('lbImg').src = ''; }
@@ -335,13 +343,12 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
   $('lb').addEventListener('click', function(e){ if(e.target === $('lb')) closeLb(); });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLb(); });
 
-  // بدء التشغيل: دخول تلقائي لو الجلسة محفوظة
+  // ---------- البدء ----------
+  loadPublic();
   var saved = load();
-  if(saved && saved.phone && saved.parent){
-    fetchList(saved).then(function(d){
-      if(d.ok) enter(saved, d); else { clear(); show($('loginView'), true); }
-    }).catch(function(){ show($('loginView'), true); });
-  } else show($('loginView'), true);
+  if(saved){
+    fetchMine(saved).then(function(d){ if(d.ok) setSession(saved, d); else clear(); }).catch(function(){});
+  }
 })();
 </script>
 </body>
