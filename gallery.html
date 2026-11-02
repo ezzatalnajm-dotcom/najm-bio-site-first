@@ -77,8 +77,9 @@ input:focus{border-color:var(--gold);outline:none}
 .badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1b1500;font-weight:900;font-size:14px;padding:2px 12px;border-radius:999px;z-index:1}
 .badge.pend{background:#2a3a6e;color:var(--gold);left:10px;right:auto;border:1px solid var(--gold)}
 .tools{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 12px}
-.tools button{background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:3px 10px;cursor:pointer;font-size:14.5px;font-weight:600}
-.tools button:hover{border-color:var(--gold)}
+.tools a,.tools button{background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:3px 10px;cursor:pointer;font-size:14.5px;font-weight:600}
+.tools a{text-decoration:none;display:inline-block}
+.tools a:hover,.tools button:hover{border-color:var(--gold)}
 .tools .del:hover{border-color:var(--danger);color:var(--danger)}
 .dragbar{flex:1 1 100%;text-align:center;background:var(--soft);border:1px dashed var(--gold);color:var(--gold);border-radius:10px;padding:8px 6px;font-weight:700;font-size:15px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .item.src{opacity:.28}
@@ -211,6 +212,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 <div class="modal hidden" id="editModal" role="dialog" aria-modal="true">
   <div class="panel">
     <form id="editForm" novalidate>
+      <div id="eHead" style="font-weight:900;color:var(--gold);font-size:19px"></div>
       <label for="eName" style="margin-top:0">اسم الطالب</label>
       <input id="eName" type="text" maxlength="40">
       <label for="eTitle">العنوان المعتمد</label>
@@ -234,7 +236,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
   var SKEY = 'najm_gallery_phone', TKEY = 'najm_gallery_teacher';
   var $ = function(id){ return document.getElementById(id); };
   var session = null, pickedData = null;
-  var teacherPass = null, allItems = [], filter = 'all', shown = [], lbIndex = 0, editId = null;
+  var teacherPass = null, allItems = [], filter = 'all', shown = [], lbIndex = 0, editId = null, editApprove = false;
   var UNITS = [1, 2, 3], pickedUnit = null, ufilter = 'all';
 
   var ERR = {
@@ -311,7 +313,12 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
           hd.addEventListener('contextmenu', function(e){ e.preventDefault(); });
           t.appendChild(hd);
         }
-        t.appendChild(toolBtn(it.approved ? 'إلغاء الاعتماد' : '✔ اعتماد', '', function(){ adminUpdate(it.id, { approved: !it.approved }); }));
+        t.appendChild(toolBtn(it.approved ? 'إلغاء الاعتماد' : '✔ اعتماد', '', function(){
+          if(it.approved) adminUpdate(it.id, { approved: false }); else openEdit(it, true);
+        }));
+        if(it.approved && it.wa){
+          var wa = document.createElement('a'); wa.href = it.wa; wa.target = '_blank'; wa.rel = 'noopener'; wa.textContent = '📲 تهنئة'; t.appendChild(wa);
+        }
         t.appendChild(toolBtn(it.weekly ? 'إزالة ⭐' : '⭐ رسمة الأسبوع', '', function(){ adminUpdate(it.id, { weekly: !it.weekly }); }));
         t.appendChild(toolBtn('✏️ تعديل', '', function(){ openEdit(it); }));
         t.appendChild(toolBtn('🗑 حذف', 'del', function(){ delItem(it); }));
@@ -472,7 +479,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
     var body = { action:'admin_update', pass: teacherPass, id: id };
     for(var k in fields) body[k] = fields[k];
     return post(body).then(function(d){
-      if(d.ok){ allItems.forEach(function(i){ if(i.id === id) for(var k in fields) i[k] = fields[k]; }); renderGrid(); }
+      if(d.ok){ allItems.forEach(function(i){ if(i.id === id){ for(var k in fields) i[k] = fields[k]; i.wa = d.wa || ''; } }); renderGrid(); }
       else alert(errText(d.error));
       return d;
     }).catch(function(){ alert('تعذر الاتصال. حاول مرة أخرى.'); });
@@ -483,7 +490,8 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
       if(d.ok){ allItems = allItems.filter(function(i){ return i.id !== it.id; }); renderGrid(); } else alert(errText(d.error));
     }).catch(function(){ alert('تعذر الاتصال. حاول مرة أخرى.'); });
   }
-  function openEdit(it){
+  function openEdit(it, approve){
+    editApprove = !!approve; $('eHead').textContent = approve ? 'اعتماد الرسمة ونشرها' : 'تعديل الرسمة'; $('eSave').textContent = approve ? 'اعتماد ونشر' : 'حفظ';
     editId = it.id; $('eName').value = it.name; $('eTitle').value = it.title || it.studentTitle || ''; $('eConcept').value = it.concept || ''; $('eUnit').value = it.unit || '';
     note($('eMsg'), ''); show($('editModal'), true); $('eName').focus();
   }
@@ -492,6 +500,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
     e.preventDefault();
     var f = { name: $('eName').value.trim(), title: $('eTitle').value.trim(), concept: $('eConcept').value.trim(), unit: digits($('eUnit').value) };
     if(f.name.length < 2){ note($('eMsg'), errText('bad_name')); return; }
+    if(editApprove) f.approved = true;
     $('eSave').disabled = true;
     adminUpdate(editId, f).then(function(d){ if(d && d.ok) show($('editModal'), false); else if(d) note($('eMsg'), errText(d.error)); })
       .then(function(){ $('eSave').disabled = false; });
