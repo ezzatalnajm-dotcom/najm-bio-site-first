@@ -2,7 +2,7 @@
  * معرض «إبداعي مع النجم» — مشروع Apps Script مستقل (لا يلمس سكربت المنصة ولا شيتها بالكتابة).
  *
  * ماذا يفعل:
- *  - الطالب المشترك (رقمه + رقم ولي أمره مطابقان لشيت «الطلاب» والحالة 2) يرفع رسمته من صفحة gallery.html.
+ *  - الطالب المشترك (رقم هاتفه مطابق لشيت «الطلاب» والحالة 2) يرفع رسمته من صفحة gallery.html.
  *  - تُحفظ الصورة في مجلد على درايف، ويُضاف صف في شيت «معرض إبداعي مع النجم» (يُنشأ تلقائيًا).
  *  - لا تظهر الرسمة لأحد إلا بعد أن تضع علامة ✔ في عمود «معتمد» (وتكتب العنوان بنفسك).
  *  - الصفحة تقرأ الرسومات المعتمدة فقط من هنا، وبعد التحقق من المشترك (لا أرقام هواتف تُرسل أبدًا).
@@ -12,7 +12,7 @@
  */
 
 var PLATFORM_SHEET_ID = '1K8BnadP-aXYVV7MqzVj6jgO6AYt4eRK7e4UBMW1YJYc';   // شيت المنصة: قراءة فقط (للتحقق من المشترك)
-var VERSION = '2026-11-01-gallery';
+var VERSION = '2026-11-02-gallery-v3';
 var TAB = 'المعرض';
 var MAX_IMG_BYTES = 2500000;     // أقصى حجم للصورة بعد الضغط
 var MAX_PER_DAY = 5;             // أقصى عدد مشاركات للطالب في اليوم
@@ -79,24 +79,24 @@ function readStudents_() {
   function col(names) { for (var i = 0; i < names.length; i++) { var ix = h.indexOf(names[i]); if (ix > -1) return ix; } return -1; }
   var cN = col(['اسم الطالب', 'الاسم', 'name']), cP = col(['هاتف الطالب', 'phone', 'الهاتف']), cQ = col(['هاتف ولي الأمر', 'parent']), cS = col(['الحالة', 'status']);
   var map = {};
-  if (cP < 0 || cQ < 0) return map;
+  if (cP < 0) return map;
   for (var r = 1; r < v.length; r++) {
     var st = cS > -1 ? String(v[r][cS] == null ? '' : v[r][cS]).trim() : '';
     if (st !== '2') continue;
     var pk = key_(v[r][cP]); if (!pk) continue;
-    map[pk] = { p: key_(v[r][cQ]), n: cN > -1 ? String(v[r][cN] || '').trim() : '' };
+    map[pk] = { n: cN > -1 ? String(v[r][cN] || '').trim() : '' };
   }
   return map;
 }
 // تخزين مؤقت 5 دقائق للمشتركين المفعّلين؛ أي رقم غير موجود أو غير مطابق يُفحص مباشرة من الشيت
-function subscriber_(phone, parent) {
-  var pk = key_(phone), qk = key_(parent); if (!pk || !qk) return null;
+function subscriber_(phone) {
+  var pk = key_(phone); if (!pk) return null;
   var cache = null, map = null;
-  try { cache = CacheService.getScriptCache(); var raw = cache.get('gal_subs_v1'); if (raw) map = JSON.parse(raw); } catch (e) { map = null; }
-  if (map && map[pk] && map[pk].p === qk) return { pk: pk, name: map[pk].n };
+  try { cache = CacheService.getScriptCache(); var raw = cache.get('gal_subs_v2'); if (raw) map = JSON.parse(raw); } catch (e) { map = null; }
+  if (map && map[pk]) return { pk: pk, name: map[pk].n };
   var fresh = readStudents_();
-  try { var js = JSON.stringify(fresh); if (cache && js.length < 90000) cache.put('gal_subs_v1', js, 300); } catch (e2) {}
-  return (fresh[pk] && fresh[pk].p === qk) ? { pk: pk, name: fresh[pk].n } : null;
+  try { var js = JSON.stringify(fresh); if (cache && js.length < 90000) cache.put('gal_subs_v2', js, 300); } catch (e2) {}
+  return fresh[pk] ? { pk: pk, name: fresh[pk].n } : null;
 }
 
 // ================== القراءة ==================
@@ -118,6 +118,23 @@ function listFor_(sub) {
   return { ok: true, name: sub.name, items: items, mine: mine };
 }
 
+// عرض عام: الرسومات المعتمدة فقط، بلا أي رقم هاتف وبلا تحقق
+function listPublic_() {
+  var sh = sheet_(), n = sh.getLastRow(), items = [];
+  if (n >= 2) {
+    var v = sh.getRange(2, 1, n - 1, 10).getValues();
+    for (var i = 0; i < v.length; i++) {
+      var r = v[i], approved = (r[0] === true || String(r[0]).toUpperCase() === 'TRUE'), id = String(r[9] || '');
+      if (!id || !approved) continue;
+      var title = String(r[2] || '').trim() || String(r[6] || '').trim();
+      items.push({ id: id, title: title || 'رسمة', concept: String(r[3] || '').trim(), name: String(r[5] || '').trim(),
+        weekly: (r[1] === true || String(r[1]).toUpperCase() === 'TRUE'), ts: String(r[7] || '') });
+    }
+  }
+  items.reverse();
+  return { ok: true, items: items };
+}
+
 // ================== الإرسال ==================
 function isImage_(bytes) {
   if (!bytes || bytes.length < 12) return null;
@@ -128,7 +145,7 @@ function isImage_(bytes) {
   return null;
 }
 function submit_(d) {
-  var sub = subscriber_(d.phone, d.parent);
+  var sub = subscriber_(d.phone);
   if (!sub) return { ok: false, error: 'not_subscriber' };
   var name = safeText_(d.name, 40), title = safeText_(d.title, 80);
   if (name.length < 2) return { ok: false, error: 'bad_name' };
@@ -172,8 +189,9 @@ function doGet(e) {
   try {
     var p = (e && e.parameter) || {};
     if (p.action === 'gallery_ping') return json_({ ok: true, version: VERSION });
+    if (p.action === 'gallery_public') return json_(listPublic_());
     if (p.action === 'gallery_list') {
-      var sub = subscriber_(p.phone, p.parent);
+      var sub = subscriber_(p.phone);
       if (!sub) return json_({ ok: false, error: 'not_subscriber' });
       return json_(listFor_(sub));
     }
