@@ -3,187 +3,252 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>إبداعي مع النجم</title>
+<title>إبداعي مع النجم — أ. عزت نجم الأحياء</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#0f3d3e; --leaf:#2f9a4a; --leaf-soft:#e3f3e6; --gold:#f2b705; --gold-soft:#fff4cc;
-  --bg:#f6faf6; --card:#ffffff; --text:#18302f; --muted:#5d7776; --line:#d6e5d8; --danger:#c0392b; --danger-soft:#fdeceb;
-  --radius:14px;
-}
-@media (prefers-color-scheme: dark){
-  :root{ --ink:#bfe8d0; --leaf:#5fd07c; --leaf-soft:#173325; --gold:#f5c842; --gold-soft:#3a3115;
-    --bg:#0e1a19; --card:#15262a; --text:#e5f1ee; --muted:#93b1ad; --line:#26403f; --danger:#ff8a7a; --danger-soft:#3a1d1a; }
+  --bg1:#0b1536; --bg2:#050a1c; --card:#11285b; --field:#0c1a42; --line:rgba(255,255,255,.16);
+  --gold:#f5c842; --gold2:#d4a017; --text:#ffffff; --muted:#93a8d6; --ok:#4cd37b; --danger:#ff7b6b; --soft:rgba(245,200,66,.12);
+  color-scheme: dark;
 }
 *{box-sizing:border-box}
-html{scroll-padding-top:12px}
-body{margin:0;background:var(--bg);color:var(--text);font-family:'Tajawal',system-ui,sans-serif;font-size:17px;line-height:1.7;min-height:100vh}
-h1,h2,h3,.cairo{font-family:'Cairo','Tajawal',sans-serif;margin:0;line-height:1.35}
+html,body{margin:0}
+body{min-height:100vh;color:var(--text);font-family:'Cairo',system-ui,sans-serif;font-size:17px;line-height:1.7;
+  background:radial-gradient(1200px 600px at 50% -10%, #17306f 0%, var(--bg1) 45%, var(--bg2) 100%) fixed}
 button,input{font:inherit}
-.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 60px}
+.wrap{max-width:1000px;margin:0 auto;padding:22px 16px 50px}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-
-/* الترويسة */
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
-.brand{font-family:'Cairo',sans-serif;font-weight:900;font-size:26px;color:var(--ink)}
-.brand small{display:block;font-weight:500;font-size:14px;color:var(--muted)}
-.linkbtn{background:none;border:0;color:var(--muted);cursor:pointer;text-decoration:underline;padding:6px}
-
-/* البطاقات والأزرار */
-.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
-.btn{background:var(--leaf);color:#fff;border:0;border-radius:12px;padding:12px 22px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;font-size:17px}
-.btn:disabled{opacity:.55;cursor:wait}
-.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
-@media (prefers-color-scheme: dark){ .btn{color:#06210f} }
-label{display:block;font-weight:700;margin:14px 0 4px}
-label span{font-weight:400;color:var(--muted);font-size:15px}
-input[type=text],input[type=tel]{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text)}
-input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:none}
-.msg{margin-top:14px;padding:12px 14px;border-radius:12px;font-weight:500}
-.msg.err{background:var(--danger-soft);color:var(--danger)}
-.msg.ok{background:var(--leaf-soft);color:var(--ink)}
 .hidden{display:none!important}
 
-/* الدخول */
-.login{max-width:440px;margin:6vh auto 0}
-.login h1{font-size:30px;color:var(--ink)}
-.login p{color:var(--muted);margin:6px 0 0}
+.title{text-align:center;color:var(--gold);font-weight:900;font-size:26px;margin:8px 0 2px}
+.sub{text-align:center;color:var(--muted);margin:0 0 22px}
 
-/* شريط الإجراءات */
-.hello{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
-.hello h2{font-size:22px;color:var(--ink)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin:0 auto 20px;max-width:640px}
+.panel.wide{max-width:none}
+label{display:block;font-weight:700;margin:12px 0 6px}
+label span{font-weight:400;color:var(--muted);font-size:15px}
+input[type=text],input[type=password],input[type=tel]{width:100%;padding:13px 16px;border:2px solid var(--line);border-radius:14px;background:var(--field);color:var(--text)}
+input:focus{border-color:var(--gold);outline:none}
+.phonebox{display:flex;direction:ltr;gap:10px}
+.phonebox .cc{flex:0 0 84px;display:flex;align-items:center;justify-content:center;background:var(--field);border:2px solid var(--line);border-radius:14px;font-weight:900}
+.phonebox input{flex:1;min-width:0;text-align:center;direction:ltr}
+.hint{color:var(--muted);font-size:14.5px;margin:10px 0 0}
 
-/* نموذج الرفع */
-.upload{margin-bottom:26px}
-.drop{display:block;border:2px dashed var(--leaf);border-radius:var(--radius);padding:22px;text-align:center;cursor:pointer;background:var(--leaf-soft);color:var(--ink);font-weight:700;margin:14px 0 0}
+.btn{border:0;border-radius:14px;padding:13px 22px;font-weight:900;cursor:pointer;color:#1b1500;background:linear-gradient(135deg,var(--gold),var(--gold2));font-size:18px}
+.btn.block{display:block;width:100%;margin-top:16px}
+.btn.ghost{background:transparent;color:var(--text);border:2px solid var(--line)}
+.btn:disabled{opacity:.55;cursor:wait}
+.msg{margin-top:14px;padding:11px 14px;border-radius:12px;font-weight:600}
+.msg.err{background:rgba(255,123,107,.14);color:var(--danger)}
+.msg.ok{background:rgba(76,211,123,.14);color:var(--ok)}
+.linkbtn{background:none;border:0;color:var(--muted);cursor:pointer;padding:6px;font-size:15px}
+.linkbtn:hover{color:var(--gold)}
+
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:0 0 16px}
+.bar h2{margin:0;font-size:21px;color:var(--text)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:transparent;border:2px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 14px;cursor:pointer;font-weight:600;font-size:15px}
+.chip.on{background:var(--soft);border-color:var(--gold);color:var(--gold)}
+
+.drop{display:block;border:2px dashed var(--gold);border-radius:16px;padding:22px;text-align:center;cursor:pointer;background:var(--soft);color:var(--gold);font-weight:700;margin-top:14px}
 .drop input{display:none}
 .preview{display:block;max-width:100%;max-height:300px;margin:14px auto 0;border-radius:12px;border:1px solid var(--line)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:560px){.row2{grid-template-columns:1fr}}
 
-.phonebox{display:flex;direction:ltr;align-items:stretch;border:2px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden;max-width:300px}
-.phonebox:focus-within{border-color:var(--leaf)}
-.phonebox .cc{padding:12px 12px;background:var(--leaf-soft);color:var(--ink);font-weight:700;border-inline-end:2px solid var(--line)}
-.phonebox input{border:0!important;border-radius:0!important;background:transparent;flex:1;min-width:0;direction:ltr;letter-spacing:1px}
-/* المعرض: الشبكة */
-.sec-title{font-size:21px;color:var(--ink);margin:30px 0 12px}
-.grid{columns:3 220px;column-gap:14px}
-.item{break-inside:avoid;margin:0 0 14px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;cursor:pointer;position:relative;display:block;width:100%;padding:0;text-align:right;color:inherit}
-.item img{display:block;width:100%;height:auto;background:var(--leaf-soft);min-height:120px}
-.item .cap{padding:10px 12px}
-.item .cap b{display:block;font-family:'Cairo',sans-serif;font-size:17px;color:var(--ink)}
-.item .cap span{color:var(--muted);font-size:14px}
-.item.weekly{border:3px solid var(--gold)}
-.badge{position:absolute;top:10px;right:10px;background:var(--gold);color:#3a2a00;font-family:'Cairo',sans-serif;font-weight:900;font-size:14px;padding:3px 12px;border-radius:999px}
-.empty{color:var(--muted);text-align:center;padding:30px 10px}
-
-/* رسوماتي */
+.sec{font-size:20px;font-weight:700;margin:26px 0 12px;color:var(--gold)}
 .mine{display:flex;flex-wrap:wrap;gap:10px}
-.mine .m{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px 8px 14px}
-.mine img{width:48px;height:48px;object-fit:cover;border-radius:8px}
-.st{font-size:14px;font-weight:700;padding:2px 10px;border-radius:999px}
-.st.pending{background:var(--gold-soft);color:#7a5a00}
-.st.published{background:var(--leaf-soft);color:var(--ink)}
-@media (prefers-color-scheme: dark){ .st.pending{color:var(--gold)} }
+.mine .m{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 14px 8px 14px}
+.mine img{width:48px;height:48px;object-fit:cover;border-radius:10px}
+.st{font-size:14px;font-weight:700;padding:1px 10px;border-radius:999px}
+.st.pending{background:var(--soft);color:var(--gold)}
+.st.published{background:rgba(76,211,123,.16);color:var(--ok)}
 
-/* عرض كبير */
-.lb{position:fixed;inset:0;background:rgba(5,20,20,.88);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
-.lb figure{margin:0;max-width:900px;width:100%;text-align:center}
-.lb img{max-width:100%;max-height:78vh;border-radius:12px}
-.lb figcaption{color:#fff;margin-top:10px;font-family:'Cairo',sans-serif;font-size:19px}
-.lb figcaption small{display:block;font-family:'Tajawal',sans-serif;opacity:.8;font-size:15px}
-.lb .x{position:absolute;top:14px;left:14px;background:#fff;color:#000;border:0;border-radius:50%;width:42px;height:42px;font-size:22px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;align-items:start}
+.item{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;position:relative}
+.item.weekly{border:2px solid var(--gold);box-shadow:0 0 0 3px var(--soft)}
+.item .pic{display:block;width:100%;padding:0;border:0;background:var(--field);cursor:pointer;aspect-ratio:4/3;overflow:hidden}
+.item img{display:block;width:100%;height:100%;object-fit:contain}
+.item .cap{padding:10px 14px 12px}
+.item .cap b{display:block;font-weight:700;font-size:18px;color:var(--text)}
+.item .cap span{color:var(--muted);font-size:14.5px}
+.badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1b1500;font-weight:900;font-size:14px;padding:2px 12px;border-radius:999px;z-index:1}
+.badge.pend{background:#2a3a6e;color:var(--gold);left:10px;right:auto;border:1px solid var(--gold)}
+.tools{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 12px}
+.tools button{background:var(--field);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:3px 10px;cursor:pointer;font-size:14.5px;font-weight:600}
+.tools button:hover{border-color:var(--gold)}
+.tools .del:hover{border-color:var(--danger);color:var(--danger)}
+.dragbar{flex:1 1 100%;text-align:center;background:var(--soft);border:1px dashed var(--gold);color:var(--gold);border-radius:10px;padding:8px 6px;font-weight:700;font-size:15px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.item.src{opacity:.28}
+.item.ghost{position:fixed;z-index:80;pointer-events:none;opacity:.94;box-shadow:0 16px 44px rgba(0,0,0,.65);transform:scale(1.04);margin:0}
+.ind{position:fixed;width:5px;background:var(--gold);border-radius:3px;z-index:70;pointer-events:none;box-shadow:0 0 12px var(--gold)}
+body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
+.units{display:flex;gap:10px;flex-wrap:wrap}
+.units button{min-width:64px;padding:8px 20px;border-radius:14px;border:2px solid var(--line);background:var(--field);color:var(--text);font-weight:900;font-size:21px;cursor:pointer}
+.units button.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1b1500;border-color:var(--gold)}
+.empty{color:var(--muted);text-align:center;padding:28px 10px}
+.foot{text-align:center;margin-top:30px}
 
-@media (prefers-reduced-motion: no-preference){
-  .item{transition:transform .15s}.item:hover{transform:translateY(-3px)}
-}
+.lb,.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.lb{background:rgba(3,8,25,.94)}
+.lb figure{margin:0;max-width:1000px;width:100%;text-align:center}
+.lb img{max-width:100%;max-height:76vh;border-radius:14px}
+.lb figcaption{margin-top:12px;font-size:24px;font-weight:700;color:var(--gold)}
+.lb figcaption small{display:block;font-size:17px;color:var(--text);font-weight:400}
+.lb .x,.lb .nav{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:50%;width:48px;height:48px;font-size:26px;cursor:pointer}
+.lb .x{top:14px;left:14px}
+.lb .nav{top:50%;transform:translateY(-50%)}
+.lb .prev{right:14px}.lb .next{left:14px}
+.modal{background:rgba(3,8,25,.8)}
+.modal .panel{width:100%;max-width:480px;margin:0}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- الصفحة الرئيسية -->
-  <section id="mainView">
-    <div class="top">
-      <div class="brand">إبداعي مع النجم<small>معرض رسومات طلاب أ. عزت</small></div>
-      <button class="linkbtn hidden" id="logoutBtn" type="button">خروج</button>
-    </div>
+  <h1 class="title">⭐ أ. عزت نجم الأحياء — إبداعي مع النجم</h1>
+  <p class="sub">معرض رسومات الطلاب</p>
 
-    <div class="hello">
-      <h2 id="helloTxt">شاهد رسومات زملائك</h2>
+  <!-- شريط الإجراءات -->
+  <div class="bar">
+    <h2 id="helloTxt">شاهد رسومات زملائك</h2>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="linkbtn hidden" id="logoutBtn" type="button">خروج</button>
       <button class="btn" id="toggleUpload" type="button">ارفع رسمتك</button>
     </div>
+  </div>
 
-    <div class="panel hidden" id="loginBox" style="margin-bottom:22px">
-      <form id="loginForm" autocomplete="off" novalidate>
-        <label for="phone" style="margin-top:0">للمشاركة برسمتك، اكتب رقم هاتفك المسجل</label>
-        <div class="phonebox"><span class="cc">974</span><input id="phone" type="tel" inputmode="numeric" maxlength="8" placeholder="xxxxxxxx" aria-label="رقم الهاتف بعد 974"></div>
-        <div id="loginMsg" class="msg err hidden" role="alert"></div>
-        <p style="margin:14px 0 0;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" id="loginBtn" type="submit">متابعة</button>
-          <button class="btn ghost" id="loginCancel" type="button">إلغاء</button>
-        </p>
-      </form>
-    </div>
+  <!-- دخول الطالب برقمه فقط -->
+  <div class="panel hidden" id="loginBox">
+    <form id="loginForm" autocomplete="off" novalidate>
+      <label for="phone" style="margin-top:0">هاتف الطالب</label>
+      <div class="phonebox"><span class="cc">974</span><input id="phone" type="tel" inputmode="tel" placeholder="xxxxxxxx" aria-label="رقم الهاتف بعد 974"></div>
+      <p class="hint">الصق الرقم أو اكتبه (8 أرقام فقط). المفتاح 974 مضاف تلقائيًا، وإن كتبته بالخطأ يُحذف.</p>
+      <div id="loginMsg" class="msg err hidden" role="alert"></div>
+      <button class="btn block" id="loginBtn" type="submit">متابعة</button>
+      <p class="foot" style="margin:8px 0 0"><button class="linkbtn" id="loginCancel" type="button">إلغاء</button></p>
+    </form>
+  </div>
 
-    <div class="panel upload hidden" id="uploadBox">
-      <form id="uploadForm" novalidate>
-        <div class="row2">
-          <div>
-            <label for="uName">اسمك الذي سيظهر <span>(اسم واحد أو اثنان أو ثلاثة، كما تحب)</span></label>
-            <input id="uName" type="text" maxlength="40">
-          </div>
-          <div>
-            <label for="uTitle">عنوان الرسمة <span>(اختياري)</span></label>
-            <input id="uTitle" type="text" maxlength="80">
-          </div>
+  <!-- رفع رسمة -->
+  <div class="panel hidden" id="uploadBox">
+    <form id="uploadForm" novalidate>
+      <div class="row2">
+        <div>
+          <label for="uName" style="margin-top:0">اسمك الذي سيظهر <span>(اسم أو اسمان أو ثلاثة، كما تحب)</span></label>
+          <input id="uName" type="text" maxlength="40">
         </div>
-        <label class="drop" for="uFile"><span id="dropTxt">اضغط لاختيار صورة الرسمة</span>
-          <input id="uFile" type="file" accept="image/jpeg,image/png,image/webp,image/*">
-        </label>
-        <img id="uPrev" class="preview hidden" alt="معاينة الرسمة">
-        <div id="uMsg" class="msg hidden" role="alert"></div>
-        <p style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" id="uBtn" type="submit">أرسل الرسمة</button>
-          <button class="btn ghost" id="uCancel" type="button">إلغاء</button>
-        </p>
-        <p style="color:var(--muted);font-size:15px;margin:10px 0 0">تظهر الرسمة في المعرض بعد أن يراجعها الأستاذ ويعتمدها.</p>
-      </form>
-    </div>
+        <div>
+          <label for="uTitle" style="margin-top:0">عنوان الرسمة <span>(اختياري)</span></label>
+          <input id="uTitle" type="text" maxlength="80">
+        </div>
+      </div>
+      <div style="font-weight:700;margin:16px 0 6px">رقم الوحدة</div>
+      <div class="units" id="uUnits" role="radiogroup" aria-label="رقم الوحدة"></div>
+      <label class="drop" for="uFile"><span id="dropTxt">اضغط لاختيار صورة الرسمة</span>
+        <input id="uFile" type="file" accept="image/*">
+      </label>
+      <img id="uPrev" class="preview hidden" alt="معاينة الرسمة">
+      <div id="uMsg" class="msg hidden" role="alert"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn" id="uBtn" type="submit">أرسل الرسمة</button>
+        <button class="btn ghost" id="uCancel" type="button">إلغاء</button>
+      </div>
+      <p class="hint">تظهر الرسمة في المعرض بعد أن يراجعها الأستاذ ويعتمدها.</p>
+    </form>
+  </div>
 
-    <div id="mineBox" class="hidden">
-      <h3 class="sec-title" style="margin-top:6px">رسوماتي</h3>
-      <div class="mine" id="mineList"></div>
-    </div>
+  <!-- دخول المعلم -->
+  <div class="panel hidden" id="teacherBox">
+    <form id="teacherForm" autocomplete="off" novalidate>
+      <label for="tpass" style="margin-top:0">كلمة سر المعلم</label>
+      <input id="tpass" type="password" autocomplete="current-password">
+      <div id="tMsg" class="msg err hidden" role="alert"></div>
+      <button class="btn block" id="tBtn" type="submit">دخول المعلم</button>
+      <p class="foot" style="margin:8px 0 0"><button class="linkbtn" id="tCancel" type="button">إلغاء</button></p>
+    </form>
+  </div>
 
-    <h3 class="sec-title">المعرض</h3>
-    <div class="grid" id="grid"></div>
-    <div class="empty hidden" id="emptyMsg">لا توجد رسومات معتمدة بعد. كن أول من يشارك.</div>
-  </section>
+  <!-- شريط المعلم -->
+  <div class="panel wide hidden" id="teacherBar" style="padding:14px 18px">
+    <div class="bar" style="margin:0">
+      <div><b style="color:var(--gold)">وضع المعلم</b> <span id="tCount" style="color:var(--muted)"></span><div id="tHint" class="hint" style="margin:2px 0 0"></div></div>
+      <div class="chips" id="filters">
+        <button class="chip on" data-f="all" type="button">الكل</button>
+        <button class="chip" data-f="pending" type="button">بانتظار الاعتماد</button>
+        <button class="chip" data-f="approved" type="button">المعتمدة</button>
+      </div>
+      <button class="btn ghost" id="tExit" type="button" style="padding:6px 16px;font-size:15px">خروج المعلم</button>
+    </div>
+  </div>
+
+  <div id="mineBox" class="hidden">
+    <h3 class="sec" style="margin-top:6px">رسوماتي</h3>
+    <div class="mine" id="mineList"></div>
+  </div>
+
+  <h3 class="sec">المعرض</h3>
+  <div class="chips" id="unitFilters" style="margin-bottom:14px"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty hidden" id="emptyMsg">لا توجد رسومات معتمدة بعد. كن أول من يشارك.</div>
+
+  <div class="foot"><button class="linkbtn" id="teacherLink" type="button">دخول المعلم</button></div>
 </div>
+
+<!-- عرض كبير للتقديم أمام الطلاب -->
+<div class="ind hidden" id="dropInd"></div>
 
 <div class="lb hidden" id="lb" role="dialog" aria-modal="true">
   <button class="x" id="lbX" type="button" aria-label="إغلاق">×</button>
+  <button class="nav prev" id="lbPrev" type="button" aria-label="السابقة">›</button>
+  <button class="nav next" id="lbNext" type="button" aria-label="التالية">‹</button>
   <figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+</div>
+
+<!-- تعديل (للمعلم) -->
+<div class="modal hidden" id="editModal" role="dialog" aria-modal="true">
+  <div class="panel">
+    <form id="editForm" novalidate>
+      <label for="eName" style="margin-top:0">اسم الطالب</label>
+      <input id="eName" type="text" maxlength="40">
+      <label for="eTitle">العنوان المعتمد</label>
+      <input id="eTitle" type="text" maxlength="80">
+      <label for="eConcept">المفهوم / الدرس <span>(اختياري)</span></label>
+      <input id="eConcept" type="text" maxlength="60">
+      <label for="eUnit">رقم الوحدة <span>(1 أو 2 أو 3)</span></label>
+      <input id="eUnit" type="tel" inputmode="numeric" maxlength="2">
+      <div id="eMsg" class="msg err hidden" role="alert"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn" id="eSave" type="submit">حفظ</button>
+        <button class="btn ghost" id="eCancel" type="button">إلغاء</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
 (function(){
   var API = 'https://script.google.com/macros/s/AKfycbyMnGMRYCX0mXUZBNH7G6NTYgSct3rHh_48VCkhf5egfZOD-XooiMuq7LeBWE7mfy5p/exec';
-  var KEY = 'najm_gallery_phone';
+  var SKEY = 'najm_gallery_phone', TKEY = 'najm_gallery_teacher';
   var $ = function(id){ return document.getElementById(id); };
   var session = null, pickedData = null;
+  var teacherPass = null, allItems = [], filter = 'all', shown = [], lbIndex = 0, editId = null;
+  var UNITS = [1, 2, 3], pickedUnit = null, ufilter = 'all';
 
   var ERR = {
     not_subscriber: 'هذا الرقم غير مسجّل كمشترك منتظم. تأكد من الرقم.',
-    bad_name: 'اكتب اسمك (حرفان على الأقل).',
+    bad_name: 'اكتب اسمًا من حرفين على الأقل.',
     bad_image: 'الملف ليس صورة صالحة. اختر صورة JPG أو PNG.',
     too_big: 'الصورة كبيرة جدًا. جرّب صورة أخرى.',
     limit_day: 'وصلت للحد اليومي (5 رسومات). عد غدًا.',
     limit_pending: 'لديك رسومات كثيرة بانتظار الاعتماد. انتظر حتى تُراجَع.',
-    setup_not_run: 'المعرض غير مهيأ بعد. تواصل مع الأستاذ.'
+    bad_unit: 'اختر رقم الوحدة.',
+    bad_password: 'كلمة السر غير صحيحة.',
+    locked: 'محاولات كثيرة خاطئة. انتظر 10 دقائق ثم حاول.',
+    not_found: 'لم أجد هذه الرسمة، ربما حُذفت. حدّث الصفحة.',
+    setup_not_run: 'المعرض غير مهيأ بعد.'
   };
   function errText(e){ return ERR[e] || 'حدث خطأ، حاول مرة أخرى.'; }
   function digits(v){
@@ -193,35 +258,81 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
   function show(el, on){ el.classList.toggle('hidden', !on); }
   function note(el, text, ok){ el.textContent = text; el.className = 'msg ' + (ok ? 'ok' : 'err'); show(el, !!text); }
   function img(id, w){ return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w' + w; }
-  function save(v){ try{ localStorage.setItem(KEY, v); }catch(e){} }
-  function load(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
-  function clear(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  function ssSet(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} }
+  function ssGet(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }
+  function ssDel(k){ try{ sessionStorage.removeItem(k); }catch(e){} }
+  function post(body){
+    return fetch(API, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) }).then(function(r){ return r.json(); });
+  }
+  function hideBoxes(except){ ['loginBox','uploadBox','teacherBox'].forEach(function(id){ if(id !== except) show($(id), false); }); }
 
-  // ---------- عرض المعرض (مفتوح للجميع) ----------
-  function renderGrid(list){
-    var items = (list || []).slice().sort(function(a,b){ return (b.weekly?1:0) - (a.weekly?1:0); });
+  function metaOf(it){ return it.name + (it.unit ? ' — الوحدة ' + it.unit : '') + (it.concept ? ' — ' + it.concept : ''); }
+
+  // ================= الشبكة =================
+  function visibleList(){
+    var list = allItems.slice();
+    if(ufilter !== 'all') list = list.filter(function(i){ return String(i.unit) === ufilter; });
+    if(teacherPass){
+      if(filter === 'pending') list = list.filter(function(i){ return !i.approved; });
+      if(filter === 'approved') list = list.filter(function(i){ return i.approved; });
+    }
+    return list.sort(function(a,b){ return ((b.weekly?1:0) - (a.weekly?1:0)) || ((b.ord||0) - (a.ord||0)); });
+  }
+  function toolBtn(txt, cls, fn){
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = txt; if(cls) b.className = cls;
+    b.addEventListener('click', fn); return b;
+  }
+  function renderGrid(){
+    shown = visibleList();
     var g = $('grid'); g.innerHTML = '';
-    show($('emptyMsg'), items.length === 0);
-    items.forEach(function(it){
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'item' + (it.weekly ? ' weekly' : '');
-      var im = document.createElement('img'); im.src = img(it.id, 600); im.alt = it.title; im.loading = 'lazy';
+    var emp = $('emptyMsg');
+    emp.textContent = ufilter !== 'all' ? 'لا توجد رسومات في هذه الوحدة بعد.' : (teacherPass ? 'لا توجد رسومات في هذا القسم.' : 'لا توجد رسومات معتمدة بعد. كن أول من يشارك.');
+    show(emp, shown.length === 0);
+    shown.forEach(function(it, idx){
+      var card = document.createElement('div'); card.className = 'item' + (it.weekly ? ' weekly' : ''); card.dataset.id = it.id;
+      if(it.weekly){ var bd = document.createElement('div'); bd.className = 'badge'; bd.textContent = '⭐ رسمة الأسبوع'; card.appendChild(bd); }
+      if(teacherPass && !it.approved){ var pd = document.createElement('div'); pd.className = 'badge pend'; pd.textContent = 'بانتظار الاعتماد'; card.appendChild(pd); }
+      var pic = document.createElement('button'); pic.type = 'button'; pic.className = 'pic'; pic.setAttribute('aria-label', 'عرض الرسمة');
+      var im = document.createElement('img'); im.src = img(it.id, 600); im.alt = it.title || 'رسمة'; im.loading = 'lazy';
+      pic.appendChild(im); pic.addEventListener('click', function(){ openLb(idx); });
       var cap = document.createElement('div'); cap.className = 'cap';
-      var bt = document.createElement('b'); bt.textContent = it.title;
-      var sp = document.createElement('span'); sp.textContent = it.name + (it.concept ? ' — ' + it.concept : '');
+      var bt = document.createElement('b'); bt.textContent = it.title || it.studentTitle || 'رسمة';
+      var sp = document.createElement('span'); sp.textContent = metaOf(it);
       cap.appendChild(bt); cap.appendChild(sp);
-      if(it.weekly){ var bd = document.createElement('div'); bd.className = 'badge'; bd.textContent = '⭐ رسمة الأسبوع'; b.appendChild(bd); }
-      b.appendChild(im); b.appendChild(cap);
-      b.addEventListener('click', function(){ openLb(it); });
-      g.appendChild(b);
+      card.appendChild(pic); card.appendChild(cap);
+      if(teacherPass){
+        var t = document.createElement('div'); t.className = 'tools';
+        if(filter === 'all' && ufilter === 'all'){
+          var hd = document.createElement('div'); hd.className = 'dragbar'; hd.textContent = '⠿ اسحب لتغيير الترتيب';
+          hd.addEventListener('pointerdown', function(e){ startDrag(e, card, it); });
+          hd.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+          t.appendChild(hd);
+        }
+        t.appendChild(toolBtn(it.approved ? 'إلغاء الاعتماد' : '✔ اعتماد', '', function(){ adminUpdate(it.id, { approved: !it.approved }); }));
+        t.appendChild(toolBtn(it.weekly ? 'إزالة ⭐' : '⭐ رسمة الأسبوع', '', function(){ adminUpdate(it.id, { weekly: !it.weekly }); }));
+        t.appendChild(toolBtn('✏️ تعديل', '', function(){ openEdit(it); }));
+        t.appendChild(toolBtn('🗑 حذف', 'del', function(){ delItem(it); }));
+        card.appendChild(t);
+      }
+      g.appendChild(card);
     });
+    if(teacherPass){
+      var pend = allItems.filter(function(i){ return !i.approved; }).length;
+      $('tCount').textContent = '— ' + allItems.length + ' رسمة، منها ' + pend + ' بانتظار الاعتماد';
+      $('tHint').textContent = (filter === 'all' && ufilter === 'all') ? 'الأحدث في الأعلى. اسحب الشريط المنقّط داخل أي رسمة لتغيير مكانها (رسمة الأسبوع تبقى أولًا).' : 'للترتيب بالسحب اختر «الكل» في الحالة وفي الوحدة.';
+    }
   }
   function loadPublic(){
-    fetch(API + '?action=gallery_public').then(function(r){ return r.json(); })
-      .then(function(d){ if(d.ok) renderGrid(d.items); else { $('emptyMsg').textContent = errText(d.error); show($('emptyMsg'), true); } })
-      .catch(function(){ $('emptyMsg').textContent = 'تعذر تحميل المعرض. تأكد من الإنترنت.'; show($('emptyMsg'), true); });
+    fetch(API + '?action=gallery_public').then(function(r){ return r.json(); }).then(function(d){
+      if(d.ok){ allItems = d.items || []; renderGrid(); }
+      else { $('emptyMsg').textContent = errText(d.error); show($('emptyMsg'), true); }
+    }).catch(function(){ $('emptyMsg').textContent = 'تعذر تحميل المعرض. تأكد من الإنترنت.'; show($('emptyMsg'), true); });
   }
 
-  // ---------- رسوماتي (للمشترك بعد الدخول) ----------
+  // ================= الطالب =================
   function renderMine(d){
     $('helloTxt').textContent = d.name ? ('أهلًا ' + d.name.split(' ')[0]) : 'أهلًا بك';
     if(!$('uName').value && d.name) $('uName').value = d.name.split(' ').slice(0,2).join(' ');
@@ -237,28 +348,28 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
       el.appendChild(im); el.appendChild(t); el.appendChild(s); $('mineList').appendChild(el);
     });
   }
-  function fetchMine(phone){
-    return fetch(API + '?action=gallery_list&phone=' + encodeURIComponent(phone)).then(function(r){ return r.json(); });
-  }
-  function setSession(phone, d){
-    session = phone; save(phone);
-    show($('logoutBtn'), true); show($('loginBox'), false);
-    renderMine(d);
-  }
+  function fetchMine(phone){ return fetch(API + '?action=gallery_list&phone=' + encodeURIComponent(phone)).then(function(r){ return r.json(); }); }
+  function setSession(phone, d){ session = phone; lsSet(SKEY, phone); show($('logoutBtn'), true); show($('loginBox'), false); renderMine(d); }
   function refreshMine(){ if(session) fetchMine(session).then(function(d){ if(d.ok) renderMine(d); }); }
 
-  // ---------- زر الرفع: يطلب الرقم أولًا إن لم يكن داخلًا ----------
   $('toggleUpload').addEventListener('click', function(){
-    if(session){ var on = $('uploadBox').classList.contains('hidden'); show($('uploadBox'), on); if(on) $('uName').focus(); }
-    else { var o = $('loginBox').classList.contains('hidden'); show($('loginBox'), o); if(o) $('phone').focus(); }
+    if(session){ var on = $('uploadBox').classList.contains('hidden'); hideBoxes(); show($('uploadBox'), on); if(on) $('uName').focus(); }
+    else { var o = $('loginBox').classList.contains('hidden'); hideBoxes(); show($('loginBox'), o); if(o) $('phone').focus(); }
   });
   $('loginCancel').addEventListener('click', function(){ show($('loginBox'), false); });
   $('uCancel').addEventListener('click', function(){ show($('uploadBox'), false); });
 
+  function cleanPhone(v){
+    var n = digits(v).replace(/^00/, '');
+    if(n.indexOf('974') === 0) n = n.slice(3);      // أرقام قطر لا تبدأ بـ 9، فالبادئة 974 تُحذف دائمًا
+    return n.slice(0, 8);
+  }
+  function normPhone(v){ var n = cleanPhone(v); return n.length === 8 ? n : null; }
+  $('phone').addEventListener('input', function(){ var c = cleanPhone(this.value); if(c !== this.value) this.value = c; });
   $('loginForm').addEventListener('submit', function(e){
     e.preventDefault();
-    var n = digits($('phone').value).replace(/^974/, '');
-    if(n.length !== 8){ note($('loginMsg'), 'اكتب رقمك المكوّن من 8 أرقام.'); return; }
+    var n = normPhone($('phone').value);
+    if(!n){ note($('loginMsg'), 'اكتب رقمًا من 8 أرقام.'); return; }
     var phone = '974' + n;
     $('loginBtn').disabled = true; note($('loginMsg'), '');
     fetchMine(phone).then(function(d){
@@ -268,11 +379,10 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
       .then(function(){ $('loginBtn').disabled = false; });
   });
   $('logoutBtn').addEventListener('click', function(){
-    clear(); session = null; show($('logoutBtn'), false); show($('uploadBox'), false); show($('mineBox'), false);
+    lsDel(SKEY); session = null; show($('logoutBtn'), false); show($('uploadBox'), false); show($('mineBox'), false);
     $('helloTxt').textContent = 'شاهد رسومات زملائك'; $('phone').value = '';
   });
 
-  // ---------- ضغط الصورة داخل المتصفح ----------
   function compress(file){
     return new Promise(function(res, rej){
       var fr = new FileReader();
@@ -300,54 +410,209 @@ input[type=text]:focus,input[type=tel]:focus{border-color:var(--leaf);outline:no
     compress(f).then(function(d){
       pickedData = d; $('uPrev').src = d; show($('uPrev'), true);
       $('dropTxt').textContent = 'اضغط لتغيير الصورة'; note($('uMsg'), '');
-    }).catch(function(){
-      $('dropTxt').textContent = 'اضغط لاختيار صورة الرسمة'; note($('uMsg'), errText('bad_image'));
-    });
+    }).catch(function(){ $('dropTxt').textContent = 'اضغط لاختيار صورة الرسمة'; note($('uMsg'), errText('bad_image')); });
   });
-
-  // ---------- الإرسال ----------
   $('uploadForm').addEventListener('submit', function(e){
     e.preventDefault();
     var name = $('uName').value.trim();
     if(name.length < 2){ note($('uMsg'), errText('bad_name')); return; }
+    if(!pickedUnit){ note($('uMsg'), errText('bad_unit')); return; }
     if(!pickedData){ note($('uMsg'), 'اختر صورة الرسمة أولًا.'); return; }
     $('uBtn').disabled = true; note($('uMsg'), 'جاري الإرسال...', true);
-    fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'gallery_submit', phone: session, name: name, title: $('uTitle').value.trim(), image: pickedData })
-    }).then(function(r){ return r.json(); }).then(function(d){
+    post({ action:'gallery_submit', phone: session, name: name, title: $('uTitle').value.trim(), unit: pickedUnit, image: pickedData }).then(function(d){
       if(d.ok){
         note($('uMsg'), 'وصلت رسمتك. ستظهر في المعرض بعد اعتماد الأستاذ.', true);
-        pickedData = null; $('uFile').value = ''; $('uTitle').value = ''; show($('uPrev'), false);
-        $('dropTxt').textContent = 'اضغط لاختيار صورة الرسمة';
-        refreshMine();
+        pickedData = null; pickedUnit = null; markUnit(); $('uFile').value = ''; $('uTitle').value = ''; show($('uPrev'), false);
+        $('dropTxt').textContent = 'اضغط لاختيار صورة الرسمة'; refreshMine();
       } else {
-        if(d.error === 'not_subscriber'){ clear(); session = null; show($('logoutBtn'), false); show($('uploadBox'), false); }
+        if(d.error === 'not_subscriber'){ lsDel(SKEY); session = null; show($('logoutBtn'), false); show($('uploadBox'), false); }
         note($('uMsg'), errText(d.error));
       }
     }).catch(function(){ note($('uMsg'), 'تعذر الإرسال. تأكد من الإنترنت وحاول مرة أخرى.'); })
       .then(function(){ $('uBtn').disabled = false; });
   });
 
-  // ---------- العرض الكبير ----------
-  function openLb(it){
-    $('lbImg').src = img(it.id, 1400); $('lbImg').alt = it.title;
-    $('lbCap').textContent = '';
-    var sm = document.createElement('small'); sm.textContent = it.name + (it.concept ? ' — ' + it.concept : '');
-    $('lbCap').appendChild(document.createTextNode(it.title)); $('lbCap').appendChild(sm);
-    show($('lb'), true);
+  // ================= المعلم =================
+  function enterTeacher(pass, items){
+    teacherPass = pass; ssSet(TKEY, pass); allItems = items; filter = 'all';
+    show($('teacherBar'), true); show($('teacherBox'), false); show($('toggleUpload'), false); show($('teacherLink'), false);
+    show($('uploadBox'), false); show($('loginBox'), false);
+    $('helloTxt').textContent = 'أهلًا أ. عزت'; renderGrid();
   }
-  function closeLb(){ show($('lb'), false); $('lbImg').src = ''; }
-  $('lbX').addEventListener('click', closeLb);
-  $('lb').addEventListener('click', function(e){ if(e.target === $('lb')) closeLb(); });
-  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLb(); });
+  function exitTeacher(){
+    teacherPass = null; ssDel(TKEY); show($('teacherBar'), false); show($('toggleUpload'), true); show($('teacherLink'), true);
+    $('helloTxt').textContent = session ? $('helloTxt').textContent : 'شاهد رسومات زملائك';
+    if(session) refreshMine(); loadPublic();
+  }
+  function reloadTeacher(){
+    return post({ action:'admin_list', pass: teacherPass }).then(function(d){
+      if(d.ok){ allItems = d.items; renderGrid(); } else if(d.error === 'bad_password' || d.error === 'locked'){ exitTeacher(); }
+      return d;
+    });
+  }
+  $('teacherLink').addEventListener('click', function(){ hideBoxes('teacherBox'); show($('teacherBox'), true); $('tpass').focus(); });
+  $('tCancel').addEventListener('click', function(){ show($('teacherBox'), false); });
+  $('teacherForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var pw = $('tpass').value; if(!pw){ note($('tMsg'), 'اكتب كلمة السر.'); return; }
+    $('tBtn').disabled = true; note($('tMsg'), '');
+    post({ action:'admin_list', pass: pw }).then(function(d){
+      if(d.ok){ $('tpass').value = ''; enterTeacher(pw, d.items); } else note($('tMsg'), errText(d.error));
+    }).catch(function(){ note($('tMsg'), 'تعذر الاتصال. حاول مرة أخرى.'); })
+      .then(function(){ $('tBtn').disabled = false; });
+  });
+  $('tExit').addEventListener('click', exitTeacher);
+  $('filters').addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if(!b) return;
+    filter = b.getAttribute('data-f');
+    Array.prototype.forEach.call($('filters').children, function(c){ c.classList.toggle('on', c === b); });
+    renderGrid();
+  });
+  function adminUpdate(id, fields){
+    var body = { action:'admin_update', pass: teacherPass, id: id };
+    for(var k in fields) body[k] = fields[k];
+    return post(body).then(function(d){
+      if(d.ok){ allItems.forEach(function(i){ if(i.id === id) for(var k in fields) i[k] = fields[k]; }); renderGrid(); }
+      else alert(errText(d.error));
+      return d;
+    }).catch(function(){ alert('تعذر الاتصال. حاول مرة أخرى.'); });
+  }
+  function delItem(it){
+    if(!confirm('حذف رسمة «' + (it.title || it.studentTitle || 'رسمة') + '» للطالب ' + it.name + '؟ لا يمكن التراجع.')) return;
+    post({ action:'admin_delete', pass: teacherPass, id: it.id }).then(function(d){
+      if(d.ok){ allItems = allItems.filter(function(i){ return i.id !== it.id; }); renderGrid(); } else alert(errText(d.error));
+    }).catch(function(){ alert('تعذر الاتصال. حاول مرة أخرى.'); });
+  }
+  function openEdit(it){
+    editId = it.id; $('eName').value = it.name; $('eTitle').value = it.title || it.studentTitle || ''; $('eConcept').value = it.concept || ''; $('eUnit').value = it.unit || '';
+    note($('eMsg'), ''); show($('editModal'), true); $('eName').focus();
+  }
+  $('eCancel').addEventListener('click', function(){ show($('editModal'), false); });
+  $('editForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var f = { name: $('eName').value.trim(), title: $('eTitle').value.trim(), concept: $('eConcept').value.trim(), unit: digits($('eUnit').value) };
+    if(f.name.length < 2){ note($('eMsg'), errText('bad_name')); return; }
+    $('eSave').disabled = true;
+    adminUpdate(editId, f).then(function(d){ if(d && d.ok) show($('editModal'), false); else if(d) note($('eMsg'), errText(d.error)); })
+      .then(function(){ $('eSave').disabled = false; });
+  });
 
-  // ---------- البدء ----------
+  // ================= السحب والإفلات (لمس + ماوس) =================
+  var drag = null;
+  function startDrag(e, card, it){
+    if(drag) return;
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    var r = card.getBoundingClientRect(), gh = card.cloneNode(true);
+    gh.className = 'item ghost'; gh.style.width = r.width + 'px'; gh.style.left = r.left + 'px'; gh.style.top = r.top + 'px';
+    document.body.appendChild(gh);
+    drag = { id: it.id, card: card, ghost: gh, dx: e.clientX - r.left, dy: e.clientY - r.top, x: e.clientX, y: e.clientY, tid: null, after: false, raf: 0 };
+    card.classList.add('src'); document.body.classList.add('dragging');
+    window.addEventListener('pointermove', onDragMove);
+    window.addEventListener('pointerup', onDragEnd);
+    window.addEventListener('pointercancel', onDragCancel);
+    dragLoop();
+  }
+  function onDragMove(e){ if(drag){ drag.x = e.clientX; drag.y = e.clientY; } }
+  function dragLoop(){
+    var d = drag; if(!d) return;
+    d.ghost.style.left = (d.x - d.dx) + 'px'; d.ghost.style.top = (d.y - d.dy) + 'px';
+    if(d.y < 90) window.scrollBy(0, -14); else if(d.y > window.innerHeight - 90) window.scrollBy(0, 14);
+    var els = document.elementsFromPoint(d.x, d.y), hit = null;
+    for(var i = 0; i < els.length; i++){
+      var c = els[i].closest ? els[i].closest('.item') : null;
+      if(c && !c.classList.contains('ghost')){ hit = c; break; }
+    }
+    var ind = $('dropInd');
+    if(hit && hit.dataset.id && hit.dataset.id !== d.id){
+      var rc = hit.getBoundingClientRect();
+      d.tid = hit.dataset.id; d.after = d.x < rc.left + rc.width / 2;     // الواجهة عربية: اليمين هو الأسبق
+      ind.style.left = (d.after ? rc.left - 8 : rc.right + 3) + 'px'; ind.style.top = rc.top + 'px'; ind.style.height = rc.height + 'px';
+      show(ind, true);
+    } else if(hit){ d.tid = null; show(ind, false); }
+    d.raf = requestAnimationFrame(dragLoop);
+  }
+  function endDrag(){
+    var d = drag; if(!d) return null;
+    drag = null; cancelAnimationFrame(d.raf);
+    if(d.ghost.parentNode) d.ghost.parentNode.removeChild(d.ghost);
+    d.card.classList.remove('src'); document.body.classList.remove('dragging'); show($('dropInd'), false);
+    window.removeEventListener('pointermove', onDragMove);
+    window.removeEventListener('pointerup', onDragEnd);
+    window.removeEventListener('pointercancel', onDragCancel);
+    return d;
+  }
+  function onDragCancel(){ endDrag(); }
+  function onDragEnd(){
+    var d = endDrag(); if(!d || !d.tid) return;
+    var ids = shown.map(function(i){ return i.id; }).filter(function(id){ return id !== d.id; });
+    var at = ids.indexOf(d.tid); if(at < 0) return;
+    ids.splice(at + (d.after ? 1 : 0), 0, d.id);
+    applyOrder(ids);
+  }
+  function applyOrder(ids){
+    var N = ids.length;
+    allItems.forEach(function(it){ var k = ids.indexOf(it.id); if(k > -1) it.ord = N - k; });
+    renderGrid();
+    post({ action:'admin_reorder', pass: teacherPass, ids: ids }).then(function(d){
+      if(!d.ok){ alert(errText(d.error)); reloadTeacher(); }
+    }).catch(function(){ alert('تعذر حفظ الترتيب. حاول مرة أخرى.'); reloadTeacher(); });
+  }
+
+  // ================= العرض الكبير (للتقديم) =================
+  function drawLb(){
+    var it = shown[lbIndex]; if(!it) return;
+    $('lbImg').src = img(it.id, 1600); $('lbImg').alt = it.title || 'رسمة';
+    $('lbCap').textContent = '';
+    var sm = document.createElement('small'); sm.textContent = metaOf(it);
+    $('lbCap').appendChild(document.createTextNode((it.weekly ? '⭐ ' : '') + (it.title || it.studentTitle || 'رسمة'))); $('lbCap').appendChild(sm);
+    var many = shown.length > 1; show($('lbPrev'), many); show($('lbNext'), many);
+  }
+  function openLb(i){ lbIndex = i; drawLb(); show($('lb'), true); }
+  function closeLb(){ show($('lb'), false); $('lbImg').src = ''; }
+  function step(d){ if(!shown.length) return; lbIndex = (lbIndex + d + shown.length) % shown.length; drawLb(); }
+  $('lbX').addEventListener('click', closeLb);
+  $('lbPrev').addEventListener('click', function(){ step(-1); });
+  $('lbNext').addEventListener('click', function(){ step(1); });
+  $('lb').addEventListener('click', function(e){ if(e.target === $('lb')) closeLb(); });
+  document.addEventListener('keydown', function(e){
+    if($('lb').classList.contains('hidden')){ if(e.key === 'Escape') show($('editModal'), false); return; }
+    if(e.key === 'Escape') closeLb();
+    else if(e.key === 'ArrowLeft') step(1);     // في الواجهة العربية اليسار = التالية
+    else if(e.key === 'ArrowRight') step(-1);
+  });
+
+  // ================= الوحدات =================
+  function markUnit(){
+    Array.prototype.forEach.call($('uUnits').children, function(b){
+      var on = b.textContent === pickedUnit; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  }
+  UNITS.forEach(function(u){
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = u; b.setAttribute('role', 'radio');
+    b.addEventListener('click', function(){ pickedUnit = String(u); markUnit(); note($('uMsg'), ''); });
+    $('uUnits').appendChild(b);
+  });
+  ['all'].concat(UNITS.map(String)).forEach(function(u){
+    var c = document.createElement('button'); c.type = 'button'; c.className = 'chip' + (u === 'all' ? ' on' : '');
+    c.textContent = u === 'all' ? 'كل الوحدات' : 'الوحدة ' + u; c.setAttribute('data-u', u);
+    c.addEventListener('click', function(){
+      ufilter = u;
+      Array.prototype.forEach.call($('unitFilters').children, function(x){ x.classList.toggle('on', x === c); });
+      renderGrid();
+    });
+    $('unitFilters').appendChild(c);
+  });
+
+  // ================= البدء =================
   loadPublic();
-  var saved = load();
+  var tp = ssGet(TKEY);
+  if(tp){
+    post({ action:'admin_list', pass: tp }).then(function(d){ if(d.ok) enterTeacher(tp, d.items); else ssDel(TKEY); }).catch(function(){});
+  }
+  var saved = lsGet(SKEY);
   if(saved){
-    fetchMine(saved).then(function(d){ if(d.ok) setSession(saved, d); else clear(); }).catch(function(){});
+    fetchMine(saved).then(function(d){ if(d.ok) setSession(saved, d); else lsDel(SKEY); }).catch(function(){});
   }
 })();
 </script>
