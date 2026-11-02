@@ -12,14 +12,16 @@
  */
 
 var PLATFORM_SHEET_ID = '1K8BnadP-aXYVV7MqzVj6jgO6AYt4eRK7e4UBMW1YJYc';   // شيت المنصة: قراءة فقط (للتحقق من المشترك)
-var VERSION = '2026-11-02-gallery-v3';
+var GALLERY_SHEET_ID = '1p3KSH49AaR_YbiHsUHSXkftI-PV8F_Rmk3R-SbbgND4';   // شيت «معرض طلاب نجم الأحياء»: تُكتب فيه الرسومات في تبويب «المعرض»
+var TEACHER_PASS = 'Teach@1212';   // كلمة سر المعلم — تُفحص هنا في الخادم فقط ولا تظهر في صفحة الطلاب
+var VERSION = '2026-11-02-gallery-v8';
 var TAB = 'المعرض';
 var MAX_IMG_BYTES = 2500000;     // أقصى حجم للصورة بعد الضغط
-var MAX_PER_DAY = 5;             // أقصى عدد مشاركات للطالب في اليوم
-var MAX_PENDING = 8;             // أقصى عدد رسومات معلّقة للطالب الواحد
+var MAX_PER_DAY = 50;            // أقصى عدد مشاركات للطالب في اليوم
+var MAX_PENDING = 50;            // أقصى عدد رسومات معلّقة للطالب الواحد
 var HEAD = ['معتمد ✔', 'رسمة الأسبوع ⭐', 'العنوان المعتمد (اكتبه أنت)', 'المفهوم / الدرس', 'الرسمة', 'الاسم', 'عنوان من الطالب',
-            'التاريخ', 'هاتف الطالب', 'رقم الملف', 'تهنئة واتساب'];
-// أعمدة (من 1): 1 معتمد | 2 أسبوع | 3 عنوان معتمد | 4 مفهوم | 5 الرسمة | 6 الاسم | 7 عنوان الطالب | 8 التاريخ | 9 هاتف | 10 ملف | 11 تهنئة
+            'التاريخ', 'هاتف الطالب', 'رقم الملف', 'تهنئة واتساب', 'الترتيب', 'الوحدة'];
+// أعمدة (من 1): 1 معتمد | 2 أسبوع | 3 عنوان معتمد | 4 مفهوم | 5 الرسمة | 6 الاسم | 7 عنوان الطالب | 8 التاريخ | 9 هاتف | 10 ملف | 11 تهنئة | 12 الترتيب (الرقم الأكبر = أعلى في المعرض) | 13 الوحدة
 
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function props_() { return PropertiesService.getScriptProperties(); }
@@ -42,13 +44,19 @@ function setup() {
   if (p.getProperty('FOLDER_ID')) { try { folder = DriveApp.getFolderById(p.getProperty('FOLDER_ID')); } catch (e) { folder = null; } }
   if (!folder) { folder = DriveApp.createFolder('إبداعي مع النجم — الرسومات'); p.setProperty('FOLDER_ID', folder.getId()); }
   var ss;
-  if (p.getProperty('SHEET_ID')) { try { ss = SpreadsheetApp.openById(p.getProperty('SHEET_ID')); } catch (e) { ss = null; } }
-  if (!ss) { ss = SpreadsheetApp.create('معرض إبداعي مع النجم'); p.setProperty('SHEET_ID', ss.getId()); }
+  if (GALLERY_SHEET_ID) { ss = SpreadsheetApp.openById(GALLERY_SHEET_ID); p.setProperty('SHEET_ID', GALLERY_SHEET_ID); }
+  else {
+    if (p.getProperty('SHEET_ID')) { try { ss = SpreadsheetApp.openById(p.getProperty('SHEET_ID')); } catch (e) { ss = null; } }
+    if (!ss) { ss = SpreadsheetApp.create('معرض إبداعي مع النجم'); p.setProperty('SHEET_ID', ss.getId()); }
+  }
   var sh = ss.getSheetByName(TAB);
   if (!sh) {
-    var first = ss.getSheets()[0];
-    sh = first.getName() === TAB ? first : ss.insertSheet(TAB);
-    try { if (first.getName() !== TAB && ss.getSheets().length > 1) ss.deleteSheet(first); } catch (e) {}
+    if (GALLERY_SHEET_ID) { sh = ss.insertSheet(TAB); }      // يضيف تبويبًا جديدًا فقط، ولا يحذف أي تبويب موجود
+    else {
+      var first = ss.getSheets()[0];
+      sh = first.getName() === TAB ? first : ss.insertSheet(TAB);
+      try { if (first.getName() !== TAB && ss.getSheets().length > 1) ss.deleteSheet(first); } catch (e) {}
+    }
   }
   if (sh.getLastRow() < 1) {
     sh.getRange(1, 1, 1, HEAD.length).setValues([HEAD]);
@@ -57,6 +65,8 @@ function setup() {
     try { sh.setRightToLeft(true); } catch (e) {}
     sh.setColumnWidth(3, 190); sh.setColumnWidth(4, 130); sh.setColumnWidth(5, 150); sh.setColumnWidth(6, 120); sh.setColumnWidth(7, 150);
   }
+  if (!String(sh.getRange(1, 12).getValue() || '').trim()) sh.getRange(1, 12).setValue('الترتيب').setFontWeight('bold').setBackground('#cfe2f3');
+  if (!String(sh.getRange(1, 13).getValue() || '').trim()) sh.getRange(1, 13).setValue('الوحدة').setFontWeight('bold').setBackground('#cfe2f3');
   // اختبار الوصول لشيت المنصة
   var plat = SpreadsheetApp.openById(PLATFORM_SHEET_ID), st = plat.getSheetByName('الطلاب');
   msg.push('✅ المجلد: ' + folder.getUrl());
@@ -66,7 +76,7 @@ function setup() {
   return msg.join('\n');
 }
 function sheet_() {
-  var id = props_().getProperty('SHEET_ID');
+  var id = GALLERY_SHEET_ID || props_().getProperty('SHEET_ID');
   if (!id) throw new Error('setup_not_run');
   return SpreadsheetApp.openById(id).getSheetByName(TAB);
 }
@@ -118,21 +128,109 @@ function listFor_(sub) {
   return { ok: true, name: sub.name, items: items, mine: mine };
 }
 
+// رقم الترتيب: الأكبر = أعلى. الصفوف التي لا ترتيب لها تأخذ رقم صفها (فالأحدث أعلى تلقائيًا)
+function ordOf_(r, i) {
+  var o = r[11];
+  return (o === '' || o == null || isNaN(Number(o))) ? i + 2 : Number(o);
+}
+
+function waLink_(phone, name) {                // رابط واتساب جاهز بالتهنئة — يُرسَل للمعلم فقط بعد التحقق من كلمة السر
+  var ph = digits_(phone); if (!ph) return '';
+  if (ph.length === 8) ph = '974' + ph;
+  var msg = 'مبروك يا ' + name + '! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء';
+  return 'https://wa.me/' + ph + '?text=' + encodeURIComponent(msg);
+}
+function unitOf_(r) {
+  var u = r[12];
+  return (u === '' || u == null) ? '' : String(u);
+}
+
 // عرض عام: الرسومات المعتمدة فقط، بلا أي رقم هاتف وبلا تحقق
 function listPublic_() {
   var sh = sheet_(), n = sh.getLastRow(), items = [];
   if (n >= 2) {
-    var v = sh.getRange(2, 1, n - 1, 10).getValues();
+    var v = sh.getRange(2, 1, n - 1, 13).getValues();
     for (var i = 0; i < v.length; i++) {
-      var r = v[i], approved = (r[0] === true || String(r[0]).toUpperCase() === 'TRUE'), id = String(r[9] || '');
-      if (!id || !approved) continue;
+      var r = v[i], id = String(r[9] || '');
+      if (!id || !isTrue_(r[0])) continue;
       var title = String(r[2] || '').trim() || String(r[6] || '').trim();
       items.push({ id: id, title: title || 'رسمة', concept: String(r[3] || '').trim(), name: String(r[5] || '').trim(),
-        weekly: (r[1] === true || String(r[1]).toUpperCase() === 'TRUE'), ts: String(r[7] || '') });
+        weekly: isTrue_(r[1]), ts: String(r[7] || ''), ord: ordOf_(r, i), unit: unitOf_(r) });
     }
   }
-  items.reverse();
+  items.sort(function (a, b) { return b.ord - a.ord; });
   return { ok: true, items: items };
+}
+
+// ================== أدوات المعلم (بكلمة سر، من الخادم فقط) ==================
+function isTrue_(x) { return x === true || String(x).toUpperCase() === 'TRUE'; }
+function adminOk_(pw) {                       // حماية من التخمين: 10 محاولات خاطئة ثم إيقاف 10 دقائق
+  var c = CacheService.getScriptCache(), f = Number(c.get('adm_fail') || 0);
+  if (f >= 10) return 'locked';
+  if (String(pw || '') === TEACHER_PASS) return true;
+  c.put('adm_fail', String(f + 1), 600);
+  return 'bad_password';
+}
+function adminList_() {                       // كل الرسومات (المعتمدة والمعلّقة)، بلا أي أرقام هواتف
+  var sh = sheet_(), n = sh.getLastRow(), items = [];
+  if (n >= 2) {
+    var v = sh.getRange(2, 1, n - 1, 13).getValues();
+    for (var i = 0; i < v.length; i++) {
+      var r = v[i], id = String(r[9] || ''); if (!id) continue;
+      items.push({ id: id, approved: isTrue_(r[0]), weekly: isTrue_(r[1]), title: String(r[2] || '').trim(), studentTitle: String(r[6] || '').trim(),
+        concept: String(r[3] || '').trim(), name: String(r[5] || '').trim(), ts: String(r[7] || ''), ord: ordOf_(r, i), unit: unitOf_(r),
+        wa: isTrue_(r[0]) ? waLink_(r[8], String(r[5] || '').trim()) : '' });
+    }
+  }
+  items.sort(function (a, b) { return b.ord - a.ord; });
+  return { ok: true, items: items };
+}
+function findRow_(sh, id) {
+  var n = sh.getLastRow(); if (n < 2) return 0;
+  var ids = sh.getRange(2, 10, n - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id)) return i + 2;
+  return 0;
+}
+function adminUpdate_(d) {
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = sheet_(), row = findRow_(sh, d.id); if (!row) return { ok: false, error: 'not_found' };
+    if (d.name !== undefined) { var nm = safeText_(d.name, 40); if (nm.length < 2) return { ok: false, error: 'bad_name' }; sh.getRange(row, 6).setValue(nm); }
+    if (d.title !== undefined) sh.getRange(row, 3).setValue(safeText_(d.title, 80));
+    if (d.concept !== undefined) sh.getRange(row, 4).setValue(safeText_(d.concept, 60));
+    if (d.unit !== undefined) {
+      var un = String(d.unit).trim();
+      if (un !== '' && (!/^\d{1,2}$/.test(un) || Number(un) < 1)) return { ok: false, error: 'bad_unit' };
+      sh.getRange(row, 13).setValue(un === '' ? '' : Number(un));
+    }
+    if (d.approved !== undefined) sh.getRange(row, 1).setValue(!!d.approved);
+    if (d.weekly !== undefined) sh.getRange(row, 2).setValue(!!d.weekly);
+    var wa = isTrue_(sh.getRange(row, 1).getValue()) ? waLink_(sh.getRange(row, 9).getValue(), String(sh.getRange(row, 6).getValue() || '')) : '';
+    return { ok: true, wa: wa };
+  } finally { lock.releaseLock(); }
+}
+function adminReorder_(d) {                   // ids بالترتيب المطلوب من الأعلى إلى الأسفل
+  var ids = d.ids;
+  if (!Array.isArray(ids) || !ids.length || ids.length > 2000) return { ok: false, error: 'bad_request' };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = sheet_(), n = sh.getLastRow(); if (n < 2) return { ok: true };
+    if (!String(sh.getRange(1, 12).getValue() || '').trim()) sh.getRange(1, 12).setValue('الترتيب').setFontWeight('bold').setBackground('#cfe2f3');
+    var idv = sh.getRange(2, 10, n - 1, 1).getValues(), ov = sh.getRange(2, 12, n - 1, 1).getValues(), pos = {}, N = ids.length;
+    for (var i = 0; i < N; i++) pos[String(ids[i])] = N - i;
+    for (var r = 0; r < idv.length; r++) { var k = String(idv[r][0]); if (pos[k] !== undefined) ov[r][0] = pos[k]; }
+    sh.getRange(2, 12, n - 1, 1).setValues(ov);
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function adminDelete_(d) {
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = sheet_(), row = findRow_(sh, d.id); if (!row) return { ok: false, error: 'not_found' };
+    sh.deleteRow(row);
+    try { DriveApp.getFileById(String(d.id)).setTrashed(true); } catch (e) {}
+    return { ok: true };
+  } finally { lock.releaseLock(); }
 }
 
 // ================== الإرسال ==================
@@ -149,6 +247,8 @@ function submit_(d) {
   if (!sub) return { ok: false, error: 'not_subscriber' };
   var name = safeText_(d.name, 40), title = safeText_(d.title, 80);
   if (name.length < 2) return { ok: false, error: 'bad_name' };
+  var unit = String(d.unit == null ? '' : d.unit).trim();
+  if (!/^\d{1,2}$/.test(unit) || Number(unit) < 1) return { ok: false, error: 'bad_unit' };
   var b64 = String(d.image || '').replace(/^data:[^;]+;base64,/, '');
   if (!b64) return { ok: false, error: 'bad_image' };
   var bytes; try { bytes = Utilities.base64Decode(b64); } catch (e) { return { ok: false, error: 'bad_image' }; }
@@ -180,6 +280,10 @@ function submit_(d) {
     sh.getRange(row, 5).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&J' + row + '&"&sz=w300")');
     sh.getRange(row, 11).setFormula('=IF(A' + row + '=TRUE,HYPERLINK("https://wa.me/"&I' + row + '&"?text="&ENCODEURL("مبروك يا "&F' + row + '&"! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء"),"📲 تهنئة"),"")');
     sh.setRowHeight(row, 100);
+    var ordMax = 0;
+    if (n >= 2) { var ov = sh.getRange(2, 12, n - 1, 1).getValues(); for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; } }
+    sh.getRange(row, 12).setValue(Math.max(ordMax, row) + 1);     // الأحدث في الأعلى
+    sh.getRange(row, 13).setValue(Number(unit));
     return { ok: true };
   } finally { lock.releaseLock(); }
 }
@@ -202,6 +306,14 @@ function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
     if (d.action === 'gallery_submit') return json_(submit_(d));
+    if (String(d.action || '').indexOf('admin_') === 0) {
+      var ok = adminOk_(d.pass);
+      if (ok !== true) return json_({ ok: false, error: ok === 'locked' ? 'locked' : 'bad_password' });
+      if (d.action === 'admin_list') return json_(adminList_());
+      if (d.action === 'admin_update') return json_(adminUpdate_(d));
+      if (d.action === 'admin_delete') return json_(adminDelete_(d));
+      if (d.action === 'admin_reorder') return json_(adminReorder_(d));
+    }
     return json_({ ok: false, error: 'unknown action' });
   } catch (err) { return json_({ ok: false, error: String(err) }); }
 }
