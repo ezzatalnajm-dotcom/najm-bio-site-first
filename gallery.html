@@ -74,6 +74,8 @@ input:focus{border-color:var(--gold);outline:none}
 .item .cap{padding:10px 14px 12px}
 .item .cap b{display:block;font-weight:700;font-size:18px;color:var(--text)}
 .item .cap span{color:var(--muted);font-size:14.5px}
+.item .cap .tline{display:block;color:var(--gold);font-weight:700;font-size:14.5px;margin-top:4px}
+.item .cap .warn{display:block;color:var(--muted);font-size:12px;margin-top:6px;opacity:.85}
 .badge{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1b1500;font-weight:900;font-size:14px;padding:2px 12px;border-radius:999px;z-index:1}
 .badge.pend{background:#2a3a6e;color:var(--gold);left:10px;right:auto;border:1px solid var(--gold)}
 .tools{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 12px}
@@ -104,6 +106,23 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .lb .prev{right:14px}.lb .next{left:14px}
 .modal{background:rgba(3,8,25,.8)}
 .modal .panel{width:100%;max-width:480px;margin:0}
+body.light{--bg1:#f4f7ff;--bg2:#dfe7fb;--card:#ffffff;--field:#eef2fc;--line:rgba(11,21,54,.16);--text:#0b1536;--muted:#4a5a86;--soft:rgba(212,160,23,.14);color-scheme:light}
+body.light .title,body.light .sec{color:#9a6b00}
+.owner{display:block;color:var(--ok);font-size:14px;font-weight:700;margin-top:4px}
+.own{display:block;font-size:14px;color:var(--muted)}
+.mine .m img{width:96px;height:96px}
+.contacts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.contacts a{border:2px solid var(--line);border-radius:14px;padding:8px 16px;color:var(--text);text-decoration:none;font-weight:700}
+.contacts a:hover{border-color:var(--gold)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--gold);color:var(--text);border-radius:14px;padding:12px 18px;font-weight:700;z-index:90;box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:90vw}
+.item .pic{position:relative}
+.wm{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;color:#fff;opacity:.62;transform:rotate(-16deg);text-shadow:0 0 3px #000,0 0 8px #000;font-weight:900;line-height:1.45}
+.wm span{display:block}
+.wm.sm{font-size:15px}.wm.lg{font-size:26px}
+.wm .ph{direction:ltr;unicode-bidi:isolate;letter-spacing:1px}
+.wm .wn{font-size:.7em;font-weight:700}
+.lbwrap{position:relative;display:inline-block;max-width:100%;line-height:0}
+.item img,.lb img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 </style>
 </head>
 <body>
@@ -116,7 +135,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
   <div class="bar">
     <h2 id="helloTxt">شاهد رسومات زملائك</h2>
     <div style="display:flex;gap:10px;align-items:center">
-      <button class="linkbtn hidden" id="logoutBtn" type="button">خروج</button>
+      <button class="linkbtn" id="themeBtn" type="button">☀️ إضاءة</button><button class="linkbtn" id="notifBtn" type="button">🔔 الإشعارات</button><button class="linkbtn hidden" id="mineBtn" type="button">📁 مشاركاتي</button><button class="linkbtn hidden" id="logoutBtn" type="button">خروج</button>
       <button class="btn" id="toggleUpload" type="button">ارفع رسمتك</button>
     </div>
   </div>
@@ -186,18 +205,39 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
   </div>
 
   <div id="mineBox" class="hidden">
-    <h3 class="sec" style="margin-top:6px">رسوماتي</h3>
+    <h3 class="sec" style="margin-top:6px" id="mineTitle">مشاركاتي</h3>
     <div class="mine" id="mineList"></div>
   </div>
 
-  <h3 class="sec">المعرض</h3>
-  <div class="chips" id="unitFilters" style="margin-bottom:14px"></div>
-  <div class="grid" id="grid"></div>
-  <div class="empty hidden" id="emptyMsg">لا توجد رسومات معتمدة بعد. كن أول من يشارك.</div>
+  <div class="chips" id="viewTabs" style="margin:22px 0 6px">
+    <button class="chip on" data-v="students" type="button">🎨 رسومات الطلاب</button>
+    <button class="chip" data-v="board" type="button">⭐ MY BOARD — رسومات الأستاذ</button>
+  </div>
+  <div id="studentsView">
+    <h3 class="sec">المعرض</h3>
+    <div class="chips" id="unitFilters" style="margin-bottom:14px"></div>
+    <div class="grid" id="grid"></div>
+    <div class="empty hidden" id="emptyMsg">لا توجد رسومات معتمدة بعد. كن أول من يشارك.</div>
+  </div>
+  <div id="boardBox" class="hidden">
+    <h3 class="sec">MY BOARD — رسومات أ. عزت</h3>
+    <form id="bForm" class="panel wide hidden" novalidate>
+      <b style="color:var(--gold)">إضافة رسمة إلى MY BOARD (للمعلم فقط، تُنشر مباشرة بلا اعتماد)</b>
+      <label for="bTitle">العنوان <span>(اختياري)</span></label>
+      <input id="bTitle" type="text" maxlength="80">
+      <label class="drop" for="bFile"><span id="bDrop">اضغط لاختيار الصورة</span><input id="bFile" type="file" accept="image/*"></label>
+      <img id="bPrev" class="preview hidden" alt="">
+      <div id="bMsg" class="msg hidden" role="alert"></div>
+      <button class="btn block" id="bBtn" type="submit">إضافة إلى MY BOARD</button>
+    </form>
+    <div class="grid" id="boardGrid"></div>
+    <div class="empty hidden" id="boardEmpty"></div>
+  </div>
 
-  <div class="foot"><button class="linkbtn" id="teacherLink" type="button">دخول المعلم</button></div>
+  <div class="contacts"><a id="cWa" class="hidden" target="_blank" rel="noopener">واتساب المعلم</a><a id="cTg" class="hidden" target="_blank" rel="noopener">تليجرام المعلم</a><a id="cTel" class="hidden">اتصال بالمعلم</a></div><div class="foot"><button class="linkbtn" id="teacherLink" type="button">دخول المعلم</button></div>
 </div>
 
+<div class="toast hidden" id="toast" role="status"></div>
 <!-- عرض كبير للتقديم أمام الطلاب -->
 <div class="ind hidden" id="dropInd"></div>
 
@@ -205,7 +245,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
   <button class="x" id="lbX" type="button" aria-label="إغلاق">×</button>
   <button class="nav prev" id="lbPrev" type="button" aria-label="السابقة">›</button>
   <button class="nav next" id="lbNext" type="button" aria-label="التالية">‹</button>
-  <figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+  <figure><div class="lbwrap"><img id="lbImg" alt=""><div class="wm lg hidden" id="lbWm"></div></div><figcaption id="lbCap"></figcaption></figure>
 </div>
 
 <!-- تعديل (للمعلم) -->
@@ -238,6 +278,10 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
   var session = null, pickedData = null;
   var teacherPass = null, allItems = [], filter = 'all', shown = [], lbIndex = 0, editId = null, editApprove = false;
   var UNITS = [1, 2, 3], pickedUnit = null, ufilter = 'all';
+  // ← ضع بيانات التواصل مع المعلم هنا: wa = رقم واتساب بالدولة بدون + (مثال 97400000000)، tg = اسم مستخدم تليجرام بدون @، tel = رقم الاتصال
+  var TEACHER = { wa: '', tg: '', tel: '' };
+  var lbList = [], boardItems = [], curView = 'students', sessName = '';
+  var seenKey = 'najm_gallery_seen', themeKey = 'najm_gallery_theme', notifKey = 'najm_gallery_notif', mineMap = {};
 
   var ERR = {
     not_subscriber: 'هذا الرقم غير مسجّل كمشترك منتظم. تأكد من الرقم.',
@@ -271,6 +315,18 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
   }
   function hideBoxes(except){ ['loginBox','uploadBox','teacherBox'].forEach(function(id){ if(id !== except) show($(id), false); }); }
 
+  // علامة الردع: اسم الطالب + هاتفه + اسم المعلم + التحذير، فوق كل صورة يتصفحها الطالب
+  function fillWm(el){
+    el.innerHTML = '';
+    if(teacherPass || !session){ show(el, false); return; }
+    [[sessName, ''], [session, 'ph'], ['أ. عزت نجم الأحياء', ''], ['نشر المحتوى قد يوقف حسابك', 'wn']].forEach(function(l){
+      if(!l[0]) return; var s = document.createElement('span'); if(l[1]) s.className = l[1]; s.textContent = l[0]; el.appendChild(s);
+    });
+    show(el, true);
+  }
+  function wmEl(){ var d = document.createElement('span'); d.className = 'wm sm'; fillWm(d); return d; }
+  document.addEventListener('contextmenu', function(e){ if(!teacherPass && e.target && e.target.tagName === 'IMG') e.preventDefault(); });
+
   function metaOf(it){ return it.name + (it.unit ? ' — الوحدة ' + it.unit : '') + (it.concept ? ' — ' + it.concept : ''); }
 
   // ================= الشبكة =================
@@ -291,6 +347,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
     shown = visibleList();
     var g = $('grid'); g.innerHTML = '';
     var emp = $('emptyMsg');
+    if(!teacherPass && !session){ shown = []; emp.textContent = 'سجّل دخولك برقم هاتفك لمشاهدة المعرض.'; show(emp, true); return; }
     emp.textContent = ufilter !== 'all' ? 'لا توجد رسومات في هذه الوحدة بعد.' : (teacherPass ? 'لا توجد رسومات في هذا القسم.' : 'لا توجد رسومات معتمدة بعد. كن أول من يشارك.');
     show(emp, shown.length === 0);
     shown.forEach(function(it, idx){
@@ -299,7 +356,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
       if(teacherPass && !it.approved){ var pd = document.createElement('div'); pd.className = 'badge pend'; pd.textContent = 'بانتظار الاعتماد'; card.appendChild(pd); }
       var pic = document.createElement('button'); pic.type = 'button'; pic.className = 'pic'; pic.setAttribute('aria-label', 'عرض الرسمة');
       var im = document.createElement('img'); im.src = img(it.id, 600); im.alt = it.title || 'رسمة'; im.loading = 'lazy';
-      pic.appendChild(im); pic.addEventListener('click', function(){ openLb(idx); });
+      pic.appendChild(im); if(!teacherPass) pic.appendChild(wmEl()); pic.addEventListener('click', function(){ openLb(idx); });
       var cap = document.createElement('div'); cap.className = 'cap';
       var bt = document.createElement('b'); bt.textContent = it.title || it.studentTitle || 'رسمة';
       var sp = document.createElement('span'); sp.textContent = metaOf(it);
@@ -343,20 +400,29 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
   function renderMine(d){
     $('helloTxt').textContent = d.name ? ('أهلًا ' + d.name.split(' ')[0]) : 'أهلًا بك';
     if(!$('uName').value && d.name) $('uName').value = d.name.split(' ').slice(0,2).join(' ');
-    var mine = d.mine || [];
-    show($('mineBox'), mine.length > 0);
+    sessName = d.name || ''; var mine = d.mine || []; mineMap = {};
+    mine.forEach(function(m){ mineMap[m.id] = m; });
+    var okN = mine.filter(function(m){ return m.status === 'published'; }).length;
+    $('mineBtn').textContent = '📁 مشاركاتي (' + okN + ' معتمدة)';
+    $('mineTitle').textContent = 'مشاركاتي — ' + okN + ' رسمة معتمدة من ' + mine.length;
     $('mineList').innerHTML = '';
+    if(!mine.length){ var em = document.createElement('div'); em.className = 'empty'; em.textContent = 'لم ترفع أي رسمة بعد.'; $('mineList').appendChild(em); }
     mine.forEach(function(m){
       var el = document.createElement('div'); el.className = 'm';
-      var im = document.createElement('img'); im.src = img(m.id, 120); im.alt = ''; im.loading = 'lazy';
-      var t = document.createElement('span'); t.textContent = m.title || 'رسمة';
+      var im = document.createElement('img'); im.src = img(m.id, 240); im.alt = ''; im.loading = 'lazy';
+      var box = document.createElement('div');
+      var t = document.createElement('b'); t.textContent = m.title || 'رسمة'; t.style.display = 'block';
       var s = document.createElement('span'); s.className = 'st ' + m.status;
-      s.textContent = m.status === 'published' ? 'منشورة' : 'بانتظار الاعتماد';
-      el.appendChild(im); el.appendChild(t); el.appendChild(s); $('mineList').appendChild(el);
+      s.textContent = m.status === 'published' ? 'منشورة ✔' : 'بانتظار الاعتماد';
+      var nm = document.createElement('span'); nm.className = 'own'; nm.textContent = m.name || '';
+      var ph = document.createElement('span'); ph.className = 'own'; ph.textContent = '📱 ' + session;
+      box.appendChild(t); box.appendChild(s); box.appendChild(nm); box.appendChild(ph);
+      el.appendChild(im); el.appendChild(box); $('mineList').appendChild(el);
     });
+    renderGrid(); renderBoard();
   }
   function fetchMine(phone){ return fetch(API + '?action=gallery_list&phone=' + encodeURIComponent(phone)).then(function(r){ return r.json(); }); }
-  function setSession(phone, d){ session = phone; lsSet(SKEY, phone); show($('logoutBtn'), true); show($('loginBox'), false); renderMine(d); }
+  function setSession(phone, d){ session = phone; lsSet(SKEY, phone); show($('logoutBtn'), true); show($('mineBtn'), true); show($('loginBox'), false); renderMine(d); }
   function refreshMine(){ if(session) fetchMine(session).then(function(d){ if(d.ok) renderMine(d); }); }
 
   $('toggleUpload').addEventListener('click', function(){
@@ -386,9 +452,52 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
       .then(function(){ $('loginBtn').disabled = false; });
   });
   $('logoutBtn').addEventListener('click', function(){
-    lsDel(SKEY); session = null; show($('logoutBtn'), false); show($('uploadBox'), false); show($('mineBox'), false);
-    $('helloTxt').textContent = 'شاهد رسومات زملائك'; $('phone').value = '';
+    lsDel(SKEY); session = null; sessName = ''; mineMap = {}; show($('mineBtn'), false); show($('logoutBtn'), false); show($('uploadBox'), false); show($('mineBox'), false);
+    $('helloTxt').textContent = 'شاهد رسومات زملائك'; $('phone').value = ''; renderGrid(); renderBoard(); show($('loginBox'), true);
   });
+
+  $('mineBtn').addEventListener('click', function(){ show($('mineBox'), $('mineBox').classList.contains('hidden')); });
+
+  // ================= الإضاءة =================
+  if(lsGet(themeKey) === 'light') document.body.classList.add('light');
+  $('themeBtn').addEventListener('click', function(){
+    var on = document.body.classList.toggle('light'); lsSet(themeKey, on ? 'light' : 'dark');
+    if(secArmed && tapCount(secB) >= 3){ secArmed = false; secB = []; hideBoxes('teacherBox'); show($('teacherBox'), true); $('tpass').focus(); }
+  });
+
+  // ================= تنبيهات الرسومات الجديدة =================
+  function toast(text){ var t = $('toast'); t.textContent = text; show(t, true); clearTimeout(toast._t); toast._t = setTimeout(function(){ show(t, false); }, 5000); }
+  function checkNew(){
+    fetch(API + '?action=gallery_public').then(function(r){ return r.json(); }).then(function(d){
+      if(!d.ok) return;
+      var items = d.items || [], ids = items.map(function(i){ return i.id; });
+      var seen = null; try{ seen = JSON.parse(lsGet(seenKey) || 'null'); }catch(e){}
+      if(!seen){ lsSet(seenKey, JSON.stringify(ids)); return; }
+      var fresh = items.filter(function(i){ return seen.indexOf(i.id) < 0; });
+      if(fresh.length){
+        toast('🎨 رسومات جديدة في المعرض: ' + fresh.length);
+        if(lsGet(notifKey) === 'on' && 'Notification' in window && Notification.permission === 'granted'){
+          try{ new Notification('معرض إبداعي مع النجم', { body: 'أُضيفت ' + fresh.length + ' رسمة جديدة' }); }catch(e){}
+        }
+        loadPublic();
+      }
+      lsSet(seenKey, JSON.stringify(ids));
+    }).catch(function(){});
+  }
+  $('notifBtn').addEventListener('click', function(){
+    if(!('Notification' in window)){ toast('متصفحك لا يدعم الإشعارات.'); return; }
+    if(Notification.permission === 'granted'){
+      var on = lsGet(notifKey) !== 'on'; lsSet(notifKey, on ? 'on' : 'off'); toast(on ? '🔔 الإشعارات مفعّلة' : 'الإشعارات متوقفة'); return;
+    }
+    Notification.requestPermission().then(function(p){
+      if(p === 'granted'){ lsSet(notifKey, 'on'); toast('🔔 تم تفعيل الإشعارات'); } else toast('لم تُفعَّل الإشعارات.');
+    });
+  });
+
+  // ================= الدخول السري للمعلم (٣ ضغطات على وضع المعلم ثم ٣ على الإضاءة) =================
+  var secA = [], secB = [], secArmed = false;
+  function tapCount(arr){ var now = Date.now(); arr.push(now); while(arr.length && now - arr[0] > 4000) arr.shift(); return arr.length; }
+  $('teacherLink').addEventListener('click', function(){ if(tapCount(secA) >= 3){ secA = []; secArmed = true; } });
 
   function compress(file){
     return new Promise(function(res, rej){
@@ -444,12 +553,12 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
     teacherPass = pass; ssSet(TKEY, pass); allItems = items; filter = 'all';
     show($('teacherBar'), true); show($('teacherBox'), false); show($('toggleUpload'), false); show($('teacherLink'), false);
     show($('uploadBox'), false); show($('loginBox'), false);
-    $('helloTxt').textContent = 'أهلًا أ. عزت'; renderGrid();
+    $('helloTxt').textContent = 'أهلًا أ. عزت'; renderGrid(); renderBoard();
   }
   function exitTeacher(){
     teacherPass = null; ssDel(TKEY); show($('teacherBar'), false); show($('toggleUpload'), true); show($('teacherLink'), true);
     $('helloTxt').textContent = session ? $('helloTxt').textContent : 'شاهد رسومات زملائك';
-    if(session) refreshMine(); loadPublic();
+    if(session) refreshMine(); loadPublic(); renderGrid(); renderBoard();
   }
   function reloadTeacher(){
     return post({ action:'admin_list', pass: teacherPass }).then(function(d){
@@ -570,16 +679,16 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 
   // ================= العرض الكبير (للتقديم) =================
   function drawLb(){
-    var it = shown[lbIndex]; if(!it) return;
-    $('lbImg').src = img(it.id, 1600); $('lbImg').alt = it.title || 'رسمة';
+    var it = lbList[lbIndex]; if(!it) return;
+    $('lbImg').src = img(it.id, 1600); fillWm($('lbWm')); $('lbImg').alt = it.title || 'رسمة';
     $('lbCap').textContent = '';
     var sm = document.createElement('small'); sm.textContent = metaOf(it);
     $('lbCap').appendChild(document.createTextNode((it.weekly ? '⭐ ' : '') + (it.title || it.studentTitle || 'رسمة'))); $('lbCap').appendChild(sm);
-    var many = shown.length > 1; show($('lbPrev'), many); show($('lbNext'), many);
+    var many = lbList.length > 1; show($('lbPrev'), many); show($('lbNext'), many);
   }
-  function openLb(i){ lbIndex = i; drawLb(); show($('lb'), true); }
+  function openLb(i, list){ lbList = list || shown; lbIndex = i; drawLb(); show($('lb'), true); }
   function closeLb(){ show($('lb'), false); $('lbImg').src = ''; }
-  function step(d){ if(!shown.length) return; lbIndex = (lbIndex + d + shown.length) % shown.length; drawLb(); }
+  function step(d){ if(!lbList.length) return; lbIndex = (lbIndex + d + lbList.length) % lbList.length; drawLb(); }
   $('lbX').addEventListener('click', closeLb);
   $('lbPrev').addEventListener('click', function(){ step(-1); });
   $('lbNext').addEventListener('click', function(){ step(1); });
@@ -613,15 +722,78 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
     $('unitFilters').appendChild(c);
   });
 
+  // ================= MY BOARD (رسومات المعلم، منفصلة عن الطلاب) =================
+  var bData = null;
+  function loadBoard(){
+    fetch(API + '?action=board_public').then(function(r){ return r.json(); }).then(function(d){
+      if(d.ok){ boardItems = (d.items || []).map(function(i){ return { id: i.id, title: i.title, name: 'أ. عزت نجم الأحياء', ts: i.ts }; }); renderBoard(); }
+    }).catch(function(){});
+  }
+  function renderBoard(){
+    var g = $('boardGrid'); g.innerHTML = ''; show($('bForm'), !!teacherPass);
+    var emp = $('boardEmpty');
+    if(!teacherPass && !session){ emp.textContent = 'سجّل دخولك برقم هاتفك لمشاهدة المعرض.'; show(emp, true); return; }
+    emp.textContent = 'لا توجد رسومات في MY BOARD بعد.'; show(emp, boardItems.length === 0);
+    boardItems.forEach(function(it, idx){
+      var card = document.createElement('div'); card.className = 'item'; card.dataset.id = it.id;
+      var pic = document.createElement('button'); pic.type = 'button'; pic.className = 'pic'; pic.setAttribute('aria-label', 'عرض الرسمة');
+      var im = document.createElement('img'); im.src = img(it.id, 600); im.alt = it.title || 'رسمة'; im.loading = 'lazy';
+      pic.appendChild(im); if(!teacherPass) pic.appendChild(wmEl()); pic.addEventListener('click', function(){ openLb(idx, boardItems); });
+      var cap = document.createElement('div'); cap.className = 'cap';
+      var bt = document.createElement('b'); bt.textContent = it.title || 'رسمة'; cap.appendChild(bt);
+      card.appendChild(pic); card.appendChild(cap);
+      if(teacherPass){
+        var t = document.createElement('div'); t.className = 'tools';
+        t.appendChild(toolBtn('🗑 حذف', 'del', function(){
+          if(!confirm('حذف هذه الرسمة من MY BOARD؟ لا يمكن التراجع.')) return;
+          post({ action:'admin_board_delete', pass: teacherPass, id: it.id }).then(function(d){
+            if(d.ok){ boardItems = boardItems.filter(function(x){ return x.id !== it.id; }); renderBoard(); } else alert(errText(d.error));
+          }).catch(function(){ alert('تعذر الاتصال. حاول مرة أخرى.'); });
+        }));
+        card.appendChild(t);
+      }
+      g.appendChild(card);
+    });
+  }
+  $('bFile').addEventListener('change', function(){
+    var f = this.files && this.files[0]; bData = null; show($('bPrev'), false); if(!f) return;
+    $('bDrop').textContent = 'جاري تجهيز الصورة...';
+    compress(f).then(function(d){ bData = d; $('bPrev').src = d; show($('bPrev'), true); $('bDrop').textContent = 'اضغط لتغيير الصورة'; note($('bMsg'), ''); })
+      .catch(function(){ $('bDrop').textContent = 'اضغط لاختيار الصورة'; note($('bMsg'), errText('bad_image')); });
+  });
+  $('bForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!teacherPass) return;
+    if(!bData){ note($('bMsg'), 'اختر الصورة أولًا.'); return; }
+    $('bBtn').disabled = true; note($('bMsg'), 'جاري الإضافة...', true);
+    post({ action:'admin_board_add', pass: teacherPass, title: $('bTitle').value.trim(), image: bData }).then(function(d){
+      if(d.ok){ note($('bMsg'), 'تمت الإضافة إلى MY BOARD.', true); bData = null; $('bFile').value = ''; $('bTitle').value = ''; show($('bPrev'), false); $('bDrop').textContent = 'اضغط لاختيار الصورة'; loadBoard(); }
+      else note($('bMsg'), errText(d.error));
+    }).catch(function(){ note($('bMsg'), 'تعذر الإرسال. حاول مرة أخرى.'); })
+      .then(function(){ $('bBtn').disabled = false; });
+  });
+  $('viewTabs').addEventListener('click', function(e){
+    var b = e.target.closest('.chip'); if(!b) return;
+    curView = b.getAttribute('data-v');
+    Array.prototype.forEach.call($('viewTabs').children, function(c){ c.classList.toggle('on', c === b); });
+    show($('studentsView'), curView === 'students'); show($('boardBox'), curView === 'board');
+    if(curView === 'board') loadBoard();
+  });
+
   // ================= البدء =================
   loadPublic();
+  if(TEACHER.wa){ $('cWa').href = 'https://wa.me/' + TEACHER.wa; show($('cWa'), true); }
+  if(TEACHER.tg){ $('cTg').href = 'https://t.me/' + TEACHER.tg; show($('cTg'), true); }
+  if(TEACHER.tel){ $('cTel').href = 'tel:' + TEACHER.tel; show($('cTel'), true); }
+  checkNew(); setInterval(checkNew, 120000); loadBoard();
   var tp = ssGet(TKEY);
   if(tp){
     post({ action:'admin_list', pass: tp }).then(function(d){ if(d.ok) enterTeacher(tp, d.items); else ssDel(TKEY); }).catch(function(){});
   }
   var saved = lsGet(SKEY);
+  if(!saved && !tp) show($('loginBox'), true);
   if(saved){
-    fetchMine(saved).then(function(d){ if(d.ok) setSession(saved, d); else lsDel(SKEY); }).catch(function(){});
+    fetchMine(saved).then(function(d){ if(d.ok) setSession(saved, d); else { lsDel(SKEY); show($('loginBox'), true); } }).catch(function(){});
   }
 })();
 </script>

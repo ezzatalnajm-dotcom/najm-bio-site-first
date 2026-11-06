@@ -14,7 +14,7 @@
 var PLATFORM_SHEET_ID = '1K8BnadP-aXYVV7MqzVj6jgO6AYt4eRK7e4UBMW1YJYc';   // شيت المنصة: قراءة فقط (للتحقق من المشترك)
 var GALLERY_SHEET_ID = '1p3KSH49AaR_YbiHsUHSXkftI-PV8F_Rmk3R-SbbgND4';   // شيت «معرض طلاب نجم الأحياء»: تُكتب فيه الرسومات في تبويب «المعرض»
 var TEACHER_PASS = 'Teach@1212';   // كلمة سر المعلم — تُفحص هنا في الخادم فقط ولا تظهر في صفحة الطلاب
-var VERSION = '2026-11-02-gallery-v8';
+var VERSION = '2026-11-06-gallery-v10';
 var TAB = 'المعرض';
 var MAX_IMG_BYTES = 2500000;     // أقصى حجم للصورة بعد الضغط
 var MAX_PER_DAY = 50;            // أقصى عدد مشاركات للطالب في اليوم
@@ -288,12 +288,79 @@ function submit_(d) {
   } finally { lock.releaseLock(); }
 }
 
+// ================== MY BOARD (رسومات المعلم، منفصلة تمامًا عن رسومات الطلاب) ==================
+var BOARD_TAB = 'MY BOARD';
+var BOARD_HEAD = ['العنوان', 'الرسمة', 'التاريخ', 'رقم الملف', 'الترتيب'];
+function boardSheet_() {
+  var ss = SpreadsheetApp.openById(GALLERY_SHEET_ID || props_().getProperty('SHEET_ID'));
+  var sh = ss.getSheetByName(BOARD_TAB);
+  if (!sh) {
+    sh = ss.insertSheet(BOARD_TAB);
+    sh.getRange(1, 1, 1, BOARD_HEAD.length).setValues([BOARD_HEAD]).setFontWeight('bold').setBackground('#cfe2f3');
+    sh.setFrozenRows(1);
+    try { sh.setRightToLeft(true); } catch (e) {}
+  }
+  return sh;
+}
+function listBoard_() {
+  var sh = boardSheet_(), n = sh.getLastRow(), items = [];
+  if (n >= 2) {
+    var v = sh.getRange(2, 1, n - 1, 5).getValues();
+    for (var i = 0; i < v.length; i++) {
+      var r = v[i], id = String(r[3] || ''); if (!id) continue;
+      var o = Number(r[4]);
+      items.push({ id: id, title: String(r[0] || '').trim() || 'رسمة', ts: String(r[2] || ''), ord: (isNaN(o) || r[4] === '') ? i + 2 : o });
+    }
+  }
+  items.sort(function (a, b) { return b.ord - a.ord; });
+  return { ok: true, items: items };
+}
+function boardAdd_(d) {
+  var title = safeText_(d.title, 80) || 'رسمة';
+  var b64 = String(d.image || '').replace(/^data:[^;]+;base64,/, '');
+  if (!b64) return { ok: false, error: 'bad_image' };
+  var bytes; try { bytes = Utilities.base64Decode(b64); } catch (e) { return { ok: false, error: 'bad_image' }; }
+  if (bytes.length > MAX_IMG_BYTES) return { ok: false, error: 'too_big' };
+  var mime = isImage_(bytes); if (!mime) return { ok: false, error: 'bad_image' };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = boardSheet_(), n = sh.getLastRow();
+    var ext = mime === 'image/png' ? 'png' : (mime === 'image/webp' ? 'webp' : 'jpg');
+    var folder = DriveApp.getFolderById(props_().getProperty('FOLDER_ID'));
+    var file = folder.createFile(Utilities.newBlob(bytes, mime, 'board_' + Date.now() + '.' + ext));
+    try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+    var fid = file.getId(), row = Math.max(n, 1) + 1, ordMax = 0;
+    if (n >= 2) { var ov = sh.getRange(2, 5, n - 1, 1).getValues(); for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; } }
+    sh.getRange(row, 3, 1, 2).setNumberFormat('@');
+    sh.getRange(row, 1, 1, 5).setValues([[title, '', stamp_(), fid, Math.max(ordMax, row) + 1]]);
+    sh.getRange(row, 2).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&D' + row + '&"&sz=w300")');
+    sh.setRowHeight(row, 100);
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function boardDelete_(d) {
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = boardSheet_(), n = sh.getLastRow(); if (n < 2) return { ok: false, error: 'not_found' };
+    var ids = sh.getRange(2, 4, n - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]) === String(d.id)) {
+        sh.deleteRow(i + 2);
+        try { DriveApp.getFileById(String(d.id)).setTrashed(true); } catch (e) {}
+        return { ok: true };
+      }
+    }
+    return { ok: false, error: 'not_found' };
+  } finally { lock.releaseLock(); }
+}
+
 // ================== المسارات ==================
 function doGet(e) {
   try {
     var p = (e && e.parameter) || {};
     if (p.action === 'gallery_ping') return json_({ ok: true, version: VERSION });
     if (p.action === 'gallery_public') return json_(listPublic_());
+    if (p.action === 'board_public') return json_(listBoard_());
     if (p.action === 'gallery_list') {
       var sub = subscriber_(p.phone);
       if (!sub) return json_({ ok: false, error: 'not_subscriber' });
@@ -313,6 +380,8 @@ function doPost(e) {
       if (d.action === 'admin_update') return json_(adminUpdate_(d));
       if (d.action === 'admin_delete') return json_(adminDelete_(d));
       if (d.action === 'admin_reorder') return json_(adminReorder_(d));
+      if (d.action === 'admin_board_add') return json_(boardAdd_(d));
+      if (d.action === 'admin_board_delete') return json_(boardDelete_(d));
     }
     return json_({ ok: false, error: 'unknown action' });
   } catch (err) { return json_({ ok: false, error: String(err) }); }
