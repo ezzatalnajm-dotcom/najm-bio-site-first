@@ -2106,7 +2106,7 @@ function submitExam(){
     controls.classList.remove('hidden');
     controls.classList.remove('hidden-ctrls');
   }
-  retryPick={}; if(wrong.length) setupRetry(wrong); else { const rt=$('retryContainer'); if(rt) rt.classList.add('hidden'); }
+  retryPick={}; if(wrong.length) setupRetry(wrong); else { const rt=$('retryContainer'); if(rt) rt.classList.add('hidden'); } try{ renderAnswersReview(); }catch(e){ console.error(e); }
   // انتقال فوري لأعلى الصفحة — النتيجة أول ما يظهر
   window.scrollTo(0, 0);
   document.documentElement.scrollTop = 0;
@@ -2119,7 +2119,7 @@ var retryPick = {}, retryList = [];
 function setupRetry(wi){
   retryList = wi.slice();
   const c=$('retryContainer'); c.classList.remove('hidden');
-  c.innerHTML=`<h3>📋 مراجعة أخطائك (${wi.length})</h3><div id="retryQ"></div>`;
+  c.innerHTML=`<h3>🔁 إعادة أخطائك (${wi.length})</h3><div id="retryQ"></div><div class="center mt-20"><button class="btn" onclick="checkRetry()">📊 فحص التقدم</button><button class="btn btn-secondary" onclick="resetRetry()">🔄 إعادة</button></div><div id="retryR" class="hidden mt-20"></div>`;
   renderRetryQs(); showRetryBig(wi.length);
 }
 function showRetryBig(n){
@@ -2131,10 +2131,52 @@ function showRetryBig(n){
       b.onclick=function(){ const r=$('retryContainer'); if(r) r.scrollIntoView({behavior:'smooth',block:'start'}); };
       const rc=$('resultContainer'); if(rc&&rc.parentNode) rc.parentNode.insertBefore(b, rc.nextSibling); else document.body.appendChild(b);
     }
-    b.textContent='📋 مراجعة أخطائي ('+n+')';
+    b.textContent='🔁 إعادة أخطائي ('+n+')';
   }catch(e){}
 }
-function hideRetryBig(){ try{ const b=$('retryBigBtn'); if(b&&b.parentNode) b.parentNode.removeChild(b); }catch(e){} }
+function hideRetryBig(){ try{ const b=$('retryBigBtn'); if(b&&b.parentNode) b.parentNode.removeChild(b); }catch(e){}  try{ hideAnswersReview(); }catch(e){} }
+function hideAnswersReview(){ try{ const c=document.getElementById('answersContainer'); if(c&&c.parentNode) c.parentNode.removeChild(c); const b=document.getElementById('answersBigBtn'); if(b&&b.parentNode) b.parentNode.removeChild(b); }catch(e){} }
+function renderAnswersReview(){
+  hideAnswersReview();
+  const rt=$('retryContainer'); if(!rt||!rt.parentNode) return;
+  const letters=['أ','ب','ج','د','ه','و'];
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let h=`<h3>📖 مراجعة الإجابات (${questions.length} سؤال)</h3>`;
+  questions.forEach((q,oi)=>{
+    const ev=evaluations[oi]||null;
+    const tr=String(transcripts[oi]||'');
+    let imgs=''; if(q.images&&q.images.length) q.images.forEach(src=>{ imgs+=`<div class="img-wrap"><img src="${src}" class="question-img" alt=""></div>`; });
+    if(q.type==='mcq'){
+      const chosen = tr.startsWith('MCQ:') ? parseInt(tr.slice(4)) : -1;
+      const correct=(typeof q.correctIndex==='number')?q.correctIndex:0;
+      const ok = chosen===correct;
+      let opts='';
+      (q.choices||[]).forEach((ch,ci)=>{
+        const mark = ci===correct ? 'correct' : (ci===chosen ? 'wrong' : '');
+        const tag = ci===chosen ? `<span class="badge ${ci===correct?'badge-good':'badge-poor'} pick-tag">اختيارك</span>` : '';
+        opts+=`<div class="mcq-option static ${mark}"><span class="opt-letter">${letters[ci]||(ci+1)}</span><span>${ch}</span>${tag}</div>`;
+      });
+      const status = chosen<0 ? '<span class="badge badge-poor">⏳ لم تُجب</span>' : (ok ? '<span class="badge badge-good">🌟 صحيحة</span>' : '<span class="badge badge-poor">❌ خاطئة</span>');
+      h+=`<div class="question-card ${ok?'evaluated':'poor'}"><div class="q-header"><span class="q-num">${oi+1}</span>${status}<span class="weight-badge">⚖️ ${q.weight||1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="mcq-options">${opts}</div><div class="result-box show"><div class="model-answer"><div class="label">📖 الإجابة الصحيحة:</div><div class="answer">(${letters[correct]||correct}) ${(q.choices||[])[correct]||''}</div></div></div></div>`;
+    } else {
+      const pct = ev ? (ev.percentage||0) : 0;
+      const mine = tr.trim() ? esc(tr) : '<span class="placeholder">— لم تُجب عن هذا السؤال —</span>';
+      const model = (ev&&ev.modelAnswer) || q.modelAnswer || q.answer || '';
+      h+=`<div class="question-card ${pct>=60?'evaluated':'poor'}"><div class="q-header"><span class="q-num">${oi+1}</span><span class="weight-badge">⚖️ ${q.weight||1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="transcript-box"><span class="label">📝 إجابتك:</span><div class="student-ans">${mine}</div></div><div class="result-box show"><div class="model-answer"><div class="label">📖 الإجابة النموذجية:</div><div class="answer">${model}</div></div></div></div>`;
+    }
+  });
+  const c=document.createElement('div'); c.id='answersContainer'; c.className='retry-section'; c.innerHTML=h;
+  rt.parentNode.insertBefore(c, rt.nextSibling);
+  try{
+    const b=document.createElement('button'); b.id='answersBigBtn'; b.type='button';
+    b.setAttribute('style','display:block;width:calc(100% - 28px);margin:14px;padding:18px 12px;font-size:22px;font-weight:900;font-family:inherit;color:#fff;background:linear-gradient(135deg,#2e9e5b,#1e7a44);border:3px solid #bfe8cf;border-radius:16px;box-shadow:0 6px 18px rgba(46,158,91,.4);cursor:pointer;');
+    b.textContent='📖 عرض الإجابات ('+questions.length+')';
+    b.onclick=function(){ c.scrollIntoView({behavior:'smooth',block:'start'}); };
+    const anchor=$('retryBigBtn')||$('resultContainer');
+    if(anchor&&anchor.parentNode) anchor.parentNode.insertBefore(b, anchor.nextSibling); else document.body.appendChild(b);
+  }catch(e){}
+}
+
 function pickRetry(oi,ci){
   if(typeof retryPick[oi]==='number') return; // بعد الاختيار تظهر النتيجة مباشرة
   retryPick[oi]=ci;
@@ -2144,30 +2186,30 @@ function renderRetryQs(){
   const cont=$('retryQ'); if(!cont) return;
   const letters=['أ','ب','ج','د','ه','و'];
   let h='';
-  retryList.forEach(oi=>{
+  retryList.forEach((oi,ri)=>{
     const q=questions[oi]; if(!q) return;
-    const ev=evaluations[oi]||null;
-    const tr=String(transcripts[oi]||'');
     let imgs=''; if(q.images&&q.images.length) q.images.forEach(src=>{ imgs+=`<div class="img-wrap"><img src="${src}" class="question-img" alt=""></div>`; });
-    const pct = ev ? ev.percentage : 0;
-    const cc = pct>=60 ? 'evaluated' : 'poor';
-    const sCls = pct>=60 ? 'good' : (pct>=40 ? 'average' : 'poor');
-    const earned = ev ? Math.round(ev.score*10)/10 : 0;
-    const head = `<div class="q-header"><span class="q-num">${oi+1}</span>${q.type==='mcq'?'<span class="badge" style="background:rgba(0,137,123,.18);color:#00897b;">اختيار</span>':''}<span class="score-display ${sCls}"><span style="opacity:.85;">درجتك:</span><span class="score-value">${earned}</span><span class="score-total">/ ${q.weight||1}</span></span><span class="weight-badge">⚖️ ${q.weight||1}</span></div>`;
     if(q.type==='mcq'){
-      const chosen = tr.startsWith('MCQ:') ? parseInt(tr.slice(4)) : -1;
+      const picked=(typeof retryPick[oi]==='number')?retryPick[oi]:-1;
       const correct=(typeof q.correctIndex==='number')?q.correctIndex:0;
       let opts='';
       (q.choices||[]).forEach((ch,ci)=>{
-        const mark = ci===correct ? 'correct' : (ci===chosen ? 'wrong' : '');
-        const tag = ci===chosen ? `<span class="badge ${ci===correct?'badge-good':'badge-poor'} pick-tag">اختيارك</span>` : '';
-        opts+=`<div class="mcq-option static ${mark}"><span class="opt-letter">${letters[ci]||(ci+1)}</span><span>${ch}</span>${tag}</div>`;
+        let mark='';
+        if(picked>=0){ if(ci===correct) mark='correct'; else if(ci===picked) mark='wrong'; }
+        opts+=`<label class="mcq-option ${picked===ci?'selected':''} ${mark}" onclick="pickRetry(${oi},${ci});return false;"><span class="opt-letter">${letters[ci]||(ci+1)}</span><span>${ch}</span></label>`;
       });
-      const none = chosen<0 ? `<div class="estimate-note">لم تُجب عن هذا السؤال.</div>` : '';
-      h+=`<div class="question-card ${cc}">${head}<div class="question-text">${q.text}</div>${imgs}<div class="mcq-options">${opts}</div>${none}<div class="result-box show"><div class="model-answer"><div class="label">📖 الإجابة الصحيحة:</div><div class="answer">(${letters[correct]||correct}) ${(q.choices||[])[correct]||''}</div></div></div></div>`;
+      let fb='';
+      if(picked>=0){
+        fb = picked===correct
+          ? `<div class="result-box show"><div class="score-row"><span class="badge badge-good">🌟 أحسنت! إجابة صحيحة</span></div></div>`
+          : `<div class="result-box show"><div class="score-row"><span class="badge badge-poor">❌ خاطئة</span></div><div class="model-answer"><div class="label">📖 الصحيحة:</div><div class="answer">(${letters[correct]||correct}) ${(q.choices||[])[correct]||''}</div></div></div>`;
+      }
+      const cc = picked<0 ? '' : (picked===correct ? 'evaluated' : 'poor');
+      h+=`<div class="question-card ${cc}"><div class="q-header"><span class="q-num">R${ri+1}</span><span class="weight-badge">⚖️ ${q.weight||1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="mcq-options">${opts}</div>${fb}</div>`;
     } else {
-      const mine = tr.trim() ? escP(tr) : '<span class="placeholder">— لم تُجب عن هذا السؤال —</span>';
-      h+=`<div class="question-card ${cc}">${head}<div class="question-text">${q.text}</div>${imgs}<div class="transcript-box"><span class="label">📝 إجابتك:</span><div class="student-ans">${mine}</div></div><div class="result-box show">${answerBlockHtml(oi,q,ev)}</div></div>`;
+      const ev=evaluations[oi]||null; const tr=transcripts[oi]||'';
+      const rh = ev ? `<div class="result-box show"><div class="model-answer"><div class="label">📖 الإجابة:</div><div class="answer">${ev.modelAnswer}</div></div></div>` : '';
+      h+=`<div class="question-card"><div class="q-header"><span class="q-num">R${ri+1}</span><span class="weight-badge">⚖️ ${q.weight||1}</span></div><div class="question-text">${q.text}</div>${imgs}<div class="transcript-box"><span class="label">📝 إجابتك:</span><textarea id="retry-ta-${ri}" class="answer-ta" placeholder="اكتب إجابتك..." oninput="transcripts[${oi}]=cleanText(this.value);">${tr}</textarea></div><div class="voice-area"><button class="btn-evaluate" onclick="evalRetry(${ri},${oi})">📊 تقييم</button></div>${rh}</div>`;
     }
   });
   cont.innerHTML=h;
