@@ -14,7 +14,7 @@
 var PLATFORM_SHEET_ID = '1K8BnadP-aXYVV7MqzVj6jgO6AYt4eRK7e4UBMW1YJYc';   // شيت المنصة: قراءة فقط (للتحقق من المشترك)
 var GALLERY_SHEET_ID = '1p3KSH49AaR_YbiHsUHSXkftI-PV8F_Rmk3R-SbbgND4';   // شيت «معرض طلاب نجم الأحياء»: تُكتب فيه الرسومات في تبويب «المعرض»
 var TEACHER_PASS = 'Teach@1212';   // كلمة سر المعلم — تُفحص هنا في الخادم فقط ولا تظهر في صفحة الطلاب
-var VERSION = '2026-11-06-gallery-v10';
+var VERSION = '2026-11-06-gallery-v11';
 var TAB = 'المعرض';
 var MAX_IMG_BYTES = 2500000;     // أقصى حجم للصورة بعد الضغط
 var MAX_PER_DAY = 50;            // أقصى عدد مشاركات للطالب في اليوم
@@ -173,7 +173,7 @@ function adminOk_(pw) {                       // حماية من التخمين:
   c.put('adm_fail', String(f + 1), 600);
   return 'bad_password';
 }
-function adminList_() {                       // كل الرسومات (المعتمدة والمعلّقة)، بلا أي أرقام هواتف
+function adminList_() {                       // كل الرسومات (المعتمدة والمعلّقة) — للمعلم فقط وبعد التحقق من كلمة السر، ومعها هاتف الطالب لإرسال الرسائل
   var sh = sheet_(), n = sh.getLastRow(), items = [];
   if (n >= 2) {
     var v = sh.getRange(2, 1, n - 1, 13).getValues();
@@ -181,7 +181,7 @@ function adminList_() {                       // كل الرسومات (المع
       var r = v[i], id = String(r[9] || ''); if (!id) continue;
       items.push({ id: id, approved: isTrue_(r[0]), weekly: isTrue_(r[1]), title: String(r[2] || '').trim(), studentTitle: String(r[6] || '').trim(),
         concept: String(r[3] || '').trim(), name: String(r[5] || '').trim(), ts: String(r[7] || ''), ord: ordOf_(r, i), unit: unitOf_(r),
-        wa: waLink_(r[8], String(r[5] || '').trim(), isTrue_(r[0])) });
+        phone: (function (p) { return p.length === 8 ? '974' + p : p; })(digits_(r[8])), wa: waLink_(r[8], String(r[5] || '').trim(), isTrue_(r[0])) });
     }
   }
   items.sort(function (a, b) { return b.ord - a.ord; });
@@ -280,7 +280,7 @@ function submit_(d) {
     sh.getRange(row, 1, 1, 10).setValues([[false, false, '', '', '', name, title, stamp_(), phone, fid]]);
     sh.getRange(row, 1, 1, 2).insertCheckboxes();
     sh.getRange(row, 5).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&J' + row + '&"&sz=w300")');
-    sh.getRange(row, 11).setFormula('=IF(A' + row + '=TRUE,HYPERLINK("https://wa.me/"&I' + row + '&"?text="&ENCODEURL("تحياتي يا د/ "&F' + row + '&"! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء"),"📲 تهنئة"),"")');
+    sh.getRange(row, 11).setFormula(waFormula_(row));
     sh.setRowHeight(row, 100);
     var ordMax = 0;
     if (n >= 2) { var ov = sh.getRange(2, 12, n - 1, 1).getValues(); for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; } }
@@ -288,6 +288,26 @@ function submit_(d) {
     sh.getRange(row, 13).setValue(Number(unit));
     return { ok: true };
   } finally { lock.releaseLock(); }
+}
+
+// ================== رابط واتساب داخل الشيت (عمود K) ==================
+function waFormula_(r) {
+  var base = 'HYPERLINK("https://wa.me/"&I' + r + '&"?text="&ENCODEURL(';
+  var sig = ' — أ. عزت نجم الأحياء';
+  var ok = base + '"تحياتي يا د/ "&F' + r + '&"! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐' + sig + '"),"📲 تحية")';
+  var pend = base + '"تحياتي يا د/ "&F' + r + '&"! وصلتني رسمتك في معرض «إبداعي مع النجم» وسأراجعها قريبًا ⭐' + sig + '"),"📲 رد")';
+  return '=IF(I' + r + '="","",IF(A' + r + '=TRUE,' + ok + ',' + pend + '))';
+}
+// شغّلها مرة واحدة من Apps Script (Run) لتحديث عمود الواتساب في كل الصفوف القديمة
+function refreshSheetLinks() {
+  var sh = sheet_(), n = sh.getLastRow();
+  if (n < 2) return 'لا توجد صفوف';
+  sh.getRange(1, 11).setValue('واتساب').setFontWeight('bold').setBackground('#cfe2f3');
+  var f = [];
+  for (var r = 2; r <= n; r++) f.push([waFormula_(r)]);
+  sh.getRange(2, 11, n - 1, 1).setFormulas(f);
+  var m = 'تم تحديث ' + (n - 1) + ' صف';
+  Logger.log(m); return m;
 }
 
 // ================== MY BOARD (رسومات المعلم، منفصلة تمامًا عن رسومات الطلاب) ==================

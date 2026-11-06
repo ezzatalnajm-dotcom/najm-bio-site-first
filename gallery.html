@@ -270,6 +270,21 @@ body.light .title,body.light .sec{color:#9a6b00}
   </div>
 </div>
 
+<div class="modal hidden" id="msgModal" role="dialog" aria-modal="true">
+  <div class="panel">
+    <div id="mHead" style="font-weight:900;color:var(--gold);font-size:19px"></div>
+    <div class="hint" id="mPhone" style="direction:ltr;text-align:right"></div>
+    <div class="chips" id="mTpl" style="margin:10px 0"></div>
+    <textarea id="mText" rows="6" style="width:100%;padding:13px 16px;border:2px solid var(--line);border-radius:14px;background:var(--field);color:var(--text);font:inherit"></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn" id="mSend" type="button">📲 فتح واتساب</button>
+      <button class="btn ghost" id="mCopy" type="button">📋 نسخ</button>
+      <a class="btn ghost" id="mCall" style="display:inline-block;text-decoration:none">📞 اتصال</a>
+      <button class="btn ghost" id="mClose" type="button">إغلاق</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   var API = 'https://script.google.com/macros/s/AKfycbyMnGMRYCX0mXUZBNH7G6NTYgSct3rHh_48VCkhf5egfZOD-XooiMuq7LeBWE7mfy5p/exec';
@@ -373,8 +388,8 @@ body.light .title,body.light .sec{color:#9a6b00}
         t.appendChild(toolBtn(it.approved ? 'إلغاء الاعتماد' : '✔ اعتماد', '', function(){
           if(it.approved) adminUpdate(it.id, { approved: false }); else openEdit(it, true);
         }));
-        if(it.wa){
-          var wa = document.createElement('a'); wa.href = it.wa; wa.target = '_blank'; wa.rel = 'noopener'; wa.textContent = it.approved ? '📲 تحية' : '📲 رد على الطالب'; t.appendChild(wa);
+        if(it.phone){
+          t.appendChild(toolBtn('📲 رسالة', '', function(){ openMsg(it); }));
         } else {
           var nw = document.createElement('span'); nw.className = 'st pending'; nw.textContent = '⚠️ لا رقم هاتف'; t.appendChild(nw);
         }
@@ -723,6 +738,44 @@ body.light .title,body.light .sec{color:#9a6b00}
     });
     $('unitFilters').appendChild(c);
   });
+
+  // ================= رسائل واتساب (للمعلم) =================
+  var MSG_TPL = [
+    { k:'ok', label:'تحية بعد النشر', t:'تحياتي يا د/ {name}! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء' },
+    { k:'pend', label:'وصلت وسأراجعها', t:'تحياتي يا د/ {name}! وصلتني رسمتك في معرض «إبداعي مع النجم» وسأراجعها قريبًا ⭐ — أ. عزت نجم الأحياء' },
+    { k:'free', label:'رسالة حرة', t:'تحياتي يا د/ {name}! ' }
+  ];
+  var msgItem = null;
+  function waNum(p){ var n = digits(p); if(n.length === 8) n = '974' + n; return n; }
+  function pickTpl(k){
+    var nm = (msgItem && msgItem.name) || '';
+    Array.prototype.forEach.call($('mTpl').children, function(c){ c.classList.toggle('on', c.getAttribute('data-k') === k); });
+    MSG_TPL.forEach(function(tp){ if(tp.k === k) $('mText').value = tp.t.replace('{name}', nm); });
+  }
+  function openMsg(it){
+    msgItem = it;
+    $('mHead').textContent = 'رسالة إلى ' + (it.name || 'الطالب');
+    $('mPhone').textContent = '+' + waNum(it.phone);
+    $('mCall').href = 'tel:+' + waNum(it.phone);
+    $('mTpl').innerHTML = '';
+    MSG_TPL.forEach(function(tp){
+      var c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.textContent = tp.label; c.setAttribute('data-k', tp.k);
+      c.addEventListener('click', function(){ pickTpl(tp.k); }); $('mTpl').appendChild(c);
+    });
+    pickTpl(it.approved ? 'ok' : 'pend');
+    show($('msgModal'), true); $('mText').focus();
+  }
+  $('mSend').addEventListener('click', function(){
+    if(!msgItem) return;
+    window.open('https://wa.me/' + waNum(msgItem.phone) + '?text=' + encodeURIComponent($('mText').value), '_blank');
+  });
+  $('mCopy').addEventListener('click', function(){
+    var ta = $('mText');
+    function done(){ toast('تم نسخ الرسالة'); }
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(done).catch(function(){ ta.select(); document.execCommand('copy'); done(); }); }
+    else { ta.select(); try{ document.execCommand('copy'); done(); }catch(e){} }
+  });
+  $('mClose').addEventListener('click', function(){ show($('msgModal'), false); });
 
   // ================= MY BOARD (رسومات المعلم، منفصلة عن الطلاب) =================
   var bData = null;
