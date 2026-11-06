@@ -134,10 +134,12 @@ function ordOf_(r, i) {
   return (o === '' || o == null || isNaN(Number(o))) ? i + 2 : Number(o);
 }
 
-function waLink_(phone, name) {                // رابط واتساب جاهز بالتهنئة — يُرسَل للمعلم فقط بعد التحقق من كلمة السر
+function waLink_(phone, name, approved) {                // رابط واتساب جاهز بالتهنئة — يُرسَل للمعلم فقط بعد التحقق من كلمة السر
   var ph = digits_(phone); if (!ph) return '';
   if (ph.length === 8) ph = '974' + ph;
-  var msg = 'مبروك يا ' + name + '! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء';
+  var msg = approved
+    ? 'تحياتي يا د/ ' + name + '! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء'
+    : 'تحياتي يا د/ ' + name + '! وصلتني رسمتك في معرض «إبداعي مع النجم» وسأراجعها قريبًا ⭐ — أ. عزت نجم الأحياء';
   return 'https://wa.me/' + ph + '?text=' + encodeURIComponent(msg);
 }
 function unitOf_(r) {
@@ -179,7 +181,7 @@ function adminList_() {                       // كل الرسومات (المع
       var r = v[i], id = String(r[9] || ''); if (!id) continue;
       items.push({ id: id, approved: isTrue_(r[0]), weekly: isTrue_(r[1]), title: String(r[2] || '').trim(), studentTitle: String(r[6] || '').trim(),
         concept: String(r[3] || '').trim(), name: String(r[5] || '').trim(), ts: String(r[7] || ''), ord: ordOf_(r, i), unit: unitOf_(r),
-        wa: isTrue_(r[0]) ? waLink_(r[8], String(r[5] || '').trim()) : '' });
+        wa: waLink_(r[8], String(r[5] || '').trim(), isTrue_(r[0])) });
     }
   }
   items.sort(function (a, b) { return b.ord - a.ord; });
@@ -205,7 +207,7 @@ function adminUpdate_(d) {
     }
     if (d.approved !== undefined) sh.getRange(row, 1).setValue(!!d.approved);
     if (d.weekly !== undefined) sh.getRange(row, 2).setValue(!!d.weekly);
-    var wa = isTrue_(sh.getRange(row, 1).getValue()) ? waLink_(sh.getRange(row, 9).getValue(), String(sh.getRange(row, 6).getValue() || '')) : '';
+    var wa = waLink_(sh.getRange(row, 9).getValue(), String(sh.getRange(row, 6).getValue() || ''), isTrue_(sh.getRange(row, 1).getValue()));
     return { ok: true, wa: wa };
   } finally { lock.releaseLock(); }
 }
@@ -278,7 +280,7 @@ function submit_(d) {
     sh.getRange(row, 1, 1, 10).setValues([[false, false, '', '', '', name, title, stamp_(), phone, fid]]);
     sh.getRange(row, 1, 1, 2).insertCheckboxes();
     sh.getRange(row, 5).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&J' + row + '&"&sz=w300")');
-    sh.getRange(row, 11).setFormula('=IF(A' + row + '=TRUE,HYPERLINK("https://wa.me/"&I' + row + '&"?text="&ENCODEURL("مبروك يا "&F' + row + '&"! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء"),"📲 تهنئة"),"")');
+    sh.getRange(row, 11).setFormula('=IF(A' + row + '=TRUE,HYPERLINK("https://wa.me/"&I' + row + '&"?text="&ENCODEURL("تحياتي يا د/ "&F' + row + '&"! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء"),"📲 تهنئة"),"")');
     sh.setRowHeight(row, 100);
     var ordMax = 0;
     if (n >= 2) { var ov = sh.getRange(2, 12, n - 1, 1).getValues(); for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; } }

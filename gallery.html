@@ -373,8 +373,10 @@ body.light .title,body.light .sec{color:#9a6b00}
         t.appendChild(toolBtn(it.approved ? 'إلغاء الاعتماد' : '✔ اعتماد', '', function(){
           if(it.approved) adminUpdate(it.id, { approved: false }); else openEdit(it, true);
         }));
-        if(it.approved && it.wa){
-          var wa = document.createElement('a'); wa.href = it.wa; wa.target = '_blank'; wa.rel = 'noopener'; wa.textContent = '📲 تهنئة'; t.appendChild(wa);
+        if(it.wa){
+          var wa = document.createElement('a'); wa.href = it.wa; wa.target = '_blank'; wa.rel = 'noopener'; wa.textContent = it.approved ? '📲 تحية' : '📲 رد على الطالب'; t.appendChild(wa);
+        } else {
+          var nw = document.createElement('span'); nw.className = 'st pending'; nw.textContent = '⚠️ لا رقم هاتف'; t.appendChild(nw);
         }
         t.appendChild(toolBtn(it.weekly ? 'إزالة ⭐' : '⭐ رسمة الأسبوع', '', function(){ adminUpdate(it.id, { weekly: !it.weekly }); }));
         t.appendChild(toolBtn('✏️ تعديل', '', function(){ openEdit(it); }));
