@@ -126,6 +126,7 @@ body.light .title,body.light .sec{color:#9a6b00}
 .wm .ph{direction:ltr;unicode-bidi:isolate}
 .lbwrap{position:relative;display:inline-block;max-width:100%;line-height:0}
 .item img,.lb img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
+.tools .msgbtn{flex:1 1 100%;background:#1f9d55;border-color:#1f9d55;color:#fff;font-weight:900;padding:6px 10px}
 </style>
 </head>
 <body>
@@ -299,6 +300,7 @@ body.light .title,body.light .sec{color:#9a6b00}
   // ← ضع بيانات التواصل مع المعلم هنا: wa = رقم واتساب بالدولة بدون + (مثال 97400000000)، tg = اسم مستخدم تليجرام بدون @، tel = رقم الاتصال
   var TEACHER = { wa: '', tg: '', tel: '' };
   var lbList = [], boardItems = [], curView = 'students', sessName = '';
+  var serverVer = '';
   var seenKey = 'najm_gallery_seen', themeKey = 'najm_gallery_theme', notifKey = 'najm_gallery_notif', mineMap = {};
 
   var ERR = {
@@ -397,7 +399,9 @@ body.light .title,body.light .sec{color:#9a6b00}
           if(it.approved) adminUpdate(it.id, { approved: false }); else openEdit(it, true);
         }));
         if(it.phone){
-          t.appendChild(toolBtn('📲 رسالة', '', function(){ openMsg(it); }));
+          t.appendChild(toolBtn('📲 رسالة للطالب', 'msgbtn', function(){ openMsg(it); }));
+        } else if(it.phone === undefined){
+          t.appendChild(toolBtn('📲 رسالة للطالب', 'msgbtn', function(){ alert('الخادم لا يرسل أرقام الهواتف بعد. انشر Gallery_Code.gs الجديد: Deploy ← Manage deployments ← Edit ← New version، ثم حدّث الصفحة.'); }));
         } else {
           var nw = document.createElement('span'); nw.className = 'st pending'; nw.textContent = '⚠️ لا رقم هاتف'; t.appendChild(nw);
         }
@@ -410,7 +414,7 @@ body.light .title,body.light .sec{color:#9a6b00}
     });
     if(teacherPass){
       var pend = allItems.filter(function(i){ return !i.approved; }).length;
-      $('tCount').textContent = '— ' + allItems.length + ' رسمة، منها ' + pend + ' بانتظار الاعتماد';
+      $('tCount').textContent = '— ' + allItems.length + ' رسمة، منها ' + pend + ' بانتظار الاعتماد' + (serverVer ? ' — نسخة الخادم ' + serverVer : '');
       $('tHint').textContent = (filter === 'all' && ufilter === 'all') ? 'الأحدث في الأعلى. اسحب الشريط المنقّط داخل أي رسمة لتغيير مكانها (رسمة الأسبوع تبقى أولًا).' : 'للترتيب بالسحب اختر «الكل» في الحالة وفي الوحدة.';
     }
   }
@@ -576,6 +580,7 @@ body.light .title,body.light .sec{color:#9a6b00}
   // ================= المعلم =================
   function enterTeacher(pass, items){
     teacherPass = pass; ssSet(TKEY, pass); allItems = items; filter = 'all';
+    fetch(API + '?action=gallery_ping').then(function(r){ return r.json(); }).then(function(d){ if(d && d.version){ serverVer = d.version; renderGrid(); } }).catch(function(){});
     show($('teacherBar'), true); show($('teacherBox'), false); show($('toggleUpload'), false); show($('teacherLink'), false);
     show($('uploadBox'), false); show($('loginBox'), false);
     $('helloTxt').textContent = 'أهلًا أ. عزت'; renderGrid(); renderBoard();
@@ -636,7 +641,13 @@ body.light .title,body.light .sec{color:#9a6b00}
     if(f.name.length < 2){ note($('eMsg'), errText('bad_name')); return; }
     if(editApprove) f.approved = true;
     $('eSave').disabled = true;
-    adminUpdate(editId, f).then(function(d){ if(d && d.ok) show($('editModal'), false); else if(d) note($('eMsg'), errText(d.error)); })
+    var wasApprove = editApprove, wid = editId;
+    adminUpdate(editId, f).then(function(d){
+        if(d && d.ok){
+          show($('editModal'), false);
+          if(wasApprove){ var ai = allItems.filter(function(i){ return i.id === wid; })[0]; if(ai && ai.phone) openMsg(ai); }   // بعد الاعتماد تفتح رسالة التحية مباشرة
+        } else if(d) note($('eMsg'), errText(d.error));
+      })
       .then(function(){ $('eSave').disabled = false; });
   });
 

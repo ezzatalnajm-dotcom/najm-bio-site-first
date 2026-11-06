@@ -14,7 +14,7 @@
 var PLATFORM_SHEET_ID = '1K8BnadP-aXYVV7MqzVj6jgO6AYt4eRK7e4UBMW1YJYc';   // شيت المنصة: قراءة فقط (للتحقق من المشترك)
 var GALLERY_SHEET_ID = '1p3KSH49AaR_YbiHsUHSXkftI-PV8F_Rmk3R-SbbgND4';   // شيت «معرض طلاب نجم الأحياء»: تُكتب فيه الرسومات في تبويب «المعرض»
 var TEACHER_PASS = 'Teach@1212';   // كلمة سر المعلم — تُفحص هنا في الخادم فقط ولا تظهر في صفحة الطلاب
-var VERSION = '2026-11-06-gallery-v11';
+var VERSION = '2026-11-06-gallery-v12';
 var TAB = 'المعرض';
 var MAX_IMG_BYTES = 2500000;     // أقصى حجم للصورة بعد الضغط
 var MAX_PER_DAY = 50;            // أقصى عدد مشاركات للطالب في اليوم
@@ -274,7 +274,13 @@ function submit_(d) {
     var folder = DriveApp.getFolderById(props_().getProperty('FOLDER_ID'));
     var file = folder.createFile(Utilities.newBlob(bytes, mime, 'drawing_' + Date.now() + '_' + sub.pk + '.' + ext));
     try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
-    var fid = file.getId(), row = sh.getLastRow() + 1;
+    var fid = file.getId(), row = 2, ordMax = 0;
+    if (n >= 2) {                                   // الأحدث في أعلى الشيت: ندرج صفًا جديدًا تحت العناوين مباشرة
+      var ov0 = sh.getRange(2, 12, n - 1, 1).getValues();
+      for (var q0 = 0; q0 < ov0.length; q0++) { var o0 = Number(ov0[q0][0]); if (o0 > ordMax) ordMax = o0; }
+      sh.insertRowBefore(2);
+      sh.getRange(2, 1, 1, 13).clearFormat();      // الصف الجديد يرث تنسيق العناوين فنمسحه
+    }
     var phone = (sub.pk.length === 8) ? ('974' + sub.pk) : sub.pk;
     sh.getRange(row, 8, 1, 3).setNumberFormat('@');
     sh.getRange(row, 1, 1, 10).setValues([[false, false, '', '', '', name, title, stamp_(), phone, fid]]);
@@ -282,12 +288,22 @@ function submit_(d) {
     sh.getRange(row, 5).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&J' + row + '&"&sz=w300")');
     sh.getRange(row, 11).setFormula(waFormula_(row));
     sh.setRowHeight(row, 100);
-    var ordMax = 0;
-    if (n >= 2) { var ov = sh.getRange(2, 12, n - 1, 1).getValues(); for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; } }
-    sh.getRange(row, 12).setValue(Math.max(ordMax, row) + 1);     // الأحدث في الأعلى
+    sh.getRange(row, 12).setValue(Math.max(ordMax, n) + 1);     // الأحدث في الأعلى
     sh.getRange(row, 13).setValue(Number(unit));
     return { ok: true };
   } finally { lock.releaseLock(); }
+}
+
+// شغّلها مرة واحدة (Run) لترتيب الصفوف القديمة في الشيت: الأحدث في الأعلى. (اعمل نسخة احتياطية من الشيت قبلها: ملف ← إنشاء نسخة)
+function sortNewestFirst() {
+  var sh = sheet_(), n = sh.getLastRow();
+  if (n < 3) return 'لا حاجة للترتيب';
+  var oc = sh.getRange(2, 12, n - 1, 1), vals = oc.getValues();
+  for (var i = 0; i < vals.length; i++) { var o = vals[i][0]; if (o === '' || o == null || isNaN(Number(o))) vals[i][0] = i + 2; }
+  oc.setValues(vals);                                  // نثبّت ترتيب المعرض الحالي قبل نقل الصفوف فلا يتغير
+  sh.getRange(2, 1, n - 1, 13).sort({ column: 8, ascending: false });
+  var m = 'تم ترتيب ' + (n - 1) + ' صف: الأحدث في الأعلى';
+  Logger.log(m); return m;
 }
 
 // ================== رابط واتساب داخل الشيت (عمود K) ==================
@@ -351,10 +367,15 @@ function boardAdd_(d) {
     var folder = DriveApp.getFolderById(props_().getProperty('FOLDER_ID'));
     var file = folder.createFile(Utilities.newBlob(bytes, mime, 'board_' + Date.now() + '.' + ext));
     try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
-    var fid = file.getId(), row = Math.max(n, 1) + 1, ordMax = 0;
-    if (n >= 2) { var ov = sh.getRange(2, 5, n - 1, 1).getValues(); for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; } }
+    var fid = file.getId(), row = 2, ordMax = 0;
+    if (n >= 2) {
+      var ov = sh.getRange(2, 5, n - 1, 1).getValues();
+      for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; }
+      sh.insertRowBefore(2);
+      sh.getRange(2, 1, 1, 5).clearFormat();
+    }
     sh.getRange(row, 3, 1, 2).setNumberFormat('@');
-    sh.getRange(row, 1, 1, 5).setValues([[title, '', stamp_(), fid, Math.max(ordMax, row) + 1]]);
+    sh.getRange(row, 1, 1, 5).setValues([[title, '', stamp_(), fid, Math.max(ordMax, n) + 1]]);
     sh.getRange(row, 2).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&D' + row + '&"&sz=w300")');
     sh.setRowHeight(row, 100);
     return { ok: true };
