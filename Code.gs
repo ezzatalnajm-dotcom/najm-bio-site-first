@@ -1,1005 +1,499 @@
 /**
- * كود Google Apps Script — النسخة الكاملة (الكود القديم كما هو + إضافات لوحة التقدم).
- * انسخه بالكامل مكان الكود الحالي، ثم: Deploy > Manage deployments > ✏️ Edit
- * > Version: New version > Deploy  (هكذا يبقى الرابط نفسه دون تغيير).
+ * معرض «إبداعي مع النجم» — مشروع Apps Script مستقل (لا يلمس سكربت المنصة ولا شيتها بالكتابة).
  *
- * الشيتات: "الطلاب" | "المحتوى" | "المتفوقون" | "لمحة عني"  (كما كانت)
- * جديد: شيت "النتائج" يُنشأ تلقائيًا عند أول نتيجة، لا تعدّل فيه يدويًا.
- * جديد: التسجيل الذاتي — الطالب يملأ نموذجًا فيُضاف صف في شيت "الطلاب" ملوّن بالأصفر.
- *   عمود "الحالة": 2 = مفعّل (يدخل المحتوى المشترك واللوحة). 0 أو 1 أو فراغ = تصفح عام فقط.
- *   عند كتابتك 2 يزول اللون الأصفر تلقائيًا.
- * أمان: لم يعد `?sheet=users` يعرض أي بيانات — التحقق يتم داخل السكربت ويرجع الاسم فقط.
+ * ماذا يفعل:
+ *  - الطالب المشترك (رقم هاتفه مطابق لشيت «الطلاب» والحالة 2) يرفع رسمته من صفحة gallery.html.
+ *  - تُحفظ الصورة في مجلد على درايف، ويُضاف صف في شيت «معرض إبداعي مع النجم» (يُنشأ تلقائيًا).
+ *  - لا تظهر الرسمة لأحد إلا بعد أن تضع علامة ✔ في عمود «معتمد» (وتكتب العنوان بنفسك).
+ *  - الصفحة تقرأ الرسومات المعتمدة فقط من هنا، وبعد التحقق من المشترك (لا أرقام هواتف تُرسل أبدًا).
  *
- * أعمدة المحتوى/المتفوقون/لمحة عني: كما في الكود القديم تمامًا (لم تتغير).
+ * التشغيل: شغّل الدالة setup مرة واحدة (Run) ثم Deploy ← New deployment ← Web app
+ *          (Execute as: Me ، Who has access: Anyone).
  *
- * تحديث 2026-10-17 (أ):
- *  - طلب التسجيل لم يعد يُتجاهل بصمت: كل طلب (جديد/مكرر/مرفوض) يُسجَّل في شيت "سجل الطلبات".
- *  - الرقم المكرر لا يُضاف مرة ثانية، ويُكتب في عمود "ملاحظات" للصف الموجود، والطالب يرى رسالة واضحة.
- *  - شيت "الطلاب": منع تكرار هاتف الطالب (يُلغى الإدخال اليدوي المكرر مع تنبيه، واللصق يُلوَّن بالأحمر).
- *  - قائمة 📊 نجم ← فحص الأرقام المكررة.
- *  - للتأكد أن النشر محدَّث: افتح رابط السكربت + ?action=ping فيظهر رقم الإصدار.
- *
- * تحديث 2026-10-18 (أ): لوحة تقدمي ترجع الآن totalExams = عدد الاختبارات الظاهرة للمشتركين
- *  (صفوف شيت "المحتوى" ظهورها 1 أو 2 ولها رابط فعلي، ورابطها يحتوي MCQ؛ كل نسخة أ/ب اختبار مستقل).
- *  للتحقق: افتح رابط السكربت + ?action=exams ليعرض القائمة التي حُسبت.
- *
- * تحديث 2026-10-18 (ب): رمز الاختبار القديم والجديد يُحسبان اختبارًا واحدًا (U2L1_P1_P2_* = U2L1_P2_*،
- *  U2L1_P1_P3_* = U2L1_P3_*) في لوحة تقدمي وفي إحصاء الأسئلة، دون تعديل أي صف في شيت "النتائج".
- *
- * تحديث 2026-10-19 (أ): الأرقام المكررة في شيت "الطلاب" لم تعد تُحذف تلقائيًا — تُلوَّن بالأحمر كل الصفوف المتشابهة،
- *  ويظهر تبويب "الأرقام المكررة" فيه كل مجموعة جنبًا إلى جنب (الاسم، الحالة، عدد النتائج، تاريخ التسجيل...) لتقرر بنفسك
- *  أي صف تحتفظ به. ويظهر تنبيه عند فتح الملف إن وُجد تكرار.
- *
- * تحديث 2026-10-19 (ب): تبويب "أرقام متكررة": كل رقم وتحته مباشرة صفوفه المتشابهة، وأمام كل صف خانة ✔.
- *  تضع ✔ أمام الصف الذي تريد بقاءه ثم من القائمة 📊 نجم ← "حذف المكرر (احتفظ بالمُحدّد ✔)": يُحذف الباقي من شيت "الطلاب"
- *  بعد رسالة تأكيد، ويُحفظ نسخة من كل صف محذوف في تبويب "المحذوفات" (للرجوع إليه).
- *
- * تحديث 2026-10-19 (ج): صفوف كل رقم في تبويب "أرقام متكررة" مُجمَّعة (تجميع الصفوف الأصلي في جوجل شيت): أزرار [−]/[+]
- *  بجانب عنوان كل رقم لطيّ صفوفه وفتحها، وأزرار 1/2 أعلى اليمين لطيّ كل الأرقام أو فتحها دفعة واحدة.
- *
- * تحديث 2026-10-19 (د): عمود "المجموعة" (العمود C في شيت الطلاب) يظهر في تبويب "أرقام متكررة" بجانب الاسم،
- *  وإن كان الرقم المكرر في مجموعات مختلفة يُكتب ذلك في عنوانه، ويظهر اسم المجموعة في رسالة تأكيد الحذف.
- *
- * تحديث 2026-10-19 (هـ): تبويب "أرقام متكررة" يعرض **كل أعمدة** صف الطالب كما هي في شيت الطلاب (أيًّا كانت)،
- *  مع عمود "اكتمال" (كم خانة معبأة)، والخانات الفارغة بلون وردي، و⭐ تقترح الصف الأكمل معلومات (ثم المفعّل ثم الأقدم).
- *
- * تحديث 2026-10-19 (و): تذكير الأسبوع للمشتركين (الحالة 2):
- *  - الموقع يسجّل متى فتح الطالب كل ملف (شيت "فتح المحتوى")، ويعرض له شريط تذكير داخل التطبيق.
- *  - السكربت يسجّل أول ظهور لكل ملف جديد (شيت "سجل المحتوى"؛ الملفات الموجودة وقت التفعيل تُعتبر قديمة ولا يُذكَّر بها).
- *  - شيت "تذكيرات الأسبوع": كل طالب مرّ أسبوع على ملف لم يفتحه، مع نص الرسالة وزر واتساب جاهز؛ ✔ أمام الاسم = أُرسل.
- *  - للتفعيل: القائمة 📊 نجم ← تفعيل تذكير الأسبوع (يوميًا).
- *
- * تحديث 2026-10-21 (أ): شاشة المعلم في لوحة تقدمي (?action=groups&key=الرمز):
- *  - ترجع كل مشترك (الحالة 2) باسمه ومجموعته (العمود C) ونسبته العامة، والموقع يقسّمها: ممتاز / جيد جدًا / جيد / مقبول.
- *  - محمية برمز المعلم المحفوظ داخل السكربت (القائمة 📊 نجم ← 🔑 تعيين رمز المعلم) — لا يُكتب الرمز في أي ملف.
- *
- * تحديث 2026-10-25: تسريع تسجيل النتائج وتقليل الزحام:
- *  - التحقق من تفعيل الطالب في saveResult_ يستخدم كاش 10 دقائق (المفعّلون فقط)؛ لو الطالب ليس في الكاش يُقرأ الشيت كما كان تمامًا.
- *  - open_ (تسجيل فتح الملف) لم يعد ينتظر القفل أكثر من ثانيتين ويتخطى التسجيل لو القفل مشغول، حتى لا يؤخر النتائج.
- *  - مهلة قفل saveResult_ من 15 إلى 30 ثانية لتقليل احتمال ضياع نتيجة وقت الزحمة.
+ * الترتيب والوحدات (من التطبيق أو من الشيت — كلاهما يعمل):
+ *  - تبويب «المعرض»: عمود L «الترتيب» وعمود M «الوحدة».
+ *  - تبويب «MY BOARD»: عمود E «الترتيب» وعمود F «الوحدة».
+ *  - الرقم الأكبر في «الترتيب» = أعلى في المعرض. عدّل الرقم في الشيت ثم حدّث الصفحة.
  */
 
-var RESULTS_SHEET = 'النتائج';
-var LOG_SHEET = 'سجل الطلبات';
-var VERSION = '2026-10-25-fast-save';
-var DUP_COLOR = '#ea9999';
-var DUP_SHEET = 'أرقام متكررة';
-var DUP_SHEET_OLD = 'الأرقام المكررة';
-var DEL_SHEET = 'المحذوفات';
-var CONTENT_LOG = 'سجل المحتوى', OPENS_SHEET = 'فتح المحتوى', REMINDED_SHEET = 'تذكيرات مرسلة', REMINDERS_SHEET = 'تذكيرات الأسبوع';
-var REMIND_DAYS = 7, REMIND_WINDOW_DAYS = 45;
+var PLATFORM_SHEET_ID = '1K8BnadP-aXYVV7MqzVj6jgO6AYt4eRK7e4UBMW1YJYc';   // شيت المنصة: قراءة فقط (للتحقق من المشترك)
+var GALLERY_SHEET_ID = '1p3KSH49AaR_YbiHsUHSXkftI-PV8F_Rmk3R-SbbgND4';   // شيت «معرض طلاب نجم الأحياء»: تُكتب فيه الرسومات في تبويب «المعرض»
+var TEACHER_PASS = 'Teach@1212';   // كلمة سر المعلم — تُفحص هنا في الخادم فقط ولا تظهر في صفحة الطلاب
+var VERSION = '2026-11-06-gallery-v13';
+var TAB = 'المعرض';
+var MAX_IMG_BYTES = 2500000;     // أقصى حجم للصورة بعد الضغط
+var MAX_PER_DAY = 50;            // أقصى عدد مشاركات للطالب في اليوم
+var MAX_PENDING = 50;            // أقصى عدد رسومات معلّقة للطالب الواحد
+var HEAD = ['معتمد ✔', 'رسمة الأسبوع ⭐', 'العنوان المعتمد (اكتبه أنت)', 'المفهوم / الدرس', 'الرسمة', 'الاسم', 'عنوان من الطالب',
+            'التاريخ', 'هاتف الطالب', 'رقم الملف', 'تهنئة واتساب', 'الترتيب', 'الوحدة'];
+// أعمدة (من 1): 1 معتمد | 2 أسبوع | 3 عنوان معتمد | 4 مفهوم | 5 الرسمة | 6 الاسم | 7 عنوان الطالب | 8 التاريخ | 9 هاتف | 10 ملف | 11 تهنئة | 12 الترتيب (الرقم الأكبر = أعلى في المعرض) | 13 الوحدة
 
-function doGet(e) {
-  var p = e.parameter || {};
-  if (p.action === 'ping') {
-    return json_({ ok: true, version: VERSION, time: new Date().toISOString() });
-  }
-  if (p.action === 'exams') {
-    var ex = examItems_();
-    var oldN = ex.items.filter(function (i) { return i.oldName; }).length;
-    return json_({ ok: true, rule: ex.rule, total: ex.items.length, oldNameLinks: oldN, note: oldN ? 'تنبيه: يوجد روابط في شيت المحتوى ما زالت بالاسم القديم (oldName=true) — غيّرها إلى الاسم الجديد' : 'كل الروابط بالأسماء الصحيحة', items: ex.items });
-  }
-  if (p.action === 'pending') {
-    return json_(pending_(p.phone, p.parent));
-  }
-  if (p.action === 'progress') {
-    return json_(progress_(p.phone, p.parent));
-  }
-  if (p.action === 'groups') {
-    return json_(groups_(p.key));
-  }
-  if (p.action === 'login') {
-    return json_(login_(p.phone, p.parent));
-  }
-  if (((p.sheet || 'users') + '').toLowerCase() === 'users') {
-    return json_([]); // أُغلق عرض قائمة الطلاب للعموم
-  }
-
-  // ===== الكود القديم بدون تغيير =====
-  var sheetParam = ((e.parameter.sheet || 'users') + '').toLowerCase();
-  var sheetNameMap = { users: 'الطلاب', content: 'المحتوى', students: 'المتفوقون', about: 'لمحة عني' };
-  var sheetName = sheetNameMap[sheetParam] || 'الطلاب';
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(sheetName);
-
-  if (!sheet) {
-    return ContentService.createTextOutput(JSON.stringify([]))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-
-  var values = sheet.getDataRange().getValues();
-  var headers = values[0];
-  var rows = [];
-  for (var i = 1; i < values.length; i++) {
-    var obj = {};
-    for (var j = 0; j < headers.length; j++) {
-      var key = (headers[j] + '').trim();
-      obj[key] = values[i][j];
-    }
-    rows.push(obj);
-  }
-
-  return ContentService.createTextOutput(JSON.stringify(rows))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  try {
-    var d = JSON.parse(e.postData.contents);
-    if (d.action === 'saveResult') return json_(saveResult_(d));
-    if (d.action === 'register') return json_(register_(d));
-    if (d.action === 'open') return json_(open_(d));
-    return json_({ ok: false, error: 'unknown action' });
-  } catch (err) {
-    logReq_('خطأ', {}, String(err));
-    return json_({ ok: false, error: String(err) });
-  }
-}
-
-// ---------- أدوات ----------
-function json_(o) {
-  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
-}
-
+function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+function props_() { return PropertiesService.getScriptProperties(); }
 function digits_(v) {
-  return String(v == null ? '' : v)
-    .replace(/[\u0660-\u0669]/g, function (c) { return c.charCodeAt(0) - 0x660; })
-    .replace(/[\u06F0-\u06F9]/g, function (c) { return c.charCodeAt(0) - 0x6F0; })
-    .replace(/\D/g, '');
+  return String(v == null ? '' : v).replace(/[\u0660-\u0669]/g, function (c) { return c.charCodeAt(0) - 0x660; })
+    .replace(/[\u06F0-\u06F9]/g, function (c) { return c.charCodeAt(0) - 0x6F0; }).replace(/\D/g, '');
 }
-// مفتاح المطابقة: نفس منطق الدخول القديم (حذف 974 من البداية)
 function key_(v) { return digits_(v).replace(/^974/, ''); }
-// يوحّد رمز الاختبار القديم والجديد: U2L1_P1_P2_MCQ_B و U2L1_P2_MCQ_B = اختبار واحد
-function normExam_(id) { return String(id == null ? '' : id).replace(/^(U\d+L\d+)_P1_(P[23])_/i, '$1_$2_'); }
-
 function stamp_() { return Utilities.formatDate(new Date(), 'Asia/Qatar', 'yyyy-MM-dd HH:mm'); }
-
-// سجل لكل طلب تسجيل/دخول حتى لا يضيع شيء بصمت (أي خطأ هنا لا يوقف العملية الأصلية)
-function logReq_(kind, d, outcome) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sh = ss.getSheetByName(LOG_SHEET);
-    if (!sh) {
-      sh = ss.insertSheet(LOG_SHEET);
-      sh.appendRow(['التاريخ', 'النوع', 'الاسم', 'هاتف الطالب', 'هاتف ولي الأمر', 'النتيجة']);
-      sh.getRange('C:E').setNumberFormat('@');
-      sh.setFrozenRows(1);
-    }
-    if (sh.getLastRow() > 2500) sh.deleteRows(2, 500);
-    d = d || {};
-    sh.appendRow([stamp_(), kind, String(d.name || '').slice(0, 80), String(d.phone || '').slice(0, 20), String(d.parent || '').slice(0, 20), String(outcome || '').slice(0, 300)]);
-  } catch (e) {}
+function safeText_(v, max) {          // نص آمن: بلا رموز تحكم/وسوم، وبلا بداية صيغة في الشيت
+  var s = String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max || 80);
+  if (/^[=+\-@]/.test(s)) s = "'" + s;
+  return s;
 }
 
-function students_() {
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('الطلاب');
-  if (!sh) return [];
-  var v = sh.getDataRange().getValues(), h = v[0].map(function (x) { return (x + '').trim(); }), out = [];
-  for (var i = 1; i < v.length; i++) {
-    var r = {};
-    for (var j = 0; j < h.length; j++) r[h[j]] = v[i][j];
-    out.push({
-      phone: key_(r.phone || r['هاتف الطالب'] || r['الهاتف'] || ''),
-      parent: key_(r.parent || r['هاتف ولي الأمر'] || ''),
-      name: String(r.name || r['اسم الطالب'] || r['الاسم'] || r['الطالب'] || '').trim(),
-      active: String(r['الحالة'] != null ? r['الحالة'] : (r.status != null ? r.status : '')).trim() === '2'
-    });
+// ================== التهيئة (مرة واحدة) ==================
+function setup() {
+  var p = props_(), msg = [];
+  var folder;
+  if (p.getProperty('FOLDER_ID')) { try { folder = DriveApp.getFolderById(p.getProperty('FOLDER_ID')); } catch (e) { folder = null; } }
+  if (!folder) { folder = DriveApp.createFolder('إبداعي مع النجم — الرسومات'); p.setProperty('FOLDER_ID', folder.getId()); }
+  var ss;
+  if (GALLERY_SHEET_ID) { ss = SpreadsheetApp.openById(GALLERY_SHEET_ID); p.setProperty('SHEET_ID', GALLERY_SHEET_ID); }
+  else {
+    if (p.getProperty('SHEET_ID')) { try { ss = SpreadsheetApp.openById(p.getProperty('SHEET_ID')); } catch (e) { ss = null; } }
+    if (!ss) { ss = SpreadsheetApp.create('معرض إبداعي مع النجم'); p.setProperty('SHEET_ID', ss.getId()); }
   }
-  return out;
-}
-
-function resultsSheet_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sh = ss.getSheetByName(RESULTS_SHEET);
+  var sh = ss.getSheetByName(TAB);
   if (!sh) {
-    sh = ss.insertSheet(RESULTS_SHEET);
-    sh.appendRow(['id', 'التاريخ', 'هاتف الطالب', 'الاسم', 'معرف الاختبار', 'الاختبار', 'الدرجة', 'الدرجة الكلية', 'النسبة', 'الوقت', 'الأخطاء']);
-    sh.getRange('A:C').setNumberFormat('@');
-    sh.setFrozenRows(1);
-  }
-  if (!sh.getRange(1, 11).getValue()) sh.getRange(1, 11).setValue('الأخطاء'); // للشيت القديم
-  return sh;
-}
-
-function parseWrong_(c) {
-  try { var a = JSON.parse(c); return Array.isArray(a) ? a : null; } catch (e) { return null; }
-}
-
-// ---------- تحقق سريع أن الطالب مفعّل (كاش 10 دقائق للمفعّلين فقط) ----------
-// يرجع {name} إن كان مفعّلًا، وإلا null. غير الموجود في الكاش يُقرأ من الشيت كما كان (فالتفعيل الجديد يعمل فورًا).
-function activeStudent_(k) {
-  if (!k) return null;
-  var cache = null, ck = 'act_' + k;
-  try {
-    cache = CacheService.getScriptCache();
-    var c = cache.get(ck);
-    if (c !== null) return { name: JSON.parse(c).n || '' };
-  } catch (e) { cache = null; }
-  var st = students_().filter(function (s) { return s.phone === k; })[0];
-  if (!st || !st.active) return null;
-  try { if (cache) cache.put(ck, JSON.stringify({ n: st.name }), 600); } catch (e2) {}
-  return { name: st.name };
-}
-
-// ---------- حفظ نتيجة (من ملفات الامتحانات) ----------
-function saveResult_(d) {
-  var phone = digits_(d.phone), score = Number(d.score), total = Number(d.total);
-  if (!d.id || !d.exam || !phone || !isFinite(score) || !isFinite(total) || total <= 0) return { ok: false, error: 'bad data' };
-  var st = activeStudent_(key_(phone));
-  if (!st) return { ok: true }; // لا نخزّن إلا المفعّلين
-  var lock = LockService.getScriptLock();
-  lock.waitLock(30000);
-  try {
-    var sh = resultsSheet_(), n = sh.getLastRow();
-    if (n > 1) {
-      var ids = sh.getRange(2, 1, n - 1, 1).getValues();
-      for (var i = 0; i < ids.length; i++) if (ids[i][0] === String(d.id)) return { ok: true };
+    if (GALLERY_SHEET_ID) { sh = ss.insertSheet(TAB); }      // يضيف تبويبًا جديدًا فقط، ولا يحذف أي تبويب موجود
+    else {
+      var first = ss.getSheets()[0];
+      sh = first.getName() === TAB ? first : ss.insertSheet(TAB);
+      try { if (first.getName() !== TAB && ss.getSheets().length > 1) ss.deleteSheet(first); } catch (e) {}
     }
-    var pct = Math.round(score / total * 10000) / 100;
-    var wrong = [];
-    (Array.isArray(d.wrong) ? d.wrong : []).slice(0, 60).forEach(function (w) {
-      wrong.push({ q: String((w && w.q) || '').slice(0, 200), a: String((w && w.a) || '').slice(0, 100), c: String((w && w.c) || '').slice(0, 100) });
-    });
-    var wj = JSON.stringify(wrong);
-    while (wj.length > 45000 && wrong.length) { wrong.pop(); wj = JSON.stringify(wrong); }
-    if (!Array.isArray(d.wrong)) wj = ''; // نسخة قديمة بلا تفاصيل: تبقى "غير معروف" ولا تُعرض كأنها بلا أخطاء
-    sh.appendRow([String(d.id), String(d.at || new Date().toISOString()), phone, st.name || String(d.name || ''),
-      String(d.exam), String(d.title || d.exam), score, total, pct, String(d.time || ''), wj]);
-    return { ok: true };
-  } finally { lock.releaseLock(); }
+  }
+  if (sh.getLastRow() < 1) {
+    sh.getRange(1, 1, 1, HEAD.length).setValues([HEAD]);
+    sh.getRange(1, 1, 1, HEAD.length).setFontWeight('bold').setBackground('#cfe2f3');
+    sh.setFrozenRows(1);
+    try { sh.setRightToLeft(true); } catch (e) {}
+    sh.setColumnWidth(3, 190); sh.setColumnWidth(4, 130); sh.setColumnWidth(5, 150); sh.setColumnWidth(6, 120); sh.setColumnWidth(7, 150);
+  }
+  if (!String(sh.getRange(1, 12).getValue() || '').trim()) sh.getRange(1, 12).setValue('الترتيب').setFontWeight('bold').setBackground('#cfe2f3');
+  if (!String(sh.getRange(1, 13).getValue() || '').trim()) sh.getRange(1, 13).setValue('الوحدة').setFontWeight('bold').setBackground('#cfe2f3');
+  boardSheet_();   // يجهّز تبويب MY BOARD وعمود الوحدة فيه
+  // اختبار الوصول لشيت المنصة
+  var plat = SpreadsheetApp.openById(PLATFORM_SHEET_ID), st = plat.getSheetByName('الطلاب');
+  msg.push('✅ المجلد: ' + folder.getUrl());
+  msg.push('✅ شيت الاعتماد (افتحه واعمل له علامة مرجعية): ' + ss.getUrl());
+  msg.push(st ? '✅ شيت المنصة مقروء — تبويب الطلاب فيه ' + (st.getLastRow() - 1) + ' صف' : '⚠️ لم أجد تبويب «الطلاب» في شيت المنصة');
+  Logger.log(msg.join('\n'));
+  return msg.join('\n');
+}
+function sheet_() {
+  var id = GALLERY_SHEET_ID || props_().getProperty('SHEET_ID');
+  if (!id) throw new Error('setup_not_run');
+  return SpreadsheetApp.openById(id).getSheetByName(TAB);
 }
 
-// ---------- الاختبارات الظاهرة للمشتركين (لسطر "أنجز X من أصل Y" في لوحة تقدمي) ----------
-function examItems_() {
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('المحتوى');
-  if (!sh || sh.getLastRow() < 2) return { rule: 'none', items: [] };
+// ================== التحقق من المشترك (قراءة فقط من شيت المنصة) ==================
+function readStudents_() {
+  var sh = SpreadsheetApp.openById(PLATFORM_SHEET_ID).getSheetByName('الطلاب');
+  if (!sh || sh.getLastRow() < 2) return {};
   var v = sh.getDataRange().getValues(), h = v[0].map(function (x) { return (x + '').trim(); });
   function col(names) { for (var i = 0; i < names.length; i++) { var ix = h.indexOf(names[i]); if (ix > -1) return ix; } return -1; }
-  var cLevel = col(['ظهور', 'level']), cLink = col(['الرابط', 'link']), cTitle = col(['العنوان', 'title']), cUnit = col(['الوحدة', 'unit']);
-  if (cLink < 0 || cTitle < 0) return { rule: 'none', items: [] };
-  var rows = [];
-  for (var i = 1; i < v.length; i++) {
-    var raw = cLevel > -1 ? String(v[i][cLevel] == null ? '' : v[i][cLevel]).trim() : '';
-    if (raw === '00') continue;                                   // مخفي تمامًا
-    var lv = parseInt(raw, 10); if (isNaN(lv)) lv = 1;
-    if (lv !== 1 && lv !== 2) continue;                           // 0 = قريبًا، 3 = مميز: لا يُحسبان
-    var title = String(v[i][cTitle] == null ? '' : v[i][cTitle]).trim();
-    var link = String(v[i][cLink] == null ? '' : v[i][cLink]).trim();
-    if (!title || !link || link === '#') continue;                // بلا رابط فعلي = "قريبًا"
-    if (cUnit > -1 && !/\d/.test(String(v[i][cUnit] == null ? '' : v[i][cUnit]))) continue; // الموقع يتجاهل الصف بلا رقم وحدة
-    rows.push({ title: title, link: link, level: lv });
-  }
-  var pick = rows.filter(function (r) { return /mcq/i.test(r.link); }), rule = 'link';
-  if (!pick.length) { rule = 'title'; pick = rows.filter(function (r) { return /بنك\s*[أا]سئلة/.test(r.title); }); }
-  var seen = {}, out = [];
-  pick.forEach(function (r) {
-    // رابط بالاسم القديم (P1_P2 / P1_P3) ورابط بالاسم الجديد لنفس الاختبار يُحسبان مرة واحدة
-    var k = r.link.toLowerCase().split('#')[0].split('?')[0].replace(/_p1_(p[23])_/, '_$1_');
-    r.oldName = /_P1_P[23]_/i.test(r.link);
-    if (!seen[k]) { seen[k] = 1; out.push(r); }
-  });
-  return { rule: rule, items: out };
-}
-
-// ---------- لوحة التقدم: تتحقق من الرقمين ثم ترجع بيانات هذا الطالب فقط ----------
-// يستخرج رمز الملف من الرابط (مثل U2L1_P2_MCQ_B.html → U2L1_P2_MCQ_B) — لا يغيّر الروابط
-function examCodeFromLink_(link) {
-  var s = String(link == null ? '' : link).trim().split('#')[0].split('?')[0];
-  var slash = Math.max(s.lastIndexOf('/'), s.lastIndexOf('\\'));
-  if (slash >= 0) s = s.slice(slash + 1);
-  return s.replace(/\.html$/i, '');
-}
-
-// خريطة رمز الاختبار الموحّد → عنوان عربي + رمز + رابط من شيت المحتوى (للعرض فقط — لا يمس شيت النتائج)
-function contentExamMap_() {
+  var cN = col(['اسم الطالب', 'الاسم', 'name']), cP = col(['هاتف الطالب', 'phone', 'الهاتف']), cQ = col(['هاتف ولي الأمر', 'parent']), cS = col(['الحالة', 'status']);
   var map = {};
-  examItems_().items.forEach(function (r) {
-    var code = examCodeFromLink_(r.link);
-    var k = normExam_(code);
-    if (!k) return;
-    if (!map[k]) map[k] = { title: r.title, code: code, link: r.link };
-  });
+  if (cP < 0) return map;
+  for (var r = 1; r < v.length; r++) {
+    var st = cS > -1 ? String(v[r][cS] == null ? '' : v[r][cS]).trim() : '';
+    if (st !== '2') continue;
+    var pk = key_(v[r][cP]); if (!pk) continue;
+    map[pk] = { n: cN > -1 ? String(v[r][cN] || '').trim() : '' };
+  }
   return map;
 }
+// تخزين مؤقت 5 دقائق للمشتركين المفعّلين؛ أي رقم غير موجود أو غير مطابق يُفحص مباشرة من الشيت
+function subscriber_(phone) {
+  var pk = key_(phone); if (!pk) return null;
+  var cache = null, map = null;
+  try { cache = CacheService.getScriptCache(); var raw = cache.get('gal_subs_v2'); if (raw) map = JSON.parse(raw); } catch (e) { map = null; }
+  if (map && map[pk]) return { pk: pk, name: map[pk].n };
+  var fresh = readStudents_();
+  try { var js = JSON.stringify(fresh); if (cache && js.length < 90000) cache.put('gal_subs_v2', js, 300); } catch (e2) {}
+  return fresh[pk] ? { pk: pk, name: fresh[pk].n } : null;
+}
 
-function progress_(phone, parent) {
-  var pk = key_(phone), qk = key_(parent);
-  if (!pk || !qk) return { ok: false, error: 'bad input' };
-  var sts = students_();
-  var me = sts.filter(function (s) { return s.phone === pk && s.parent === qk; })[0];
-  if (!me) return { ok: false, error: 'not found' };
-  if (!me.active) return { ok: false, error: 'pending' };
-
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(RESULTS_SHEET);
-  var best = {}; // phoneKey -> exam -> أفضل محاولة
-  var attempts = {}; // exam -> عدد محاولات هذا الطالب
-  if (sh && sh.getLastRow() > 1) {
-    var v = sh.getRange(2, 1, sh.getLastRow() - 1, 11).getValues();
+// ================== القراءة ==================
+function listFor_(sub) {
+  var sh = sheet_(), n = sh.getLastRow(), items = [], mine = [];
+  if (n >= 2) {
+    var v = sh.getRange(2, 1, n - 1, 10).getValues();
     for (var i = 0; i < v.length; i++) {
-      var k = key_(v[i][2]), ex = normExam_(v[i][4]), pct = Number(v[i][8]);
-      if (!k || !ex) continue;
-      best[k] = best[k] || {};
-      if (k === pk) attempts[ex] = (attempts[ex] || 0) + 1;
-      var cur = best[k][ex];
-      if (!cur || pct > cur.percent) best[k][ex] = { exam: ex, title: v[i][5], score: Number(v[i][6]), total: Number(v[i][7]), percent: pct, at: v[i][1], wrong: parseWrong_(v[i][10]) };
+      var r = v[i], approved = (r[0] === true || String(r[0]).toUpperCase() === 'TRUE'), id = String(r[9] || '');
+      if (!id) continue;
+      var title = String(r[2] || '').trim() || String(r[6] || '').trim();
+      if (approved) items.push({ id: id, title: title || 'رسمة', concept: String(r[3] || '').trim(), name: String(r[5] || '').trim(),
+        weekly: (r[1] === true || String(r[1]).toUpperCase() === 'TRUE'), ts: String(r[7] || '') });
+      if (key_(r[8]) === sub.pk) mine.push({ id: id, title: title, name: String(r[5] || '').trim(), weekly: (r[1] === true || String(r[1]).toUpperCase() === 'TRUE'),
+        status: approved ? 'published' : 'pending', ts: String(r[7] || '') });
     }
   }
-  function overall(k) {
-    var s = 0, t = 0, c = 0, b = best[k] || {};
-    for (var ex in b) { s += b[ex].score; t += b[ex].total; c++; }
-    return { pct: t ? s / t * 100 : null, taken: c };
-  }
-
-  // عرض فقط: عنوان عربي من شيت المحتوى + الرمز — دون تعديل شيت النتائج
-  var cmap = {};
-  try { cmap = contentExamMap_(); } catch (e) { cmap = {}; }
-  var totalExams = 0;
-  try { totalExams = examItems_().items.length; } catch (e) { totalExams = 0; }
-
-  var mine = overall(pk), exams = [];
-  for (var ex in (best[pk] || {})) {
-    var o = best[pk][ex];
-    o.attempts = attempts[ex] || 1;
-    var meta = cmap[ex];
-    if (meta) {
-      o.code = meta.code;
-      o.title = meta.title; // للعرض في اللوحة فقط
-      o.link = meta.link;
-    } else {
-      o.code = o.exam;
-    }
-    exams.push(o);
-  }
-  exams.sort(function (a, b) { return a.exam < b.exam ? -1 : 1; });
-
-  // اختبارات ظاهرة في المحتوى ولم يُنجزها هذا الطالب بعد
-  var pending = [];
-  for (var ck in cmap) {
-    if (!(best[pk] && best[pk][ck])) {
-      pending.push({ exam: ck, title: cmap[ck].title, code: cmap[ck].code, link: cmap[ck].link });
-    }
-  }
-  pending.sort(function (a, b) { return a.exam < b.exam ? -1 : 1; });
-
-  var topPct = null, n = 0;
-  if (mine.pct !== null) {
-    var higher = 0;
-    var activeKeys = {}; sts.forEach(function (s) { if (s.active) activeKeys[s.phone] = 1; });
-    for (var k2 in best) { if (!activeKeys[k2]) continue; var o2 = overall(k2); if (o2.pct === null) continue; n++; if (k2 !== pk && o2.pct > mine.pct + 1e-9) higher++; }
-    topPct = Math.ceil((higher + 1) / n * 100);
-  }
-  return {
-    ok: true,
-    name: me.name,
-    exams: exams,
-    pending: pending,
-    overall: mine.pct === null ? null : Math.round(mine.pct * 100) / 100,
-    taken: mine.taken,
-    totalExams: totalExams,
-    topPct: topPct,
-    n: n
-  };
+  items.reverse(); mine.reverse();     // الأحدث أولًا
+  return { ok: true, name: sub.name, items: items, mine: mine };
 }
 
-// ---------- شاشة المعلم: كل المشتركين بمجموعاتهم ونسبهم (محمية برمز المعلم) ----------
-function setTeacherKey() {
-  var ui = SpreadsheetApp.getUi();
-  var r = ui.prompt('رمز المعلم', 'اكتب الرمز الذي ستدخل به شاشة المعلم في لوحة تقدمي (8 أحرف/أرقام على الأقل):', ui.ButtonSet.OK_CANCEL);
-  if (r.getSelectedButton() !== ui.Button.OK) return;
-  var k = String(r.getResponseText() || '').trim();
-  if (k.length < 8) { ui.alert('الرمز قصير — اكتب 8 أحرف/أرقام على الأقل'); return; }
-  PropertiesService.getScriptProperties().setProperty('TEACHER_KEY', k);
-  ui.alert('تم حفظ الرمز ✅');
+// رقم الترتيب: الأكبر = أعلى. الصفوف التي لا ترتيب لها تأخذ رقم صفها (فالأحدث أعلى تلقائيًا)
+function ordOf_(r, i) {
+  var o = r[11];
+  return (o === '' || o == null || isNaN(Number(o))) ? i + 2 : Number(o);
 }
 
-function groups_(key) {
-  var saved = PropertiesService.getScriptProperties().getProperty('TEACHER_KEY');
-  if (!saved || String(key || '') !== saved) return { ok: false, error: 'unauthorized' };
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), sh = ss.getSheetByName('الطلاب');
-  if (!sh || sh.getLastRow() < 2) return { ok: true, students: [] };
-  var v = sh.getDataRange().getValues(), h = v[0].map(function (x) { return (x + '').trim(); }), c = studentCols_(h);
-  // أفضل محاولة لكل طالب في كل اختبار (نفس منطق لوحة الطالب)
-  var best = {}, rs = ss.getSheetByName(RESULTS_SHEET);
-  if (rs && rs.getLastRow() > 1) {
-    var rv = rs.getRange(2, 1, rs.getLastRow() - 1, 11).getValues();
-    for (var i = 0; i < rv.length; i++) {
-      var k = key_(rv[i][2]), ex = normExam_(rv[i][4]), pct = Number(rv[i][8]);
-      if (!k || !ex) continue;
-      best[k] = best[k] || {};
-      var cur = best[k][ex];
-      if (!cur || pct > cur.percent) best[k][ex] = { percent: pct, score: Number(rv[i][6]), total: Number(rv[i][7]) };
+function waLink_(phone, name, approved) {                // رابط واتساب جاهز بالتهنئة — يُرسَل للمعلم فقط بعد التحقق من كلمة السر
+  var ph = digits_(phone); if (!ph) return '';
+  if (ph.length === 8) ph = '974' + ph;
+  var msg = approved
+    ? 'تحياتي يا د/ ' + name + '! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐ — أ. عزت نجم الأحياء'
+    : 'تحياتي يا د/ ' + name + '! وصلتني رسمتك في معرض «إبداعي مع النجم» وسأراجعها قريبًا ⭐ — أ. عزت نجم الأحياء';
+  return 'https://wa.me/' + ph + '?text=' + encodeURIComponent(msg);
+}
+function unitOf_(r) {
+  var u = r[12];
+  return (u === '' || u == null) ? '' : String(u);
+}
+
+// عرض عام: الرسومات المعتمدة فقط، بلا أي رقم هاتف وبلا تحقق
+function listPublic_() {
+  var sh = sheet_(), n = sh.getLastRow(), items = [];
+  if (n >= 2) {
+    var v = sh.getRange(2, 1, n - 1, 13).getValues();
+    for (var i = 0; i < v.length; i++) {
+      var r = v[i], id = String(r[9] || '');
+      if (!id || !isTrue_(r[0])) continue;
+      var title = String(r[2] || '').trim() || String(r[6] || '').trim();
+      items.push({ id: id, title: title || 'رسمة', concept: String(r[3] || '').trim(), name: String(r[5] || '').trim(),
+        weekly: isTrue_(r[1]), ts: String(r[7] || ''), ord: ordOf_(r, i), unit: unitOf_(r) });
     }
   }
-  var out = [], seen = {};
-  for (var r = 1; r < v.length; r++) {
-    var row = v[r];
-    var st = c.status > -1 ? String(row[c.status] == null ? '' : row[c.status]).trim() : '';
-    if (st !== '2') continue; // المشتركون فقط
-    var pk = c.phone > -1 ? key_(row[c.phone]) : '';
-    if (!pk || seen[pk]) continue; seen[pk] = 1;
-    var s0 = 0, t0 = 0, n = 0, b = best[pk] || {};
-    for (var e in b) { s0 += b[e].score; t0 += b[e].total; n++; }
-    out.push({
-      name: c.name > -1 ? String(row[c.name] || '').trim() : '',
-      group: c.group > -1 ? String(row[c.group] || '').trim() : '',
-      overall: t0 ? Math.round(s0 / t0 * 10000) / 100 : null,
-      taken: n
-    });
-  }
-  return { ok: true, students: out };
-}
-
-// ---------- تسجيل الدخول: يتحقق من الرقمين والحالة ويرجع الاسم فقط ----------
-function login_(phone, parent) {
-  var pk = key_(phone), qk = key_(parent);
-  var ld = { phone: digits_(phone), parent: digits_(parent) };
-  if (!pk || !qk) { logReq_('دخول', ld, 'رُفض: رقم غير صحيح'); return { ok: false, error: 'not_found' }; }
-  var me = students_().filter(function (s) { return s.phone === pk && s.parent === qk; })[0];
-  if (!me) { logReq_('دخول', ld, 'غير مسجل'); return { ok: false, error: 'not_found' }; }
-  if (!me.active) { logReq_('دخول', ld, 'قيد المراجعة (الحالة ليست 2)'); return { ok: false, error: 'pending' }; }
-  return { ok: true, name: me.name };
-}
-
-// ---------- التسجيل الذاتي: صف جديد أصفر في شيت "الطلاب" بدون حالة ----------
-function ensureCol_(sh, names, create) {
-  var lc = Math.max(sh.getLastColumn(), 1);
-  var h = sh.getRange(1, 1, 1, lc).getValues()[0].map(function (x) { return (x + '').trim(); });
-  for (var i = 0; i < names.length; i++) { var ix = h.indexOf(names[i]); if (ix > -1) return ix + 1; }
-  if (!create) return 0;
-  sh.getRange(1, lc + 1).setValue(create);
-  return lc + 1;
-}
-
-function register_(d) {
-  var name = String(d.name || '').trim(), area = String(d.area || '').trim();
-  var phone = digits_(d.phone), parent = digits_(d.parent);
-  if (/^\d{8}$/.test(phone)) phone = '974' + phone;
-  if (/^\d{8}$/.test(parent)) parent = '974' + parent;
-  function okPhone(p) { return p.indexOf('974') === 0 ? /^974\d{8}$/.test(p) : /^\d{8,15}$/.test(p); }
-  var logd = { name: name, phone: phone, parent: parent };
-  if (name.length < 3 || name.length > 80 || area.length < 2 || area.length > 80 || !okPhone(phone) || !okPhone(parent)) {
-    logReq_('تسجيل', logd, 'رُفض: بيانات غير صحيحة');
-    return { ok: false, error: 'bad data' };
-  }
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('الطلاب');
-  if (!sh) { logReq_('تسجيل', logd, 'خطأ: شيت الطلاب غير موجود'); return { ok: false, error: 'no sheet' }; }
-  var lock = LockService.getScriptLock();
-  lock.waitLock(15000);
-  try {
-    var cName = ensureCol_(sh, ['اسم الطالب', 'الاسم', 'name'], 'اسم الطالب');
-    var cPhone = ensureCol_(sh, ['هاتف الطالب', 'phone', 'الهاتف'], 'هاتف الطالب');
-    var cParent = ensureCol_(sh, ['هاتف ولي الأمر', 'parent'], 'هاتف ولي الأمر');
-    var cArea = ensureCol_(sh, ['مكان السكن', 'منطقة السكن', 'المنطقة'], 'مكان السكن');
-    var cStatus = ensureCol_(sh, ['الحالة', 'status'], 'الحالة');
-    var cDate = ensureCol_(sh, ['تاريخ التسجيل'], 'تاريخ التسجيل');
-    var n = sh.getLastRow();
-    if (n > 1) {
-      var ph = sh.getRange(2, cPhone, n - 1, 1).getValues();
-      for (var i = 0; i < ph.length; i++) {
-        if (key_(ph[i][0]) === key_(phone)) {
-          // الرقم موجود: لا نضيف صفًا جديدًا، لكن نترك أثرًا واضحًا
-          var r0 = i + 2;
-          var samePar = key_(sh.getRange(r0, cParent).getValue()) === key_(parent);
-          var st = String(sh.getRange(r0, cStatus).getValue()).trim();
-          var cNote = ensureCol_(sh, ['ملاحظات'], 'ملاحظات');
-          var cell = sh.getRange(r0, cNote), old = String(cell.getValue() || '');
-          cell.setNumberFormat('@');
-          cell.setValue((old ? old + ' | ' : '') + 'طلب تسجيل مكرر ' + stamp_());
-          logReq_('تسجيل', logd, 'مكرر — الرقم موجود في الصف ' + r0 + (st === '2' ? ' (مفعّل)' : ' (غير مفعّل)'));
-          return { ok: false, error: samePar ? (st === '2' ? 'active' : 'pending') : 'exists' };
-        }
-      }
-    }
-    var row = n + 1, lc = sh.getLastColumn(), rng = sh.getRange(row, 1, 1, lc);
-    rng.setNumberFormat('@');
-    sh.getRange(row, cName).setValue(name);
-    sh.getRange(row, cPhone).setValue(phone);
-    sh.getRange(row, cParent).setValue(parent);
-    sh.getRange(row, cArea).setValue(area);
-    sh.getRange(row, cDate).setValue(stamp_());
-    rng.setBackground('#fff2cc');
-    logReq_('تسجيل', logd, 'تمت الإضافة — الصف ' + row);
-    return { ok: true };
-  } finally { lock.releaseLock(); }
-}
-
-// عند كتابتك 2 في عمود "الحالة" يزول اللون الأصفر تلقائيًا + فحص تكرار هاتف الطالب
-function onEdit(e) {
-  try {
-    var sh = e.range.getSheet();
-    if (sh.getName() === 'الطلاب' && e.range.getRow() >= 2) {
-      var c = ensureCol_(sh, ['الحالة', 'status'], '');
-      if (c && e.range.getColumn() === c && String(e.value).trim() === '2') sh.getRange(e.range.getRow(), 1, 1, sh.getLastColumn()).setBackground(null);
-    }
-  } catch (err) {}
-  try { dupCheckOnEdit_(e); } catch (err2) {}
-  try { reminderEdit_(e); } catch (err3) {}
-}
-
-// ---------- منع تكرار هاتف الطالب في شيت "الطلاب" ----------
-function phoneCol_(sh) { return ensureCol_(sh, ['هاتف الطالب', 'phone', 'الهاتف'], ''); }
-
-// يلوّن الأرقام المكررة بالأحمر ويزيل اللون عن غير المكررة؛ يرجع صفوف المكرر
-function markDuplicates_(sh) {
-  var cPhone = phoneCol_(sh); if (!cPhone) return [];
-  var n = sh.getLastRow(); if (n < 2) return [];
-  var rng = sh.getRange(2, cPhone, n - 1, 1), vals = rng.getValues(), bgs = rng.getBackgrounds();
-  var first = sh.getRange(2, 1, n - 1, 1).getBackgrounds();
-  var count = {};
-  vals.forEach(function (v) { var k = key_(v[0]); if (k) count[k] = (count[k] || 0) + 1; });
-  var dupRows = [], changed = false;
-  for (var i = 0; i < vals.length; i++) {
-    var k = key_(vals[i][0]);
-    if (k && count[k] > 1) {
-      dupRows.push(i + 2);
-      if (bgs[i][0] !== DUP_COLOR) { bgs[i][0] = DUP_COLOR; changed = true; }
-    } else if (bgs[i][0] === DUP_COLOR) {
-      bgs[i][0] = (first[i][0] && first[i][0] !== DUP_COLOR) ? first[i][0] : '#ffffff'; changed = true;
-    }
-  }
-  if (changed) rng.setBackgrounds(bgs);
-  return dupRows;
-}
-
-// يحدّد أماكن الأعمدة المعروفة في شيت الطلاب من صف العناوين h (يرجع -1 لغير الموجود)
-function studentCols_(h) {
-  function col(names) { for (var i = 0; i < names.length; i++) { var ix = h.indexOf(names[i]); if (ix > -1) return ix; } return -1; }
-  var c = {
-    name: col(['اسم الطالب', 'الاسم', 'name']), phone: col(['هاتف الطالب', 'phone', 'الهاتف']), parent: col(['هاتف ولي الأمر', 'parent']),
-    area: col(['مكان السكن', 'منطقة السكن', 'المنطقة']), status: col(['الحالة', 'status']), date: col(['تاريخ التسجيل']), note: col(['ملاحظات']),
-    group: col(['المجموعة', 'اسم المجموعة', 'المجموعه', 'group'])
-  };
-  // عمود المجموعة: بالاسم، وإلا العمود C بشرط ألا يكون عنوانه حقلًا معروفًا آخر
-  if (c.group < 0 && h.length >= 3 && ['اسم الطالب', 'الاسم', 'name', 'هاتف الطالب', 'phone', 'الهاتف', 'هاتف ولي الأمر', 'parent', 'الحالة', 'status', 'تاريخ التسجيل', 'ملاحظات', 'مكان السكن', 'منطقة السكن', 'المنطقة', ''].indexOf(h[2]) === -1) c.group = 2;
-  return c;
-}
-
-// يقرأ شيت "الطلاب" ويرجع مجموعات الأرقام المكررة (كل مجموعة = صفوف بنفس هاتف الطالب بعد توحيد الصيغة)
-// كل صف يحمل vals = كل أعمدة الصف كما هي. والمصفوفة المرجعة عليها: headers, cols, groupLabel
-function dupGroups_() {
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('الطلاب');
-  if (!sh || sh.getLastRow() < 2) return [];
-  var v = sh.getDataRange().getValues(), h = v[0].map(function (x) { return (x + '').trim(); });
-  var cols = studentCols_(h);
-  if (cols.phone < 0) return [];
-  function s(i, c) { return c > -1 && v[i][c] != null ? String(v[i][c]).trim() : ''; }
-  var by = {};
-  for (var i = 1; i < v.length; i++) {
-    var k = key_(v[i][cols.phone]); if (!k) continue;
-    (by[k] = by[k] || []).push({ row: i + 1, vals: v[i].slice(), name: s(i, cols.name), phone: s(i, cols.phone), parent: s(i, cols.parent), area: s(i, cols.area),
-      status: s(i, cols.status), date: s(i, cols.date), note: s(i, cols.note), group: s(i, cols.group) });
-  }
-  var out = [];
-  for (var k2 in by) if (by[k2].length > 1) out.push(by[k2]);
-  out.sort(function (a, b) { return a[0].row - b[0].row; });
-  out.headers = h; out.cols = cols;
-  out.groupLabel = cols.group > -1 ? h[cols.group] : '';
-  return out;
-}
-
-// تخطيط تبويب "أرقام متكررة": A ✔ | B مقترح | C الصف | D مفتاح (مخفي) | E اكتمال | F… كل أعمدة شيت الطلاب | ثم "نتائج مسجلة"
-var DUP_FIRST = 5;   // فهرس (من 0) أول عمود من أعمدة الطلاب
-
-// يقرأ التبويب ويرجع المجموعات حسب مفتاح الرقم: [{key, m, rows:[{r, vals, checked}]}]
-function parseDupTab_(tab) {
-  var v = tab.getDataRange().getValues();
-  if (v.length < 3) return [];
-  var resIdx = v[1].indexOf('نتائج مسجلة');
-  if (resIdx < DUP_FIRST) return [];
-  var m = resIdx - DUP_FIRST, by = {}, order = [];
-  for (var i = 2; i < v.length; i++) {
-    var key = String(v[i][3] == null ? '' : v[i][3]).trim(), rn = v[i][2];
-    if (!key || !/^\d+$/.test(String(rn).trim())) continue;
-    if (!by[key]) { by[key] = { key: key, m: m, rows: [] }; order.push(key); }
-    by[key].rows.push({ r: Number(rn), vals: v[i].slice(DUP_FIRST, DUP_FIRST + m), checked: v[i][0] === true || String(v[i][0]).toUpperCase() === 'TRUE' });
-  }
-  return order.map(function (k) { return by[k]; });
-}
-
-// يزيل تجميع الصفوف السابق من التبويب قبل إعادة بنائه (clear() لا يزيله)
-function clearGroups_(sh, upTo) {
-  try {
-    var start = 0;
-    for (var r = 1; r <= upTo + 1; r++) {
-      var d = r <= upTo ? sh.getRowGroupDepth(r) : 0;
-      if (d > 0 && !start) start = r;
-      if (d === 0 && start) { sh.getRange(start, 1, r - start, 1).shiftRowGroupDepth(-1); start = 0; }
-    }
-  } catch (e) {}
-}
-
-function isEmptyCell_(x) { return x === '' || x == null || String(x).trim() === ''; }
-
-// يبني/يحدّث تبويب "أرقام متكررة": كل رقم وتحته مباشرة صفوفه بكل تفاصيلها. لا يُنشأ إلا عند وجود تكرار، ولا يحذف أي صف
-function buildDupSheet_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), groups = dupGroups_(), gl = groups.groupLabel || 'المجموعة';
-  var oldTab = ss.getSheetByName(DUP_SHEET_OLD);          // تبويب النسخة السابقة (يُنشأ تلقائيًا) — يُستبدل بالجديد
-  if (oldTab) { try { ss.deleteSheet(oldTab); } catch (e0) {} }
-  var out = ss.getSheetByName(DUP_SHEET);
-  if (!groups.length && !out) return 0;
-  var keep = {};                                           // نحافظ على علامات ✔ التي وضعتها عند إعادة البناء
-  if (out) { try { parseDupTab_(out).forEach(function (g) { g.rows.forEach(function (x) { if (x.checked) keep[g.key + '|' + x.r] = true; }); }); } catch (e1) {} }
-  if (!out) out = ss.insertSheet(DUP_SHEET);
-  clearGroups_(out, out.getLastRow());
-  out.clear();
-  if (!groups.length) { out.getRange(1, 1).setValue('✅ لا توجد أرقام مكررة (آخر فحص ' + stamp_() + ')'); return 0; }
-  var h = groups.headers, cols = groups.cols, m = h.length, N = DUP_FIRST + m + 1;
-  function blank() { var a = []; for (var q = 0; q < N; q++) a.push(''); return a; }
-  var counts = {}, rs = ss.getSheetByName(RESULTS_SHEET);
-  if (rs && rs.getLastRow() > 1) rs.getRange(2, 3, rs.getLastRow() - 1, 1).getValues().forEach(function (r) { var k = key_(r[0]); if (k) counts[k] = (counts[k] || 0) + 1; });
-  var total = m - (cols.note > -1 ? 1 : 0);                // الخانات التي تُحسب في الاكتمال (بدون عمود الملاحظات)
-  function filled(x) { var n = 0; for (var j = 0; j < m; j++) if (j !== cols.note && !isEmptyCell_(x.vals[j])) n++; return n; }
-  var rows = [], kinds = [], spans = [], colors = [], curStart = 0;
-  var t = blank(); t[0] = '① ضع ✔ أمام الصف الذي تريد بقاءه في كل رقم   ② من القائمة 📊 نجم اختر «حذف المكرر (احتفظ بالمُحدّد ✔)»   ③ يُحذف الباقي بعد تأكيدك، وتُحفظ نسخة منه في تبويب «' + DEL_SHEET + '»   (⭐ = المقترح: الأكمل معلومات، ثم المفعّل، ثم الأقدم — والخانات الفارغة بلون وردي)';
-  rows.push(t); kinds.push('title'); colors.push(null);
-  var hd = ['✔ احتفظ', 'مقترح', 'الصف', 'مفتاح', 'اكتمال'];
-  for (var j0 = 0; j0 < m; j0++) hd.push(h[j0] || ('عمود ' + (j0 + 1)));
-  hd.push('نتائج مسجلة');
-  rows.push(hd); kinds.push('head'); colors.push(null);
-  groups.forEach(function (g) {
-    var key = key_(g[0].phone), best = g[0];
-    g.forEach(function (x) {
-      var fx = filled(x), fb = filled(best);
-      if (fx > fb || (fx === fb && x.status === '2' && best.status !== '2')) best = x;
-    });
-    var gset = {}; g.forEach(function (x) { if (x.group) gset[x.group] = 1; });
-    var diffGroups = Object.keys(gset).length > 1;
-    var b = blank(); b[DUP_FIRST - 1 + 0] = '📞 ' + g[0].phone + '   —   ' + g.length + ' صفوف متشابهة' + (diffGroups ? '   —   ⚠️ في مجموعات مختلفة' : '');
-    rows.push(b); kinds.push('block'); colors.push(null);
-    curStart = rows.length + 1;                       // أول صف بيانات تحت عنوان هذا الرقم (رقم الصف في الشيت)
-    g.forEach(function (x) {
-      var fx = filled(x);
-      var r = [!!keep[key + '|' + x.row], x === best ? '⭐' : '', x.row, key, fx + ' من ' + total];
-      var rc = ['#fff2cc', '#fff2cc', '#fff2cc', '#fff2cc', '#fff2cc'];
-      for (var j = 0; j < m; j++) { r.push(x.vals[j] == null ? '' : x.vals[j]); rc.push(j !== cols.note && isEmptyCell_(x.vals[j]) ? '#f4cccc' : '#fff2cc'); }
-      r.push(counts[key_(x.phone)] || 0); rc.push('#fff2cc');
-      rows.push(r); kinds.push('row'); colors.push(rc);
-    });
-    spans.push([curStart, g.length]);
-    rows.push(blank()); kinds.push('gap'); colors.push(null);
-  });
-  // تنسيق نصي لأعمدة الهاتف والمفتاح قبل كتابة القيم (حتى لا تضيع الأصفار/الصيغة)
-  out.getRange(1, 4, rows.length, 1).setNumberFormat('@');
-  for (var jp = 0; jp < m; jp++) if (/هاتف|phone/i.test(String(h[jp]))) out.getRange(1, DUP_FIRST + jp + 1, rows.length, 1).setNumberFormat('@');
-  out.getRange(1, 1, rows.length, N).setValues(rows);
-  out.getRange(1, 1, 1, N).setFontWeight('bold');
-  out.getRange(2, 1, 1, N).setFontWeight('bold');
-  for (var i = 0; i < kinds.length; i++) {
-    var rr = i + 1;
-    if (kinds[i] === 'head') out.getRange(rr, 1, 1, N).setBackground('#cfe2f3');
-    else if (kinds[i] === 'block') { out.getRange(rr, 1, 1, N).setBackground('#f5c542'); out.getRange(rr, 1, 1, N).setFontWeight('bold'); }
-    else if (kinds[i] === 'row') { out.getRange(rr, 1, 1, N).setBackgrounds([colors[i]]); out.getRange(rr, 1).insertCheckboxes(); }
-  }
-  try { out.hideColumns(4); } catch (e2) {}
-  try { // تجميع صفوف كل رقم: [−]/[+] بجانب عنوانه (العنوان فوق الصفوف)
-    spans.forEach(function (s) { out.getRange(s[0], 1, s[1], 1).shiftRowGroupDepth(1); });
-    out.setRowGroupControlPosition(SpreadsheetApp.GroupControlTogglePosition.BEFORE);
-  } catch (e3) {}
-  out.setFrozenRows(2);
-  return groups.length;
-}
-
-// من القائمة: يحذف من شيت "الطلاب" كل الصفوف غير المعلَّمة ✔ في تبويب "أرقام متكررة" (بعد تأكيدك + نسخة احتياطية)
-function applyDuplicateChoices() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), ui = SpreadsheetApp.getUi();
-  var tab = ss.getSheetByName(DUP_SHEET), st = ss.getSheetByName('الطلاب');
-  if (!tab || !st) { ui.alert('لا يوجد تبويب "' + DUP_SHEET + '" الآن (أي لا توجد أرقام مكررة أو لم يُفحص بعد). افتح 📊 نجم ← فحص الأرقام المكررة أولًا.'); return; }
-  var cPhone = phoneCol_(st);
-  if (!cPhone) { ui.alert('لم أجد عمود هاتف الطالب في شيت الطلاب'); return; }
-  var hdr = st.getRange(1, 1, 1, st.getLastColumn()).getValues()[0].map(function (x) { return (x + '').trim(); });
-  var cols = studentCols_(hdr);
-  var groups = parseDupTab_(tab), plan = [], none = 0, multi = 0, changed = 0, kept = 0;
-  groups.forEach(function (g) {
-    var ch = g.rows.filter(function (x) { return x.checked; });
-    if (ch.length === 0) { none++; return; }
-    if (ch.length > 1) { multi++; return; }
-    var ok = g.rows.every(function (x) {   // تأكد أن الصف في الشيت ما زال هو نفسه تمامًا كما يظهر في التبويب
-      var cur = st.getRange(x.r, 1, 1, Math.max(g.m, 1)).getValues()[0];
-      if (key_(cur[cols.phone]) !== g.key) return false;
-      for (var j = 0; j < g.m; j++) if (String(cur[j] == null ? '' : cur[j]).trim() !== String(x.vals[j] == null ? '' : x.vals[j]).trim()) return false;
-      return true;
-    });
-    if (!ok) { changed++; return; }
-    kept++;
-    g.rows.forEach(function (x) {
-      if (!x.checked) plan.push({ r: x.r, name: cols.name > -1 ? String(x.vals[cols.name] || '').trim() : '', group: cols.group > -1 ? String(x.vals[cols.group] || '').trim() : '', key: g.key });
-    });
-  });
-  var notes = (none ? '\n• ' + none + ' رقم لم تحدد له صفًا (تُرك كما هو).' : '') + (multi ? '\n• ' + multi + ' رقم حددت فيه أكثر من صف (تُرك كما هو).' : '') + (changed ? '\n• ' + changed + ' رقم تغيّرت بياناته بعد بناء التبويب (تُرك — حدّث التبويب بالفحص ثم أعد المحاولة).' : '');
-  if (!plan.length) { ui.alert('لا يوجد ما يُحذف.' + notes); return; }
-  var lines = plan.slice(0, 15).map(function (p) { return '• الصف ' + p.r + ' — ' + (p.name || 'بلا اسم') + (p.group ? ' — ' + p.group : ''); }).join('\n') + (plan.length > 15 ? '\n… و' + (plan.length - 15) + ' آخرين' : '');
-  var resp = ui.alert('تأكيد الحذف', 'سيُحذف ' + plan.length + ' صف من شيت «الطلاب»، ويبقى صف واحد لكل رقم (' + kept + ' رقم):\n' + lines + notes + '\n\nتُحفظ نسخة من المحذوف في تبويب «' + DEL_SHEET + '». هل تريد المتابعة؟', ui.ButtonSet.YES_NO);
-  if (resp !== ui.Button.YES) return;
-  var lock = LockService.getScriptLock();
-  lock.waitLock(15000);
-  try {
-    var lc = st.getLastColumn(), hdr2 = st.getRange(1, 1, 1, lc).getValues()[0];
-    plan.sort(function (a, b) { return b.r - a.r; });         // من الأسفل للأعلى حتى لا تتحرك أرقام الصفوف
-    var saved = plan.map(function (p) { return [p.r].concat(st.getRange(p.r, 1, 1, lc).getValues()[0]); });
-    var bk = ss.getSheetByName(DEL_SHEET) || ss.insertSheet(DEL_SHEET);
-    bk.appendRow(['— حذف بتاريخ ' + stamp_() + ' — الأعمدة التالية: الصف الأصلي ثم أعمدة شيت الطلاب —'].concat(hdr2));
-    saved.forEach(function (row) { bk.appendRow(['محذوف'].concat(row)); });
-    plan.forEach(function (p) { st.deleteRow(p.r); });
-  } finally { lock.releaseLock(); }
-  markDuplicates_(st);
-  buildDupSheet_();
-  ss.toast('تم حذف ' + plan.length + ' صف والاحتفاظ بصف واحد لكل رقم (' + kept + '). نسخة المحذوف في تبويب «' + DEL_SHEET + '».', 'نجم', 20);
-}
-
-function dupCheckOnEdit_(e) {
-  var sh = e.range.getSheet();
-  if (sh.getName() !== 'الطلاب' || e.range.getRow() < 2) return;
-  var cPhone = phoneCol_(sh); if (!cPhone) return;
-  if (cPhone < e.range.getColumn() || cPhone > e.range.getLastColumn()) return;
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var single = e.range.getNumRows() === 1 && e.range.getNumColumns() === 1;
-  var r = e.range.getRow(), v = e.value;
-  var dups = markDuplicates_(sh);                 // يلوّن كل الصفوف المتشابهة بالأحمر (ويُزيل اللون عن غير المكرر)
-  var n = buildDupSheet_();                        // يحدّث تبويب "الأرقام المكررة"
-  if (!dups.length) return;
-  if (single && dups.indexOf(r) > -1 && String(v == null ? '' : v).trim() !== '') {
-    // إدخال يدوي لرقم موجود: لا نحذف شيئًا — نخبرك بالصفوف المتشابهة لتقرر
-    var k = key_(v), same = [];
-    dupGroups_().forEach(function (g) { if (key_(g[0].phone) === k) same = g; });
-    var lines = same.map(function (x) { return '• الصف ' + x.row + ' — ' + (x.name || 'بلا اسم') + ' — ' + (x.status === '2' ? 'مفعّل' : 'غير مفعّل'); }).join('\n');
-    var msg = '⚠️ رقم الهاتف (' + String(v).trim() + ') مكرر في الصفوف:\n' + lines + '\n\nلم أحذف شيئًا. راجع الصفوف وقرّر أيها تحتفظ به (التفاصيل في تبويب "' + DUP_SHEET + '").';
-    try { SpreadsheetApp.getUi().alert('رقم مكرر', msg, SpreadsheetApp.getUi().ButtonSet.OK); }
-    catch (x) { ss.toast(msg, 'نجم — رقم مكرر', 30); }
-  } else {
-    ss.toast('⚠️ يوجد ' + n + ' رقم/أرقام مكررة (الصفوف: ' + dups.join('، ') + ') — ملوّنة بالأحمر. التفاصيل في تبويب "' + DUP_SHEET + '".', 'نجم — تنبيه', 30);
-  }
-}
-
-// من القائمة: فحص يدوي — يلوّن، ويحدّث تبويب "الأرقام المكررة"، ويفتحه
-function checkDuplicates() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), sh = ss.getSheetByName('الطلاب');
-  if (!sh) { SpreadsheetApp.getUi().alert('لا يوجد شيت اسمه الطلاب'); return; }
-  markDuplicates_(sh);
-  var n = buildDupSheet_();
-  if (n) {
-    ss.setActiveSheet(ss.getSheetByName(DUP_SHEET));
-    SpreadsheetApp.getUi().alert('⚠️ يوجد ' + n + ' رقم/أرقام مكررة.\nفي تبويب "' + DUP_SHEET + '": كل رقم وتحته صفوفه. ضع ✔ أمام الصف الذي تريد بقاءه، ثم من القائمة 📊 نجم اختر «حذف المكرر (احتفظ بالمُحدّد ✔)».');
-  } else {
-    SpreadsheetApp.getUi().alert('✅ لا توجد أرقام مكررة');
-  }
-}
-
-// ================== تذكير الأسبوع للمشتركين ==================
-function today_() { return Utilities.formatDate(new Date(), 'Asia/Qatar', 'yyyy-MM-dd'); }
-function dstr_(v) { return v instanceof Date ? Utilities.formatDate(v, 'Asia/Qatar', 'yyyy-MM-dd') : String(v == null ? '' : v).trim().slice(0, 10); }
-function daysBetween_(a, b) {
-  var pa = String(a).split('-'), pb = String(b).split('-');
-  return Math.round((Date.UTC(+pb[0], +pb[1] - 1, +pb[2]) - Date.UTC(+pa[0], +pa[1] - 1, +pa[2])) / 86400000);
-}
-// مفتاح الملف: الرابط بدون ?... و #... وبتوحيد الاسم القديم/الجديد
-function itemKey_(link) { return String(link == null ? '' : link).trim().toLowerCase().split('#')[0].split('?')[0].replace(/_p1_(p[23])_/, '_$1_'); }
-function waPhone_(k) { k = digits_(k); return k.length === 8 ? '974' + k : k; }
-
-// الملفات الفعّالة الظاهرة للمشتركين: ظهور 1 أو 2 + رابط فعلي + رقم وحدة (كما يفعل الموقع)
-function contentRows_() {
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('المحتوى');
-  if (!sh || sh.getLastRow() < 2) return [];
-  var v = sh.getDataRange().getValues(), h = v[0].map(function (x) { return (x + '').trim(); });
-  function col(names) { for (var i = 0; i < names.length; i++) { var ix = h.indexOf(names[i]); if (ix > -1) return ix; } return -1; }
-  var cLevel = col(['ظهور', 'level']), cLink = col(['الرابط', 'link']), cTitle = col(['العنوان', 'title']), cUnit = col(['الوحدة', 'unit']);
-  if (cLink < 0 || cTitle < 0) return [];
-  var out = [], seen = {};
-  for (var i = 1; i < v.length; i++) {
-    var raw = cLevel > -1 ? String(v[i][cLevel] == null ? '' : v[i][cLevel]).trim() : '';
-    if (raw === '00') continue;
-    var lv = parseInt(raw, 10); if (isNaN(lv)) lv = 1;
-    if (lv !== 1 && lv !== 2) continue;
-    var title = String(v[i][cTitle] == null ? '' : v[i][cTitle]).trim(), link = String(v[i][cLink] == null ? '' : v[i][cLink]).trim();
-    if (!title || !link || link === '#') continue;
-    if (cUnit > -1 && !/\d/.test(String(v[i][cUnit] == null ? '' : v[i][cUnit]))) continue;
-    var key = itemKey_(link); if (seen[key]) continue; seen[key] = 1;
-    out.push({ title: title, link: link, key: key, level: lv });
-  }
-  return out;
-}
-
-// يسجّل أول ظهور لكل ملف جديد. أول مرة (أو إن كان السجل فارغًا): كل الملفات الموجودة تُعتبر "قديمة" ولا يُذكَّر بها
-function syncContentLog_(force) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), props = PropertiesService.getScriptProperties();
-  var last = Number(props.getProperty('lastContentSync') || 0);
-  if (!force && ss.getSheetByName(CONTENT_LOG) && Date.now() - last < 10 * 60 * 1000) return;
-  var lock = LockService.getScriptLock();
-  lock.waitLock(15000);
-  try {
-    var sh = ss.getSheetByName(CONTENT_LOG);
-    if (!sh) {
-      sh = ss.insertSheet(CONTENT_LOG);
-      sh.appendRow(['المفتاح', 'العنوان', 'أول ظهور', 'قديم (لا يُذكَّر به)']);
-      sh.getRange('A:C').setNumberFormat('@');
-      sh.setFrozenRows(1);
-    }
-    var fresh = sh.getLastRow() < 2, known = {};
-    if (!fresh) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (r) { known[String(r[0])] = 1; });
-    var add = [], t = today_();
-    contentRows_().forEach(function (r) { if (!known[r.key]) { known[r.key] = 1; add.push([r.key, r.title, t, fresh]); } });
-    if (add.length) sh.getRange(sh.getLastRow() + 1, 1, add.length, 4).setValues(add);
-    props.setProperty('lastContentSync', String(Date.now()));
-  } finally { lock.releaseLock(); }
-}
-
-function loadReminderData_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), log = {}, active = {}, opens = {}, reminded = {};
-  var sh = ss.getSheetByName(CONTENT_LOG);
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues().forEach(function (r) {
-    log[String(r[0])] = { title: String(r[1]), firstSeen: dstr_(r[2]), baseline: r[3] === true || String(r[3]).toUpperCase() === 'TRUE' };
-  });
-  contentRows_().forEach(function (r) { active[r.key] = r; });
-  var ob = ss.getSheetByName(OPENS_SHEET);
-  if (ob && ob.getLastRow() > 1) ob.getRange(2, 1, ob.getLastRow() - 1, 2).getValues().forEach(function (r) { opens[String(r[0]) + '|' + String(r[1])] = 1; });
-  var rb = ss.getSheetByName(REMINDED_SHEET);
-  if (rb && rb.getLastRow() > 1) rb.getRange(2, 1, rb.getLastRow() - 1, 1).getValues().forEach(function (r) { reminded[String(r[0])] = 1; });
-  return { log: log, active: active, opens: opens, reminded: reminded };
-}
-
-// ملفات لم يفتحها الطالب (pk = مفتاح هاتفه) مرّ عليها أسبوع أو أكثر (وليس أكثر من 45 يومًا)
-function pendingItems_(pk, d, skipReminded) {
-  var out = [], t = today_();
-  for (var key in d.active) {
-    var l = d.log[key];
-    if (!l || l.baseline || !l.firstSeen) continue;
-    var days = daysBetween_(l.firstSeen, t);
-    if (days < REMIND_DAYS || days > REMIND_WINDOW_DAYS) continue;
-    if (d.opens[pk + '|' + key]) continue;
-    if (skipReminded && d.reminded[pk + '|' + key]) continue;
-    out.push({ key: key, title: d.active[key].title, link: d.active[key].link, days: days });
-  }
-  out.sort(function (a, b) { return b.days - a.days; });
-  return out;
-}
-
-// للموقع: ما الذي لم يفتحه هذا الطالب؟ (يتحقق من الرقمين والحالة 2)
-function pending_(phone, parent) {
-  var pk = key_(phone), qk = key_(parent);
-  if (!pk || !qk) return { ok: false, error: 'bad input' };
-  var me = students_().filter(function (s) { return s.phone === pk && s.parent === qk; })[0];
-  if (!me) return { ok: false, error: 'not found' };
-  if (!me.active) return { ok: false, error: 'pending' };
-  try { syncContentLog_(false); } catch (e) {}
-  var items = pendingItems_(pk, loadReminderData_(), false).slice(0, 5).map(function (i) { return { title: i.title, link: i.link, days: i.days }; });
+  items.sort(function (a, b) { return b.ord - a.ord; });
   return { ok: true, items: items };
 }
 
-// من الموقع: الطالب فتح ملفًا (أول مرة فقط تُسجَّل)
-function open_(d) {
-  var pk = key_(d.phone), qk = key_(d.parent), link = String(d.link || '');
-  if (!pk || !qk || !link) return { ok: false, error: 'bad input' };
-  var me = students_().filter(function (s) { return s.phone === pk && s.parent === qk; })[0];
-  if (!me || !me.active) return { ok: false, error: 'not allowed' };
-  var key = itemKey_(link), valid = false;
-  contentRows_().forEach(function (r) { if (r.key === key) valid = true; });
-  if (!valid) return { ok: true };                       // ليس من محتوى الموقع: نتجاهله
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), lock = LockService.getScriptLock();
-  if (!lock.tryLock(2000)) return { ok: true }; // القفل مشغول: نتخطى تسجيل الفتح (تتبّع فقط) ولا نؤخر النتائج
+// ================== أدوات المعلم (بكلمة سر، من الخادم فقط) ==================
+function isTrue_(x) { return x === true || String(x).toUpperCase() === 'TRUE'; }
+function adminOk_(pw) {                       // حماية من التخمين: 10 محاولات خاطئة ثم إيقاف 10 دقائق
+  var c = CacheService.getScriptCache(), f = Number(c.get('adm_fail') || 0);
+  if (f >= 10) return 'locked';
+  if (String(pw || '') === TEACHER_PASS) return true;
+  c.put('adm_fail', String(f + 1), 600);
+  return 'bad_password';
+}
+function adminList_() {                       // كل الرسومات (المعتمدة والمعلّقة) — للمعلم فقط وبعد التحقق من كلمة السر، ومعها هاتف الطالب لإرسال الرسائل
+  var sh = sheet_(), n = sh.getLastRow(), items = [];
+  if (n >= 2) {
+    var v = sh.getRange(2, 1, n - 1, 13).getValues();
+    for (var i = 0; i < v.length; i++) {
+      var r = v[i], id = String(r[9] || ''); if (!id) continue;
+      items.push({ id: id, approved: isTrue_(r[0]), weekly: isTrue_(r[1]), title: String(r[2] || '').trim(), studentTitle: String(r[6] || '').trim(),
+        concept: String(r[3] || '').trim(), name: String(r[5] || '').trim(), ts: String(r[7] || ''), ord: ordOf_(r, i), unit: unitOf_(r),
+        phone: (function (p) { return p.length === 8 ? '974' + p : p; })(digits_(r[8])), wa: waLink_(r[8], String(r[5] || '').trim(), isTrue_(r[0])) });
+    }
+  }
+  items.sort(function (a, b) { return b.ord - a.ord; });
+  return { ok: true, items: items };
+}
+function findRow_(sh, id) {
+  var n = sh.getLastRow(); if (n < 2) return 0;
+  var ids = sh.getRange(2, 10, n - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id)) return i + 2;
+  return 0;
+}
+function adminUpdate_(d) {
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
-    var sh = ss.getSheetByName(OPENS_SHEET);
-    if (!sh) { sh = ss.insertSheet(OPENS_SHEET); sh.appendRow(['هاتف الطالب', 'المفتاح', 'أول فتح', 'العنوان']); sh.getRange('A:B').setNumberFormat('@'); sh.setFrozenRows(1); }
-    var n = sh.getLastRow();
-    if (n > 1) { var v = sh.getRange(2, 1, n - 1, 2).getValues(); for (var i = 0; i < v.length; i++) if (String(v[i][0]) === pk && String(v[i][1]) === key) return { ok: true }; }
-    sh.appendRow([pk, key, stamp_(), String(d.title || '').slice(0, 100)]);
+    var sh = sheet_(), row = findRow_(sh, d.id); if (!row) return { ok: false, error: 'not_found' };
+    if (d.name !== undefined) { var nm = safeText_(d.name, 40); if (nm.length < 2) return { ok: false, error: 'bad_name' }; sh.getRange(row, 6).setValue(nm); }
+    if (d.title !== undefined) sh.getRange(row, 3).setValue(safeText_(d.title, 80));
+    if (d.concept !== undefined) sh.getRange(row, 4).setValue(safeText_(d.concept, 60));
+    if (d.unit !== undefined) {
+      var un = String(d.unit).trim();
+      if (un !== '' && (!/^\d{1,2}$/.test(un) || Number(un) < 1)) return { ok: false, error: 'bad_unit' };
+      sh.getRange(row, 13).setValue(un === '' ? '' : Number(un));
+    }
+    if (d.approved !== undefined) sh.getRange(row, 1).setValue(!!d.approved);
+    if (d.weekly !== undefined) sh.getRange(row, 2).setValue(!!d.weekly);
+    var wa = waLink_(sh.getRange(row, 9).getValue(), String(sh.getRange(row, 6).getValue() || ''), isTrue_(sh.getRange(row, 1).getValue()));
+    return { ok: true, wa: wa };
+  } finally { lock.releaseLock(); }
+}
+function adminReorder_(d) {                   // ids بالترتيب المطلوب من الأعلى إلى الأسفل
+  var ids = d.ids;
+  if (!Array.isArray(ids) || !ids.length || ids.length > 2000) return { ok: false, error: 'bad_request' };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = sheet_(), n = sh.getLastRow(); if (n < 2) return { ok: true };
+    if (!String(sh.getRange(1, 12).getValue() || '').trim()) sh.getRange(1, 12).setValue('الترتيب').setFontWeight('bold').setBackground('#cfe2f3');
+    var idv = sh.getRange(2, 10, n - 1, 1).getValues(), ov = sh.getRange(2, 12, n - 1, 1).getValues(), pos = {}, N = ids.length;
+    for (var i = 0; i < N; i++) pos[String(ids[i])] = N - i;
+    for (var r = 0; r < idv.length; r++) { var k = String(idv[r][0]); if (pos[k] !== undefined) ov[r][0] = pos[k]; }
+    sh.getRange(2, 12, n - 1, 1).setValues(ov);
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function adminDelete_(d) {
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = sheet_(), row = findRow_(sh, d.id); if (!row) return { ok: false, error: 'not_found' };
+    sh.deleteRow(row);
+    try { DriveApp.getFileById(String(d.id)).setTrashed(true); } catch (e) {}
     return { ok: true };
   } finally { lock.releaseLock(); }
 }
 
-function reminderMsg_(name, items) {
-  var first = String(name || '').trim().split(/\s+/)[0] || 'طالبنا';
-  var n = items.length, titles = items.slice(0, 3).map(function (i) { return '«' + i.title + '»'; }).join('، ') + (n > 3 ? ' و' + (n - 3) + ' أخرى' : '');
-  var body = n === 1 ? 'تم إضافة ملف جديد من أسبوع لم تطلع عليه: ' + titles + '. افتح الملف وابدأ بحله.'
-                     : 'تم إضافة ' + n + ' ملفات جديدة من أسبوع لم تطلع عليها: ' + titles + '. افتح الملفات وابدأ بحلها.';
-  return 'السلام عليكم ' + first + '،\n' + body + '\n— أ. عزت نجم الأحياء ⭐';
+// ================== الإرسال ==================
+function isImage_(bytes) {
+  if (!bytes || bytes.length < 12) return null;
+  var b = bytes.map(function (x) { return x & 255; });
+  if (b[0] === 0xFF && b[1] === 0xD8) return 'image/jpeg';
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) return 'image/png';
+  if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return 'image/webp';
+  return null;
+}
+function submit_(d) {
+  var sub = subscriber_(d.phone);
+  if (!sub) return { ok: false, error: 'not_subscriber' };
+  var name = safeText_(d.name, 40), title = safeText_(d.title, 80);
+  if (name.length < 2) return { ok: false, error: 'bad_name' };
+  var unit = String(d.unit == null ? '' : d.unit).trim();
+  if (!/^\d{1,2}$/.test(unit) || Number(unit) < 1) return { ok: false, error: 'bad_unit' };
+  var b64 = String(d.image || '').replace(/^data:[^;]+;base64,/, '');
+  if (!b64) return { ok: false, error: 'bad_image' };
+  var bytes; try { bytes = Utilities.base64Decode(b64); } catch (e) { return { ok: false, error: 'bad_image' }; }
+  if (bytes.length > MAX_IMG_BYTES) return { ok: false, error: 'too_big' };
+  var mime = isImage_(bytes); if (!mime) return { ok: false, error: 'bad_image' };
+
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = sheet_(), n = sh.getLastRow();
+    if (n >= 2) {                       // حدود الاستخدام
+      var v = sh.getRange(2, 1, n - 1, 9).getValues(), today = stamp_().slice(0, 10), perDay = 0, pending = 0;
+      for (var i = 0; i < v.length; i++) {
+        if (key_(v[i][8]) !== sub.pk) continue;
+        if (String(v[i][7]).slice(0, 10) === today) perDay++;
+        if (!(v[i][0] === true || String(v[i][0]).toUpperCase() === 'TRUE')) pending++;
+      }
+      if (perDay >= MAX_PER_DAY) return { ok: false, error: 'limit_day' };
+      if (pending >= MAX_PENDING) return { ok: false, error: 'limit_pending' };
+    }
+    var ext = mime === 'image/png' ? 'png' : (mime === 'image/webp' ? 'webp' : 'jpg');
+    var folder = DriveApp.getFolderById(props_().getProperty('FOLDER_ID'));
+    var file = folder.createFile(Utilities.newBlob(bytes, mime, 'drawing_' + Date.now() + '_' + sub.pk + '.' + ext));
+    try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+    var fid = file.getId(), row = 2, ordMax = 0;
+    if (n >= 2) {                                   // الأحدث في أعلى الشيت: ندرج صفًا جديدًا تحت العناوين مباشرة
+      var ov0 = sh.getRange(2, 12, n - 1, 1).getValues();
+      for (var q0 = 0; q0 < ov0.length; q0++) { var o0 = Number(ov0[q0][0]); if (o0 > ordMax) ordMax = o0; }
+      sh.insertRowBefore(2);
+      sh.getRange(2, 1, 1, 13).clearFormat();      // الصف الجديد يرث تنسيق العناوين فنمسحه
+    }
+    var phone = (sub.pk.length === 8) ? ('974' + sub.pk) : sub.pk;
+    sh.getRange(row, 8, 1, 3).setNumberFormat('@');
+    sh.getRange(row, 1, 1, 10).setValues([[false, false, '', '', '', name, title, stamp_(), phone, fid]]);
+    sh.getRange(row, 1, 1, 2).insertCheckboxes();
+    sh.getRange(row, 5).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&J' + row + '&"&sz=w300")');
+    sh.getRange(row, 11).setFormula(waFormula_(row));
+    sh.setRowHeight(row, 100);
+    sh.getRange(row, 12).setValue(Math.max(ordMax, n) + 1);     // الأحدث في الأعلى
+    sh.getRange(row, 13).setValue(Number(unit));
+    return { ok: true };
+  } finally { lock.releaseLock(); }
 }
 
-// يبني شيت "تذكيرات الأسبوع": كل طالب عليه تذكير + نص الرسالة + زر واتساب
-function weeklyReminders_() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), d = loadReminderData_(), rows = [];
-  students_().forEach(function (s) {
-    if (!s.active) return;
-    var items = pendingItems_(s.phone, d, true);
-    if (items.length) rows.push({ s: s, items: items });
-  });
-  var sh = ss.getSheetByName(REMINDERS_SHEET);
-  if (!rows.length && !sh) return 0;
-  if (!sh) sh = ss.insertSheet(REMINDERS_SHEET);
-  sh.clear();
-  if (!rows.length) { sh.getRange(1, 1).setValue('✅ لا يوجد طلاب عليهم تذكير الآن (آخر تحديث ' + stamp_() + ')'); return 0; }
-  var out = [['✔ أُرسل', 'اسم الطالب', 'هاتف الطالب', 'هاتف ولي الأمر', 'عدد الملفات', 'الملفات', 'نص الرسالة', 'واتساب الطالب', 'واتساب ولي الأمر', 'المفاتيح']];
-  rows.forEach(function (r) {
-    var msg = reminderMsg_(r.s.name, r.items), enc = encodeURIComponent(msg);
-    var f1 = '=HYPERLINK("https://wa.me/' + waPhone_(r.s.phone) + '?text=' + enc + '","📲 أرسل للطالب")';
-    var f2 = r.s.parent ? '=HYPERLINK("https://wa.me/' + waPhone_(r.s.parent) + '?text=' + enc + '","📲 أرسل لولي الأمر")' : '';
-    out.push([false, r.s.name, waPhone_(r.s.phone), r.s.parent ? waPhone_(r.s.parent) : '', r.items.length, r.items.map(function (i) { return i.title + ' (منذ ' + i.days + ' يومًا)'; }).join(' | '), msg, f1, f2,
-      r.items.map(function (i) { return r.s.phone + '|' + i.key; }).join(';')]);
-  });
-  sh.getRange(1, 3, out.length, 2).setNumberFormat('@');
-  sh.getRange(1, 10, out.length, 1).setNumberFormat('@');
-  sh.getRange(1, 1, out.length, 10).setValues(out);
-  sh.getRange(1, 1, 1, 10).setFontWeight('bold');
-  sh.getRange(1, 1, 1, 10).setBackground('#cfe2f3');
-  for (var i = 2; i <= out.length; i++) sh.getRange(i, 1).insertCheckboxes();
-  try { sh.hideColumns(10); } catch (e) {}
-  sh.setFrozenRows(1);
-  return rows.length;
+// شغّلها مرة واحدة (Run) لترتيب الصفوف القديمة في الشيت: الأحدث في الأعلى. (اعمل نسخة احتياطية من الشيت قبلها: ملف ← إنشاء نسخة)
+function sortNewestFirst() {
+  var sh = sheet_(), n = sh.getLastRow();
+  if (n < 3) return 'لا حاجة للترتيب';
+  var oc = sh.getRange(2, 12, n - 1, 1), vals = oc.getValues();
+  for (var i = 0; i < vals.length; i++) { var o = vals[i][0]; if (o === '' || o == null || isNaN(Number(o))) vals[i][0] = i + 2; }
+  oc.setValues(vals);                                  // نثبّت ترتيب المعرض الحالي قبل نقل الصفوف فلا يتغير
+  sh.getRange(2, 1, n - 1, 13).sort({ column: 8, ascending: false });
+  var m = 'تم ترتيب ' + (n - 1) + ' صف: الأحدث في الأعلى';
+  Logger.log(m); return m;
 }
 
-// ✔ أمام الطالب = أُرسلت له الرسالة: تُحفظ مفاتيح ملفاته كي لا يُذكَّر بها مرة أخرى
-function reminderEdit_(e) {
-  var sh = e.range.getSheet();
-  if (sh.getName() !== REMINDERS_SHEET || e.range.getColumn() !== 1 || e.range.getRow() < 2) return;
-  if (String(e.value).toUpperCase() !== 'TRUE') return;
-  var r = e.range.getRow(), keys = String(sh.getRange(r, 10).getValue() || '').split(';').filter(Boolean);
-  if (!keys.length) return;
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), rb = ss.getSheetByName(REMINDED_SHEET);
-  if (!rb) { rb = ss.insertSheet(REMINDED_SHEET); rb.appendRow(['هاتف الطالب|المفتاح', 'تاريخ الإرسال']); rb.getRange('A:A').setNumberFormat('@'); rb.setFrozenRows(1); }
-  var t = stamp_();
-  keys.forEach(function (k) { rb.appendRow([k, t]); });
-  sh.getRange(r, 1, 1, 10).setBackground('#d9ead3');
+// اختياري: شغّلها (Run) ليتطابق ترتيب صفوف الشيت مع «الترتيب» (الرقم الأكبر في الأعلى). اعمل نسخة احتياطية قبلها.
+function sortGalleryByOrder() {
+  var sh = sheet_(), n = sh.getLastRow();
+  if (n < 3) return 'لا حاجة للترتيب';
+  var oc = sh.getRange(2, 12, n - 1, 1), vals = oc.getValues();
+  for (var i = 0; i < vals.length; i++) { var o = vals[i][0]; if (o === '' || o == null || isNaN(Number(o))) vals[i][0] = i + 2; }
+  oc.setValues(vals);
+  sh.getRange(2, 1, n - 1, 13).sort({ column: 12, ascending: false });
+  var m = 'تم ترتيب صفوف «المعرض» حسب عمود الترتيب';
+  Logger.log(m); return m;
+}
+function sortBoardByOrder() {
+  var sh = boardSheet_(), n = sh.getLastRow();
+  if (n < 3) return 'لا حاجة للترتيب';
+  var oc = sh.getRange(2, 5, n - 1, 1), vals = oc.getValues();
+  for (var i = 0; i < vals.length; i++) { var o = vals[i][0]; if (o === '' || o == null || isNaN(Number(o))) vals[i][0] = i + 2; }
+  oc.setValues(vals);
+  sh.getRange(2, 1, n - 1, 6).sort({ column: 5, ascending: false });
+  var m = 'تم ترتيب صفوف MY BOARD حسب عمود الترتيب';
+  Logger.log(m); return m;
 }
 
-function dailyJob() { try { syncContentLog_(true); } catch (e) {} weeklyReminders_(); }
-
-function installReminderTrigger() {
-  var ui = SpreadsheetApp.getUi();
-  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'dailyJob') ScriptApp.deleteTrigger(t); });
-  ScriptApp.newTrigger('dailyJob').timeBased().everyDays(1).atHour(9).create();
-  dailyJob();
-  ui.alert('✅ تم تفعيل تذكير الأسبوع.\nيعمل تلقائيًا كل يوم قرابة الساعة 9 صباحًا: يسجّل الملفات الجديدة، ويجهّز في تبويب "' + REMINDERS_SHEET + '" الطلاب الذين مرّ أسبوع على ملف لم يفتحوه.\nالملفات الموجودة الآن تُعتبر قديمة ولا يُذكَّر بها؛ التذكير للملفات التي تُضاف من الآن فصاعدًا.');
+// ================== رابط واتساب داخل الشيت (عمود K) ==================
+function waFormula_(r) {
+  var base = 'HYPERLINK("https://wa.me/"&I' + r + '&"?text="&ENCODEURL(';
+  var sig = ' — أ. عزت نجم الأحياء';
+  var ok = base + '"تحياتي يا د/ "&F' + r + '&"! رسمتك اتنشرت في معرض «إبداعي مع النجم» ⭐' + sig + '"),"📲 تحية")';
+  var pend = base + '"تحياتي يا د/ "&F' + r + '&"! وصلتني رسمتك في معرض «إبداعي مع النجم» وسأراجعها قريبًا ⭐' + sig + '"),"📲 رد")';
+  return '=IF(I' + r + '="","",IF(A' + r + '=TRUE,' + ok + ',' + pend + '))';
+}
+// شغّلها مرة واحدة من Apps Script (Run) لتحديث عمود الواتساب في كل الصفوف القديمة
+function refreshSheetLinks() {
+  var sh = sheet_(), n = sh.getLastRow();
+  if (n < 2) return 'لا توجد صفوف';
+  sh.getRange(1, 11).setValue('واتساب').setFontWeight('bold').setBackground('#cfe2f3');
+  var f = [];
+  for (var r = 2; r <= n; r++) f.push([waFormula_(r)]);
+  sh.getRange(2, 11, n - 1, 1).setFormulas(f);
+  var m = 'تم تحديث ' + (n - 1) + ' صف';
+  Logger.log(m); return m;
 }
 
-function refreshReminders() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  try { syncContentLog_(true); } catch (e) {}
-  var n = weeklyReminders_(), sh = ss.getSheetByName(REMINDERS_SHEET);
-  if (sh) ss.setActiveSheet(sh);
-  SpreadsheetApp.getUi().alert(n ? 'يوجد ' + n + ' طالب/طلاب عليهم تذكير. في تبويب "' + REMINDERS_SHEET + '": اضغط زر واتساب ثم ضع ✔ بعد الإرسال.' : '✅ لا يوجد طلاب عليهم تذكير الآن.');
-}
-
-// ---------- للمعلم: قائمة 📊 نجم ← تحديث إحصاء الأسئلة (شيت "إحصاء الأسئلة") ----------
-function onOpen() {
-  try { SpreadsheetApp.getUi().createMenu('📊 نجم').addItem('تحديث إحصاء الأسئلة', 'buildQuestionStats').addItem('فحص الأرقام المكررة', 'checkDuplicates').addItem('حذف المكرر (احتفظ بالمُحدّد ✔)', 'applyDuplicateChoices').addItem('تفعيل تذكير الأسبوع (يوميًا)', 'installReminderTrigger').addItem('تحديث تذكيرات الأسبوع الآن', 'refreshReminders').addItem('🔑 تعيين رمز المعلم', 'setTeacherKey').addToUi(); } catch (e) {}
-  try { // تنبيه عند فتح الملف إن وُجد تكرار
-    var gs = dupGroups_();
-    if (gs.length) SpreadsheetApp.getActiveSpreadsheet().toast('⚠️ يوجد ' + gs.length + ' رقم/أرقام مكررة في شيت الطلاب — افتح 📊 نجم ← فحص الأرقام المكررة', 'نجم — تنبيه', 20);
-  } catch (e2) {}
-}
-
-function buildQuestionStats() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet(), sh = ss.getSheetByName(RESULTS_SHEET);
-  if (!sh || sh.getLastRow() < 2) { SpreadsheetApp.getUi().alert('لا توجد نتائج بعد'); return; }
-  var v = sh.getRange(2, 1, sh.getLastRow() - 1, 11).getValues(), best = {};
-  v.forEach(function (r) { // أفضل محاولة لكل طالب في كل اختبار
-    var k = key_(r[2]) + '|' + normExam_(r[4]), pct = Number(r[8]);
-    if (!best[k] || pct > best[k].pct) best[k] = { ex: normExam_(r[4]), title: r[5], pct: pct, wrong: parseWrong_(r[10]) };
-  });
-  var ex = {};
-  for (var k in best) {
-    var b = best[k];
-    if (b.wrong === null) continue; // محاولات قديمة بلا تفاصيل
-    var e = ex[b.ex] = ex[b.ex] || { title: b.title, n: 0, qs: {} };
-    e.n++;
-    b.wrong.forEach(function (w) {
-      var o = e.qs[w.q] = e.qs[w.q] || { miss: 0, c: w.c, ans: {} };
-      o.miss++;
-      if (w.a) o.ans[w.a] = (o.ans[w.a] || 0) + 1;
-    });
+// ================== MY BOARD (رسومات المعلم، منفصلة تمامًا عن رسومات الطلاب) ==================
+// أعمدة (من 1): 1 العنوان | 2 الرسمة | 3 التاريخ | 4 رقم الملف | 5 الترتيب (الأكبر = أعلى) | 6 الوحدة
+var BOARD_TAB = 'MY BOARD';
+var BOARD_HEAD = ['العنوان', 'الرسمة', 'التاريخ', 'رقم الملف', 'الترتيب', 'الوحدة'];
+function boardSheet_() {
+  var ss = SpreadsheetApp.openById(GALLERY_SHEET_ID || props_().getProperty('SHEET_ID'));
+  var sh = ss.getSheetByName(BOARD_TAB);
+  if (!sh) {
+    sh = ss.insertSheet(BOARD_TAB);
+    sh.getRange(1, 1, 1, BOARD_HEAD.length).setValues([BOARD_HEAD]).setFontWeight('bold').setBackground('#cfe2f3');
+    sh.setFrozenRows(1);
+    try { sh.setRightToLeft(true); } catch (e) {}
   }
-  var rows = [['الاختبار', 'السؤال', 'عدد من أخطأ', 'عدد من حلّ الاختبار', 'نسبة الخطأ %', 'الإجابة الصحيحة', 'أكثر إجابة خاطئة تكرارًا']];
-  Object.keys(ex).sort().forEach(function (id) {
-    var e = ex[id];
-    Object.keys(e.qs).map(function (q) { return { q: q, o: e.qs[q] }; })
-      .sort(function (a, b) { return b.o.miss - a.o.miss; })
-      .forEach(function (x) {
-        var top = '', tc = 0;
-        for (var a in x.o.ans) if (x.o.ans[a] > tc) { tc = x.o.ans[a]; top = a; }
-        rows.push([e.title, x.q, x.o.miss, e.n, Math.round(x.o.miss / e.n * 1000) / 10, x.o.c, top]);
-      });
-  });
-  var out = ss.getSheetByName('إحصاء الأسئلة') || ss.insertSheet('إحصاء الأسئلة');
-  out.clear();
-  out.getRange(1, 1, rows.length, 7).setValues(rows);
-  out.setFrozenRows(1);
-  out.getRange(1, 1, 1, 7).setFontWeight('bold');
+  if (!String(sh.getRange(1, 5).getValue() || '').trim()) sh.getRange(1, 5).setValue('الترتيب').setFontWeight('bold').setBackground('#cfe2f3');
+  if (!String(sh.getRange(1, 6).getValue() || '').trim()) sh.getRange(1, 6).setValue('الوحدة').setFontWeight('bold').setBackground('#cfe2f3');
+  return sh;
+}
+function listBoard_() {
+  var sh = boardSheet_(), n = sh.getLastRow(), items = [];
+  if (n >= 2) {
+    var v = sh.getRange(2, 1, n - 1, 6).getValues();
+    for (var i = 0; i < v.length; i++) {
+      var r = v[i], id = String(r[3] || ''); if (!id) continue;
+      var o = Number(r[4]);
+      items.push({ id: id, title: String(r[0] || '').trim() || 'رسمة', ts: String(r[2] || ''), ord: (isNaN(o) || r[4] === '') ? i + 2 : o,
+        unit: (r[5] === '' || r[5] == null) ? '' : String(r[5]) });
+    }
+  }
+  items.sort(function (a, b) { return b.ord - a.ord; });
+  return { ok: true, items: items };
+}
+function boardAdd_(d) {
+  var title = safeText_(d.title, 80) || 'رسمة';
+  var unit = String(d.unit == null ? '' : d.unit).trim();
+  if (unit !== '' && (!/^\d{1,2}$/.test(unit) || Number(unit) < 1)) return { ok: false, error: 'bad_unit' };
+  var b64 = String(d.image || '').replace(/^data:[^;]+;base64,/, '');
+  if (!b64) return { ok: false, error: 'bad_image' };
+  var bytes; try { bytes = Utilities.base64Decode(b64); } catch (e) { return { ok: false, error: 'bad_image' }; }
+  if (bytes.length > MAX_IMG_BYTES) return { ok: false, error: 'too_big' };
+  var mime = isImage_(bytes); if (!mime) return { ok: false, error: 'bad_image' };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = boardSheet_(), n = sh.getLastRow();
+    var ext = mime === 'image/png' ? 'png' : (mime === 'image/webp' ? 'webp' : 'jpg');
+    var folder = DriveApp.getFolderById(props_().getProperty('FOLDER_ID'));
+    var file = folder.createFile(Utilities.newBlob(bytes, mime, 'board_' + Date.now() + '.' + ext));
+    try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+    var fid = file.getId(), row = 2, ordMax = 0;
+    if (n >= 2) {
+      var ov = sh.getRange(2, 5, n - 1, 1).getValues();
+      for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; }
+      sh.insertRowBefore(2);
+      sh.getRange(2, 1, 1, 6).clearFormat();
+    }
+    sh.getRange(row, 3, 1, 2).setNumberFormat('@');
+    sh.getRange(row, 1, 1, 6).setValues([[title, '', stamp_(), fid, Math.max(ordMax, n) + 1, unit === '' ? '' : Number(unit)]]);
+    sh.getRange(row, 2).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&D' + row + '&"&sz=w300")');
+    sh.setRowHeight(row, 100);
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function boardFindRow_(sh, id) {
+  var n = sh.getLastRow(); if (n < 2) return 0;
+  var ids = sh.getRange(2, 4, n - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id)) return i + 2;
+  return 0;
+}
+function boardUpdate_(d) {                    // تعديل عنوان/وحدة رسمة في MY BOARD
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = boardSheet_(), row = boardFindRow_(sh, d.id); if (!row) return { ok: false, error: 'not_found' };
+    if (d.unit !== undefined) {
+      var un = String(d.unit).trim();
+      if (un !== '' && (!/^\d{1,2}$/.test(un) || Number(un) < 1)) return { ok: false, error: 'bad_unit' };
+      sh.getRange(row, 6).setValue(un === '' ? '' : Number(un));
+    }
+    if (d.title !== undefined) sh.getRange(row, 1).setValue(safeText_(d.title, 80));
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function boardReorder_(d) {                   // ids بالترتيب المطلوب من الأعلى إلى الأسفل
+  var ids = d.ids;
+  if (!Array.isArray(ids) || !ids.length || ids.length > 2000) return { ok: false, error: 'bad_request' };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = boardSheet_(), n = sh.getLastRow(); if (n < 2) return { ok: true };
+    var idv = sh.getRange(2, 4, n - 1, 1).getValues(), ov = sh.getRange(2, 5, n - 1, 1).getValues(), pos = {}, N = ids.length;
+    for (var i = 0; i < N; i++) pos[String(ids[i])] = N - i;
+    for (var r = 0; r < idv.length; r++) { var k = String(idv[r][0]); if (pos[k] !== undefined) ov[r][0] = pos[k]; }
+    sh.getRange(2, 5, n - 1, 1).setValues(ov);
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function boardDelete_(d) {
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = boardSheet_(), n = sh.getLastRow(); if (n < 2) return { ok: false, error: 'not_found' };
+    var ids = sh.getRange(2, 4, n - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]) === String(d.id)) {
+        sh.deleteRow(i + 2);
+        try { DriveApp.getFileById(String(d.id)).setTrashed(true); } catch (e) {}
+        return { ok: true };
+      }
+    }
+    return { ok: false, error: 'not_found' };
+  } finally { lock.releaseLock(); }
+}
+
+// ================== المسارات ==================
+function doGet(e) {
+  try {
+    var p = (e && e.parameter) || {};
+    if (p.action === 'gallery_ping') return json_({ ok: true, version: VERSION });
+    if (p.action === 'gallery_public') return json_(listPublic_());
+    if (p.action === 'board_public') return json_(listBoard_());
+    if (p.action === 'gallery_list') {
+      var sub = subscriber_(p.phone);
+      if (!sub) return json_({ ok: false, error: 'not_subscriber' });
+      return json_(listFor_(sub));
+    }
+    return json_({ ok: true, service: 'najm-gallery', version: VERSION });
+  } catch (err) { return json_({ ok: false, error: String(err) }); }
+}
+function doPost(e) {
+  try {
+    var d = JSON.parse(e.postData.contents);
+    if (d.action === 'gallery_submit') return json_(submit_(d));
+    if (String(d.action || '').indexOf('admin_') === 0) {
+      var ok = adminOk_(d.pass);
+      if (ok !== true) return json_({ ok: false, error: ok === 'locked' ? 'locked' : 'bad_password' });
+      if (d.action === 'admin_list') return json_(adminList_());
+      if (d.action === 'admin_update') return json_(adminUpdate_(d));
+      if (d.action === 'admin_delete') return json_(adminDelete_(d));
+      if (d.action === 'admin_reorder') return json_(adminReorder_(d));
+      if (d.action === 'admin_board_add') return json_(boardAdd_(d));
+      if (d.action === 'admin_board_update') return json_(boardUpdate_(d));
+      if (d.action === 'admin_board_reorder') return json_(boardReorder_(d));
+      if (d.action === 'admin_board_delete') return json_(boardDelete_(d));
+    }
+    return json_({ ok: false, error: 'unknown action' });
+  } catch (err) { return json_({ ok: false, error: String(err) }); }
 }
