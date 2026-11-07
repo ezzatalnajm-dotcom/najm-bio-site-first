@@ -9,12 +9,17 @@
  *
  * التشغيل: شغّل الدالة setup مرة واحدة (Run) ثم Deploy ← New deployment ← Web app
  *          (Execute as: Me ، Who has access: Anyone).
+ *
+ * الترتيب والوحدات (من التطبيق أو من الشيت — كلاهما يعمل):
+ *  - تبويب «المعرض»: عمود L «الترتيب» وعمود M «الوحدة».
+ *  - تبويب «MY BOARD»: عمود E «الترتيب» وعمود F «الوحدة».
+ *  - الرقم الأكبر في «الترتيب» = أعلى في المعرض. عدّل الرقم في الشيت ثم حدّث الصفحة.
  */
 
 var PLATFORM_SHEET_ID = '1K8BnadP-aXYVV7MqzVj6jgO6AYt4eRK7e4UBMW1YJYc';   // شيت المنصة: قراءة فقط (للتحقق من المشترك)
 var GALLERY_SHEET_ID = '1p3KSH49AaR_YbiHsUHSXkftI-PV8F_Rmk3R-SbbgND4';   // شيت «معرض طلاب نجم الأحياء»: تُكتب فيه الرسومات في تبويب «المعرض»
 var TEACHER_PASS = 'Teach@1212';   // كلمة سر المعلم — تُفحص هنا في الخادم فقط ولا تظهر في صفحة الطلاب
-var VERSION = '2026-11-06-gallery-v12';
+var VERSION = '2026-11-06-gallery-v13';
 var TAB = 'المعرض';
 var MAX_IMG_BYTES = 2500000;     // أقصى حجم للصورة بعد الضغط
 var MAX_PER_DAY = 50;            // أقصى عدد مشاركات للطالب في اليوم
@@ -67,6 +72,7 @@ function setup() {
   }
   if (!String(sh.getRange(1, 12).getValue() || '').trim()) sh.getRange(1, 12).setValue('الترتيب').setFontWeight('bold').setBackground('#cfe2f3');
   if (!String(sh.getRange(1, 13).getValue() || '').trim()) sh.getRange(1, 13).setValue('الوحدة').setFontWeight('bold').setBackground('#cfe2f3');
+  boardSheet_();   // يجهّز تبويب MY BOARD وعمود الوحدة فيه
   // اختبار الوصول لشيت المنصة
   var plat = SpreadsheetApp.openById(PLATFORM_SHEET_ID), st = plat.getSheetByName('الطلاب');
   msg.push('✅ المجلد: ' + folder.getUrl());
@@ -306,6 +312,28 @@ function sortNewestFirst() {
   Logger.log(m); return m;
 }
 
+// اختياري: شغّلها (Run) ليتطابق ترتيب صفوف الشيت مع «الترتيب» (الرقم الأكبر في الأعلى). اعمل نسخة احتياطية قبلها.
+function sortGalleryByOrder() {
+  var sh = sheet_(), n = sh.getLastRow();
+  if (n < 3) return 'لا حاجة للترتيب';
+  var oc = sh.getRange(2, 12, n - 1, 1), vals = oc.getValues();
+  for (var i = 0; i < vals.length; i++) { var o = vals[i][0]; if (o === '' || o == null || isNaN(Number(o))) vals[i][0] = i + 2; }
+  oc.setValues(vals);
+  sh.getRange(2, 1, n - 1, 13).sort({ column: 12, ascending: false });
+  var m = 'تم ترتيب صفوف «المعرض» حسب عمود الترتيب';
+  Logger.log(m); return m;
+}
+function sortBoardByOrder() {
+  var sh = boardSheet_(), n = sh.getLastRow();
+  if (n < 3) return 'لا حاجة للترتيب';
+  var oc = sh.getRange(2, 5, n - 1, 1), vals = oc.getValues();
+  for (var i = 0; i < vals.length; i++) { var o = vals[i][0]; if (o === '' || o == null || isNaN(Number(o))) vals[i][0] = i + 2; }
+  oc.setValues(vals);
+  sh.getRange(2, 1, n - 1, 6).sort({ column: 5, ascending: false });
+  var m = 'تم ترتيب صفوف MY BOARD حسب عمود الترتيب';
+  Logger.log(m); return m;
+}
+
 // ================== رابط واتساب داخل الشيت (عمود K) ==================
 function waFormula_(r) {
   var base = 'HYPERLINK("https://wa.me/"&I' + r + '&"?text="&ENCODEURL(';
@@ -327,8 +355,9 @@ function refreshSheetLinks() {
 }
 
 // ================== MY BOARD (رسومات المعلم، منفصلة تمامًا عن رسومات الطلاب) ==================
+// أعمدة (من 1): 1 العنوان | 2 الرسمة | 3 التاريخ | 4 رقم الملف | 5 الترتيب (الأكبر = أعلى) | 6 الوحدة
 var BOARD_TAB = 'MY BOARD';
-var BOARD_HEAD = ['العنوان', 'الرسمة', 'التاريخ', 'رقم الملف', 'الترتيب'];
+var BOARD_HEAD = ['العنوان', 'الرسمة', 'التاريخ', 'رقم الملف', 'الترتيب', 'الوحدة'];
 function boardSheet_() {
   var ss = SpreadsheetApp.openById(GALLERY_SHEET_ID || props_().getProperty('SHEET_ID'));
   var sh = ss.getSheetByName(BOARD_TAB);
@@ -338,16 +367,19 @@ function boardSheet_() {
     sh.setFrozenRows(1);
     try { sh.setRightToLeft(true); } catch (e) {}
   }
+  if (!String(sh.getRange(1, 5).getValue() || '').trim()) sh.getRange(1, 5).setValue('الترتيب').setFontWeight('bold').setBackground('#cfe2f3');
+  if (!String(sh.getRange(1, 6).getValue() || '').trim()) sh.getRange(1, 6).setValue('الوحدة').setFontWeight('bold').setBackground('#cfe2f3');
   return sh;
 }
 function listBoard_() {
   var sh = boardSheet_(), n = sh.getLastRow(), items = [];
   if (n >= 2) {
-    var v = sh.getRange(2, 1, n - 1, 5).getValues();
+    var v = sh.getRange(2, 1, n - 1, 6).getValues();
     for (var i = 0; i < v.length; i++) {
       var r = v[i], id = String(r[3] || ''); if (!id) continue;
       var o = Number(r[4]);
-      items.push({ id: id, title: String(r[0] || '').trim() || 'رسمة', ts: String(r[2] || ''), ord: (isNaN(o) || r[4] === '') ? i + 2 : o });
+      items.push({ id: id, title: String(r[0] || '').trim() || 'رسمة', ts: String(r[2] || ''), ord: (isNaN(o) || r[4] === '') ? i + 2 : o,
+        unit: (r[5] === '' || r[5] == null) ? '' : String(r[5]) });
     }
   }
   items.sort(function (a, b) { return b.ord - a.ord; });
@@ -355,6 +387,8 @@ function listBoard_() {
 }
 function boardAdd_(d) {
   var title = safeText_(d.title, 80) || 'رسمة';
+  var unit = String(d.unit == null ? '' : d.unit).trim();
+  if (unit !== '' && (!/^\d{1,2}$/.test(unit) || Number(unit) < 1)) return { ok: false, error: 'bad_unit' };
   var b64 = String(d.image || '').replace(/^data:[^;]+;base64,/, '');
   if (!b64) return { ok: false, error: 'bad_image' };
   var bytes; try { bytes = Utilities.base64Decode(b64); } catch (e) { return { ok: false, error: 'bad_image' }; }
@@ -372,12 +406,44 @@ function boardAdd_(d) {
       var ov = sh.getRange(2, 5, n - 1, 1).getValues();
       for (var q = 0; q < ov.length; q++) { var o = Number(ov[q][0]); if (o > ordMax) ordMax = o; }
       sh.insertRowBefore(2);
-      sh.getRange(2, 1, 1, 5).clearFormat();
+      sh.getRange(2, 1, 1, 6).clearFormat();
     }
     sh.getRange(row, 3, 1, 2).setNumberFormat('@');
-    sh.getRange(row, 1, 1, 5).setValues([[title, '', stamp_(), fid, Math.max(ordMax, n) + 1]]);
+    sh.getRange(row, 1, 1, 6).setValues([[title, '', stamp_(), fid, Math.max(ordMax, n) + 1, unit === '' ? '' : Number(unit)]]);
     sh.getRange(row, 2).setFormula('=IMAGE("https://drive.google.com/thumbnail?id="&D' + row + '&"&sz=w300")');
     sh.setRowHeight(row, 100);
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function boardFindRow_(sh, id) {
+  var n = sh.getLastRow(); if (n < 2) return 0;
+  var ids = sh.getRange(2, 4, n - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id)) return i + 2;
+  return 0;
+}
+function boardUpdate_(d) {                    // تعديل عنوان/وحدة رسمة في MY BOARD
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = boardSheet_(), row = boardFindRow_(sh, d.id); if (!row) return { ok: false, error: 'not_found' };
+    if (d.unit !== undefined) {
+      var un = String(d.unit).trim();
+      if (un !== '' && (!/^\d{1,2}$/.test(un) || Number(un) < 1)) return { ok: false, error: 'bad_unit' };
+      sh.getRange(row, 6).setValue(un === '' ? '' : Number(un));
+    }
+    if (d.title !== undefined) sh.getRange(row, 1).setValue(safeText_(d.title, 80));
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function boardReorder_(d) {                   // ids بالترتيب المطلوب من الأعلى إلى الأسفل
+  var ids = d.ids;
+  if (!Array.isArray(ids) || !ids.length || ids.length > 2000) return { ok: false, error: 'bad_request' };
+  var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    var sh = boardSheet_(), n = sh.getLastRow(); if (n < 2) return { ok: true };
+    var idv = sh.getRange(2, 4, n - 1, 1).getValues(), ov = sh.getRange(2, 5, n - 1, 1).getValues(), pos = {}, N = ids.length;
+    for (var i = 0; i < N; i++) pos[String(ids[i])] = N - i;
+    for (var r = 0; r < idv.length; r++) { var k = String(idv[r][0]); if (pos[k] !== undefined) ov[r][0] = pos[k]; }
+    sh.getRange(2, 5, n - 1, 1).setValues(ov);
     return { ok: true };
   } finally { lock.releaseLock(); }
 }
@@ -424,6 +490,8 @@ function doPost(e) {
       if (d.action === 'admin_delete') return json_(adminDelete_(d));
       if (d.action === 'admin_reorder') return json_(adminReorder_(d));
       if (d.action === 'admin_board_add') return json_(boardAdd_(d));
+      if (d.action === 'admin_board_update') return json_(boardUpdate_(d));
+      if (d.action === 'admin_board_reorder') return json_(boardReorder_(d));
       if (d.action === 'admin_board_delete') return json_(boardDelete_(d));
     }
     return json_({ ok: false, error: 'unknown action' });
