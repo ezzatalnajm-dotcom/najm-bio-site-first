@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="app-version" content="2026-10-23-devices">
+<meta name="app-version" content="2026-11-11-best10">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <title>لوحة تقدمي — أ. عزت نجم الأحياء</title>
@@ -375,7 +375,7 @@ async function tGo(again){
     if(!d.ok||!Array.isArray(d.students)) throw new Error(d.error==='unauthorized'?'ua':'x');
     try{sessionStorage.setItem('najm_tkey',k)}catch(_){}
     TD=d.students;TT=+d.totalExams||0;
-    if(!TG||!TD.some(s=>(s.group||'بدون مجموعة')===TG)) TG='';
+    if(!TG||(TG!=='__BEST'&&!TD.some(s=>(s.group||'بدون مجموعة')===TG))) TG='';
     $('tlogin').classList.add('hide');$('login').classList.add('hide');$('tview').classList.remove('hide');tRender();
   }catch(x){
     const m=x.message==='ua'?'❌ الرمز غير صحيح':'❌ تعذر جلب البيانات (تأكد أن الخادم محدَّث لدعم المجموعات)';
@@ -385,8 +385,9 @@ async function tGo(again){
 function tRender(){
   const gs={};TD.forEach(s=>{const g=s.group||'بدون مجموعة';(gs[g]=gs[g]||[]).push(s)});
   const names=Object.keys(gs).sort((a,b)=>a.localeCompare(b,'ar'));
-  if(TG!==''&&!gs[TG]) TG='';
-  $('tchips').innerHTML='<button class="chip'+(TG===''?' on':'')+'" onclick="tPick(\'\')">الكل ('+TD.length+')</button>'+names.map(n=>'<button class="chip'+(TG===n?' on':'')+'" data-g="'+esc(n)+'" onclick="tPick(this.dataset.g)">'+esc(n)+' ('+gs[n].length+')</button>').join('');
+  if(TG!==''&&TG!=='__BEST'&&!gs[TG]) TG='';
+  $('tchips').innerHTML='<button class="chip'+(TG===''?' on':'')+'" onclick="tPick(\'\')">الكل ('+TD.length+')</button><button class="chip'+(TG==='__BEST'?' on':'')+'" onclick="tPick(\'__BEST\')">🏆 BEST 10</button>'+names.map(n=>'<button class="chip'+(TG===n?' on':'')+'" data-g="'+esc(n)+'" onclick="tPick(this.dataset.g)">'+esc(n)+' ('+gs[n].length+')</button>').join('');
+  if(TG==='__BEST'){$('tsum').textContent='';$('tcertall').innerHTML='';$('ttop').innerHTML='';$('tbands').innerHTML=bestHtml();return}
   const list=TG===''?TD:gs[TG];
   const has=list.filter(s=>s.overall!=null),no=list.filter(s=>s.overall==null);
   $('tsum').textContent=BANDS.map(b=>b[1]+': '+has.filter(s=>b[2](+s.overall)).length).join(' · ')+(no.length?' · بدون نتائج: '+no.length:'');
@@ -400,6 +401,16 @@ function tRender(){
     h+='<div class="band '+b[0]+'"><div class="bh">'+b[1]+'<span>'+L.length+'</span></div>'+(L.length?L.map(row).join(''):'<div class="st" style="color:var(--mut)">لا يوجد</div>')+'</div>'});
   if(no.length) h+='<div class="band b-no"><div class="bh">لم يبدؤوا بعد<span>'+no.length+'</span></div>'+no.map(row).join('')+'</div>';
   $('tbands').innerHTML=h;
+}
+/* BEST 10: أفضل 10 من كل المجموعات.
+   نقاط الترتيب = المتوسط المئوي + BEST_BONUS لكل اختبار محلول (تعويض لمن حلّ أكثر)، بشرط BEST_MIN اختبارات على الأقل.
+   المعروض هو المتوسط الحقيقي بدون الزيادة. التعادل: الأكثر اختبارات ثم الأعلى متوسطًا. */
+const BEST_BONUS=0.5,BEST_MIN=3;
+function bestHtml(){
+  const L=TD.filter(s=>s.overall!=null&&(s.taken||0)>=BEST_MIN).map(s=>({s,sc:+s.overall+BEST_BONUS*(s.taken||0)}))
+    .sort((a,b)=>(b.sc-a.sc)||((b.s.taken||0)-(a.s.taken||0))||(b.s.overall-a.s.overall)).slice(0,10),med=['🥇','🥈','🥉'];
+  if(!L.length) return '<div class="st" style="color:var(--mut)">لا يوجد طلاب بعد (الحد الأدنى '+BEST_MIN+' اختبارات)</div>';
+  return '<div class="top"><div class="th">🏆 BEST 10 — كل المجموعات</div>'+L.map((x,i)=>'<div class="tr"><b>'+(med[i]||(i+1))+'</b><span>'+esc(x.s.name||'—')+(x.s.group?' <small>'+esc(x.s.group)+'</small>':'')+'</span><i>'+(+x.s.overall).toFixed(1)+'%</i><small>'+(x.s.taken||0)+' اختبار</small></div>').join('')+'</div><div class="hint">الترتيب = المتوسط المئوي + '+BEST_BONUS+' نقطة لكل اختبار محلول (حد أدنى '+BEST_MIN+' اختبارات). المعروض هو المتوسط الحقيقي.</div>';
 }
 function tPick(g){TG=g;tRender()}
 async function tReset(){

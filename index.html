@@ -372,6 +372,7 @@
             border: 1px solid #c6f6d5;
         }
         .user-badge span { color: #22543d; font-weight: 600; font-size: 14px; }
+        .gallery-btn { background: #ffd966; color: #0f2b3d; border: 0; padding: 5px 14px; border-radius: 20px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 13px; text-decoration: none; display: inline-block; }
         .logout-btn { background: #e53e3e; color: white; border: none; padding: 5px 14px; border-radius: 20px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 13px; }
 
         .about-card {
@@ -1163,6 +1164,9 @@
         if (!isValidPhone(phone)) { err.textContent = "❌ هاتف الطالب غير صحيح (رقم قطري من 8 أرقام، أو غيّر المفتاح لرقم دولي)"; err.style.display = 'block'; return; }
         if (!isValidPhone(parent)) { err.textContent = "❌ هاتف ولي الأمر غير صحيح (رقم قطري من 8 أرقام، أو غيّر المفتاح لرقم دولي)"; err.style.display = 'block'; return; }
 
+        await performLogin(phone, parent, err);
+    }
+    async function performLogin(phone, parent, err) {
         err.textContent = "⏳ جاري التحقق...";
         err.style.color = "#1e5a7a";
         err.style.display = 'block';
@@ -1199,6 +1203,7 @@
         }
         updateHeaderAuth();
         closeLogin();
+        document.getElementById('regModal').classList.remove('show');
         renderSharedPanel();
         checkForNewItems();
         checkPending();
@@ -1253,6 +1258,11 @@
         try {
             const r = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'register', name, phone, parent, area }) });
             const d = await r.json();
+            if (!d.ok && d.error === 'active') {
+                btn.disabled = false; btn.textContent = 'إرسال طلب التسجيل';
+                await performLogin(phone, parent, m);
+                return;
+            }
             if (d.ok) {
                 try { localStorage.setItem('najm_reg_state', 'sent'); } catch (e) {}
                 document.getElementById('regBox').innerHTML = '<div style="text-align:center;padding:20px 8px;"><div style="font-size:48px">✅</div><h3>تم استلام طلبك</h3><p style="color:#718096;line-height:1.8">ستتم مراجعة طلبك وتفعيله قريبًا.<br>يمكنك الآن تصفح المحتوى العام.</p><button class="btn-primary" onclick="skipRegister()">متابعة التصفح</button></div>';
@@ -1510,7 +1520,10 @@
         }
         let html = `<div class="user-badge">
             <span>👤 مرحباً، ${currentUser.name}</span>
-            <button class="logout-btn" onclick="logout()">خروج</button>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <a class="gallery-btn" href="https://najm-bio-site-first.vercel.app/gallery.html" target="_blank" rel="noopener">🎨 المعرض</a>
+                <button class="logout-btn" onclick="logout()">خروج</button>
+            </div>
         </div>`;
         html += renderUnits('shared', sharedData, true, true);
         panel.innerHTML = html;
