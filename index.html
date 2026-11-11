@@ -372,7 +372,11 @@
             border: 1px solid #c6f6d5;
         }
         .user-badge span { color: #22543d; font-weight: 600; font-size: 14px; }
-        .gallery-btn { background: #ffd966; color: #0f2b3d; border: 2px solid #f0a800; padding: 9px 22px; border-radius: 24px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 17px; text-decoration: none; display: inline-block; box-shadow: 0 3px 10px rgba(240,168,0,0.45); }
+        .gallery-btn { background: #ffd966; color: #0f2b3d; border: 2px solid #f0a800; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 14px; text-decoration: none; display: inline-block; box-shadow: 0 2px 6px rgba(240,168,0,0.4); }
+        .tg-btn { color: #fff; border: 0; padding: 7px 15px; border-radius: 20px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        .tg-hw { background: #2b8cc4; }
+        .tg-vid { background: #7b4fc9; }
+        .tg-steps { margin: 0 0 14px; padding: 0 22px 0 0; color: #2d3748; font-size: 14.5px; line-height: 2; text-align: right; }
         .logout-btn { background: #e53e3e; color: white; border: none; padding: 5px 14px; border-radius: 20px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 13px; }
 
         .about-card {
@@ -674,6 +678,22 @@
         <button class="btn-secondary" onclick="openRegister()">📝 تسجيل جديد</button>
         <button class="btn-secondary" onclick="closeLogin()">إلغاء</button>
         <div class="login-error" id="loginError"></div>
+    </div>
+</div>
+
+<!-- Telegram bot modal -->
+<div class="modal-overlay" id="tgModal" onclick="if(event.target===this)closeTg()">
+    <div class="modal-box">
+        <h3 id="tgTitle">📚 الواجبات</h3>
+        <p style="text-align:center;color:#1e5a7a;font-weight:700;font-size:14px;margin:-8px 0 12px">للدخول إلى قنوات الواجبات والفيديوهات اتبع الخطوات:</p>
+        <ol class="tg-steps">
+            <li>اضغط «فتح البوت» ثم اكتب <b dir="ltr">/start</b> وانتظر دقيقة.</li>
+            <li>اضغط «شارك رقمي 📱» بالرقم المسجل لدى الأستاذ وانتظر دقيقة.</li>
+            <li>سيصلك رابطان: أحدهما للواجبات والآخر للفيديوهات.</li>
+        </ol>
+        <p style="text-align:center;color:#c05621;font-size:13px;font-weight:700;margin:0 0 14px">⚠️ الرابط يعمل لمرة واحدة فقط، فادخل به من حسابك أنت.</p>
+        <a class="btn-primary" href="https://t.me/ALNAJM_bio_bot" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">فتح البوت</a>
+        <div style="text-align:center;margin-top:10px"><button class="btn-secondary" style="width:auto;padding:8px 26px;" onclick="closeTg()">إغلاق</button></div>
     </div>
 </div>
 
@@ -1211,6 +1231,12 @@
         loadSolvedExams();
     }
 
+    function openTg(k) {
+        document.getElementById('tgTitle').textContent = k === 'vid' ? '🎬 الفيديوهات' : '📚 الواجبات';
+        document.getElementById('tgModal').classList.add('show');
+    }
+    function closeTg() { document.getElementById('tgModal').classList.remove('show'); }
+
     // ======================== التسجيل الذاتي ========================
     const REG_BOX_HTML = document.getElementById('regBox').innerHTML;
     function openRegister(fromShared) {
@@ -1521,8 +1547,10 @@
         }
         let html = `<div class="user-badge">
             <span>👤 مرحباً، ${currentUser.name}</span>
-            <div style="display:flex;gap:8px;align-items:center;">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <a class="gallery-btn" href="https://najm-bio-site-first.vercel.app/gallery.html" target="_blank" rel="noopener">🎨 المعرض</a>
+                <button class="tg-btn tg-hw" onclick="openTg('hw')">📚 الواجبات</button>
+                <button class="tg-btn tg-vid" onclick="openTg('vid')">🎬 الفيديوهات</button>
                 <button class="logout-btn" onclick="logout()">خروج</button>
             </div>
         </div>`;
