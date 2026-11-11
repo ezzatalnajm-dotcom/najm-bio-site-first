@@ -984,7 +984,8 @@
                 REVISION_FIRST = revFirst; REVISION_SECOND = revSecond;
             } catch (e) { /* تجاهل وارجع للاحتياطي */ }
         }
-        renderPublicPanel();
+        // المشترك المسجَّل دخوله يفتح التطبيق مباشرة على «مشترك»، وغيره على «عام»
+        if (currentUser) switchTab('shared'); else renderPublicPanel();
 
         // هات آخر تحديث من الشيت في الخلفية، وحدّث العرض لو اتغير حاجة
         const rows = await loadContentRows();
@@ -1204,7 +1205,7 @@
         updateHeaderAuth();
         closeLogin();
         document.getElementById('regModal').classList.remove('show');
-        renderSharedPanel();
+        switchTab('shared'); // بعد أي دخول ناجح ينتقل مباشرة إلى «مشترك» (وهو يعرض المحتوى)
         checkForNewItems();
         checkPending();
         loadSolvedExams();
@@ -1317,7 +1318,7 @@
             if (d && d.ok === false) {
                 if (d.error === 'devices' || d.error === 'blocked') { try { alert("⛔ تم إيقاف الحساب للدخول من أكثر من جهاز — تواصل مع المعلم"); } catch (e) {} }
                 currentUser = null; localStorage.removeItem('najm_shared_user'); updateHeaderAuth();
-                if (document.getElementById('sharedPanel').classList.contains('active-panel')) renderSharedPanel();
+                if (document.getElementById('sharedPanel').classList.contains('active-panel')) switchTab('public');
             } else if (d && d.ok) {
                 checkPending();
                 loadSolvedExams();
