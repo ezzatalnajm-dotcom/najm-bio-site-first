@@ -69,7 +69,7 @@
 
 var RESULTS_SHEET = 'النتائج';
 var LOG_SHEET = 'سجل الطلبات';
-var VERSION = '2026-10-29-exclude-atlas-exam';
+var VERSION = '2026-11-11-teacher-key-limit';
 var DUP_COLOR = '#ea9999';
 var DUP_SHEET = 'أرقام متكررة';
 var DUP_SHEET_OLD = 'الأرقام المكررة';
@@ -404,8 +404,11 @@ function setTeacherKey() {
 }
 
 function groups_(key) {
+  // حماية من التخمين: 10 محاولات خاطئة ثم إيقاف 10 دقائق (نفس منطق المعرض)
+  var cache = CacheService.getScriptCache(), fails = Number(cache.get('tk_fail') || 0);
+  if (fails >= 10) return { ok: false, error: 'locked' };
   var saved = PropertiesService.getScriptProperties().getProperty('TEACHER_KEY');
-  if (!saved || String(key || '') !== saved) return { ok: false, error: 'unauthorized' };
+  if (!saved || String(key || '') !== saved) { cache.put('tk_fail', String(fails + 1), 600); return { ok: false, error: 'unauthorized' }; }
   var ss = SpreadsheetApp.getActiveSpreadsheet(), sh = ss.getSheetByName('الطلاب');
   if (!sh || sh.getLastRow() < 2) return { ok: true, students: [] };
   var v = sh.getDataRange().getValues(), h = v[0].map(function (x) { return (x + '').trim(); }), c = studentCols_(h);

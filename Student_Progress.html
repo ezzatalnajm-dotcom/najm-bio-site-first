@@ -218,13 +218,13 @@ async function go(){
   $('err').style.display='none';
   const b=document.querySelector('#login button');b.textContent='⏳ جاري التحميل...';
   try{
-    const r=await fetch(URL_+'?action=progress&phone='+phone+'&parent='+parent+'&device='+encodeURIComponent(najmDeviceId())+'&t='+Date.now());
+    const r=await fetchT(URL_+'?action=progress&phone='+phone+'&parent='+parent+'&device='+encodeURIComponent(najmDeviceId())+'&t='+Date.now());
     const d=await r.json();
     if(!d.ok) throw new Error(d.error==='pending'?'pd':d.error==='not found'?'nf':(d.error==='devices'||d.error==='blocked')?'dv':'x');
     U={phone,parent};D=d;
     try{localStorage.setItem('najm_progress_user',JSON.stringify(U))}catch(e){}
     render();
-  }catch(e){showErr(e.message==='dv'?'⛔ تم إيقاف الحساب للدخول من أكثر من جهاز — تواصل مع المعلم':e.message==='pd'?'⏳ طلبك قيد المراجعة وسيتم تفعيله قريبًا.':e.message==='nf'?'❌ الرقمان غير مسجلين. تواصل مع الأستاذ.':'❌ تعذر الاتصال، حاول مرة أخرى.')}
+  }catch(e){showErr(e.name==='AbortError'?'⏱️ الاتصال بطيء — اضغط «عرض نتائجي» مرة أخرى':e.message==='dv'?'⛔ تم إيقاف الحساب للدخول من أكثر من جهاز — تواصل مع المعلم':e.message==='pd'?'⏳ طلبك قيد المراجعة وسيتم تفعيله قريبًا.':e.message==='nf'?'❌ الرقمان غير مسجلين. تواصل مع الأستاذ.':'❌ تعذر الاتصال، حاول مرة أخرى.')}
   b.textContent='عرض نتائجي';
 }
 
@@ -365,20 +365,21 @@ const BANDS=[['b-ex','ممتاز',p=>p>=85],['b-vg','جيد جدًا',p=>p>=75&&
 function tShow(){$('login').classList.add('hide');$('tlogin').classList.remove('hide');$('tkey').value=sessionStorage.getItem('najm_tkey')||''}
 function tBack(){$('tlogin').classList.add('hide');$('login').classList.remove('hide')}
 function tOut(){try{sessionStorage.removeItem('najm_tkey')}catch(e){}TD=null;$('tview').classList.add('hide');$('login').classList.remove('hide')}
+function fetchT(url,ms){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||15000);return fetch(url,{signal:c.signal}).finally(()=>clearTimeout(t))}
 async function tGo(again){
   const k=again?(sessionStorage.getItem('najm_tkey')||''):$('tkey').value.trim();
   const e=$('terr');e.style.display='none';
   if(!k){e.textContent='❌ اكتب الرمز';e.style.display='block';return}
   try{
-    const r=await fetch(URL_+'?action=groups&key='+encodeURIComponent(k)+'&t='+Date.now());
+    const r=await fetchT(URL_+'?action=groups&key='+encodeURIComponent(k)+'&t='+Date.now());
     const d=await r.json();
-    if(!d.ok||!Array.isArray(d.students)) throw new Error(d.error==='unauthorized'?'ua':'x');
+    if(!d.ok||!Array.isArray(d.students)) throw new Error(d.error==='unauthorized'?'ua':d.error==='locked'?'lk':'x');
     try{sessionStorage.setItem('najm_tkey',k)}catch(_){}
     TD=d.students;TT=+d.totalExams||0;
     if(!TG||(TG!=='__BEST'&&!TD.some(s=>(s.group||'بدون مجموعة')===TG))) TG='';
     $('tlogin').classList.add('hide');$('login').classList.add('hide');$('tview').classList.remove('hide');tRender();
   }catch(x){
-    const m=x.message==='ua'?'❌ الرمز غير صحيح':'❌ تعذر جلب البيانات (تأكد أن الخادم محدَّث لدعم المجموعات)';
+    const m=x.name==='AbortError'?'⏱️ الاتصال بطيء — اضغط دخول مرة أخرى':x.message==='lk'?'🔒 محاولات خاطئة كثيرة — حاول بعد 10 دقائق':x.message==='ua'?'❌ الرمز غير صحيح':'❌ تعذر جلب البيانات (تأكد أن الخادم محدَّث لدعم المجموعات)';
     if(again){alert(m)}else{e.textContent=m;e.style.display='block'}
   }
 }
