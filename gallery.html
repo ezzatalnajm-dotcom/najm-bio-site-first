@@ -97,7 +97,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .lb,.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
 .lb{background:rgba(3,8,25,.94)}
 .lb figure{margin:0;max-width:1000px;width:100%;text-align:center}
-.lb img{max-width:100%;max-height:76vh;border-radius:14px}
+.lb img{max-width:100%;max-height:66vh;border-radius:14px}
 .lb figcaption{margin-top:12px;font-size:24px;font-weight:700;color:var(--gold)}
 .lb figcaption small{display:block;font-size:17px;color:var(--text);font-weight:400}
 .lb .x,.lb .nav{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:50%;width:48px;height:48px;font-size:26px;cursor:pointer}
@@ -135,6 +135,29 @@ body.light .title,body.light .sec{color:#9a6b00}
 .tools .mv:disabled{opacity:.35;cursor:default}
 .tools .mv:disabled:hover{border-color:var(--line)}
 .units.small button{min-width:56px;padding:6px 16px;font-size:19px}
+
+.editimg{display:block;margin:12px auto 0;padding:8px 18px;font-size:16px}
+.modal .panel.edpanel{max-width:640px;max-height:94vh;overflow:auto;padding:16px}
+.edhead{font-weight:900;color:var(--gold);font-size:19px;margin-bottom:10px}
+.edstage{position:relative;margin:0 auto;width:fit-content;max-width:100%;line-height:0;background:#000;border-radius:10px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.edstage canvas{display:block}
+.edcrop{position:absolute;border:2px solid var(--gold);box-shadow:0 0 0 9999px rgba(3,8,25,.62);cursor:move;touch-action:none}
+.edcrop .h{position:absolute;width:30px;height:30px;background:rgba(245,200,66,.92);border:2px solid #1b1500;border-radius:8px;touch-action:none}
+.edcrop .tl{top:-2px;left:-2px;cursor:nwse-resize}
+.edcrop .tr{top:-2px;right:-2px;cursor:nesw-resize}
+.edcrop .bl{bottom:-2px;left:-2px;cursor:nesw-resize}
+.edcrop .br{bottom:-2px;right:-2px;cursor:nwse-resize}
+.edrow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.edrow .chip{font-size:16px;padding:6px 14px}
+#imgEd input[type=range]{width:100%;accent-color:#f5c842}
+.lb .dl{position:absolute;top:14px;left:74px;background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:9px 18px;font-weight:700;text-decoration:none}
+.lbwrap{transform-origin:center center}
+.lb .x,.lb .nav,.lb .dl,.lbtools{z-index:3}
+.lbtools{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;background:rgba(3,8,25,.72);padding:8px 14px;border-radius:18px;max-width:96vw;color:#fff}
+.lbtools button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;min-width:44px;height:44px;font-size:22px;cursor:pointer}
+.lbtools label{display:flex;align-items:center;gap:6px;margin:0;font-weight:700;color:#fff}
+.lbtools input[type=range]{width:96px;accent-color:#f5c842}
+.edfoot{position:sticky;bottom:-16px;display:flex;gap:10px;flex-wrap:wrap;margin:12px -16px -16px;padding:12px 16px 16px;background:var(--card);border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -183,6 +206,7 @@ body.light .title,body.light .sec{color:#9a6b00}
         <input id="uFile" type="file" accept="image/*">
       </label>
       <img id="uPrev" class="preview hidden" alt="معاينة الرسمة">
+      <button class="btn ghost editimg hidden" id="uEdit" type="button">✂️ تعديل الصورة (تدوير / إضاءة / قص)</button>
       <div id="uMsg" class="msg hidden" role="alert"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
         <button class="btn" id="uBtn" type="submit">أرسل الرسمة</button>
@@ -244,6 +268,7 @@ body.light .title,body.light .sec{color:#9a6b00}
       <div class="units small" id="bUnits"></div>
       <label class="drop" for="bFile"><span id="bDrop">اضغط لاختيار الصورة</span><input id="bFile" type="file" accept="image/*"></label>
       <img id="bPrev" class="preview hidden" alt="">
+      <button class="btn ghost editimg hidden" id="bEdit" type="button">✂️ تعديل الصورة (تدوير / إضاءة / قص)</button>
       <div id="bMsg" class="msg hidden" role="alert"></div>
       <button class="btn block" id="bBtn" type="submit">إضافة إلى رسومات الأستاذ</button>
     </form>
@@ -260,9 +285,17 @@ body.light .title,body.light .sec{color:#9a6b00}
 
 <div class="lb hidden" id="lb" role="dialog" aria-modal="true">
   <button class="x" id="lbX" type="button" aria-label="إغلاق">×</button>
+  <a class="dl hidden" id="lbDl" target="_blank" rel="noopener">⬇ تحميل</a>
   <button class="nav prev" id="lbPrev" type="button" aria-label="السابقة">›</button>
   <button class="nav next" id="lbNext" type="button" aria-label="التالية">‹</button>
   <figure><div class="lbwrap"><img id="lbImg" alt=""><div class="wm lg hidden" id="lbWm"></div></div><figcaption id="lbCap"></figcaption></figure>
+  <div class="lbtools" id="lbTools">
+    <button type="button" id="lbRotL" aria-label="تدوير لليسار">⟲</button>
+    <button type="button" id="lbRotR" aria-label="تدوير لليمين">⟳</button>
+    <label>☀ <input type="range" id="lbBr" min="-50" max="100" value="0" aria-label="الإضاءة"></label>
+    <label>◐ <input type="range" id="lbCt" min="-50" max="80" value="0" aria-label="التباين"></label>
+    <button type="button" id="lbReset" aria-label="إعادة الضبط">↺</button>
+  </div>
 </div>
 
 <!-- تعديل (للمعلم) -->
@@ -301,6 +334,30 @@ body.light .title,body.light .sec{color:#9a6b00}
         <button class="btn ghost" id="bECancel" type="button">إلغاء</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="modal hidden" id="imgEd" role="dialog" aria-modal="true" aria-label="تعديل الصورة">
+  <div class="panel edpanel">
+    <div class="edhead">✂️ تعديل الصورة</div>
+    <div class="edstage" id="edStage"><canvas id="edCv"></canvas>
+      <div class="edcrop hidden" id="edCrop"><i class="h tl" data-h="tl"></i><i class="h tr" data-h="tr"></i><i class="h bl" data-h="bl"></i><i class="h br" data-h="br"></i></div>
+    </div>
+    <div class="edrow">
+      <button type="button" class="chip" id="edRotL">⟲ تدوير لليسار</button>
+      <button type="button" class="chip" id="edRotR">⟳ تدوير لليمين</button>
+      <button type="button" class="chip" id="edAuto">✨ تحسين تلقائي</button>
+      <button type="button" class="chip" id="edReset">↺ إعادة الضبط</button>
+    </div>
+    <label for="edBr" style="margin-top:8px">الإضاءة <span id="edBrV">0</span></label>
+    <input type="range" id="edBr" min="-50" max="100" value="0">
+    <label for="edCt">التباين <span id="edCtV">0</span></label>
+    <input type="range" id="edCt" min="-50" max="80" value="0">
+    <p class="hint">للقص: اسحب الإطار الذهبي أو أحد زواياه. دوّر الصورة أولًا ثم قصّها (التدوير يعيد الإطار كاملًا).</p>
+    <div class="edfoot">
+      <button class="btn" id="edOk" type="button">تطبيق</button>
+      <button class="btn ghost" id="edNo" type="button">إلغاء</button>
+    </div>
   </div>
 </div>
 
@@ -399,6 +456,11 @@ body.light .title,body.light .sec{color:#9a6b00}
     var b = document.createElement('button'); b.type = 'button'; b.textContent = txt; if(cls) b.className = cls;
     b.addEventListener('click', fn); return b;
   }
+  // رابط تحميل الصورة الأصلية — يُنشأ للمعلم فقط (داخل if(teacherPass))
+  function dlUrl(id){ return 'https://drive.google.com/uc?export=download&id=' + encodeURIComponent(id); }
+  function dlLink(it){
+    var a = document.createElement('a'); a.href = dlUrl(it.id); a.target = '_blank'; a.rel = 'noopener'; a.textContent = '⬇ تحميل'; return a;
+  }
   function addOrderTools(t, card, it, idx, list, kind){
     var hd = document.createElement('div'); hd.className = 'dragbar'; hd.textContent = '⠿ اسحب لتغيير الترتيب';
     hd.addEventListener('pointerdown', function(e){ startDrag(e, card, it, kind); });
@@ -453,6 +515,7 @@ body.light .title,body.light .sec{color:#9a6b00}
           var nw = document.createElement('span'); nw.className = 'st pending'; nw.textContent = '⚠️ لا رقم هاتف'; t.appendChild(nw);
         }
         t.appendChild(toolBtn(it.weekly ? 'إزالة ⭐' : '⭐ رسمة الأسبوع', '', function(){ adminUpdate(it.id, { weekly: !it.weekly }); }));
+        t.appendChild(dlLink(it));
         t.appendChild(toolBtn('✏️ تعديل', '', function(){ openEdit(it); }));
         t.appendChild(toolBtn('🗑 حذف', 'del', function(){ delItem(it); }));
         card.appendChild(t);
@@ -598,11 +661,11 @@ body.light .title,body.light .sec{color:#9a6b00}
     });
   }
   $('uFile').addEventListener('change', function(){
-    var f = this.files && this.files[0]; pickedData = null; show($('uPrev'), false);
+    var f = this.files && this.files[0]; pickedData = null; show($('uPrev'), false); show($('uEdit'), false);
     if(!f) return;
     $('dropTxt').textContent = 'جاري تجهيز الصورة...';
     compress(f).then(function(d){
-      pickedData = d; $('uPrev').src = d; show($('uPrev'), true);
+      pickedData = d; $('uPrev').src = d; show($('uPrev'), true); show($('uEdit'), true);
       $('dropTxt').textContent = 'اضغط لتغيير الصورة'; note($('uMsg'), '');
     }).catch(function(){ $('dropTxt').textContent = 'اضغط لاختيار صورة الرسمة'; note($('uMsg'), errText('bad_image')); });
   });
@@ -616,7 +679,7 @@ body.light .title,body.light .sec{color:#9a6b00}
     post({ action:'gallery_submit', phone: session, name: name, title: $('uTitle').value.trim(), unit: pickedUnit, image: pickedData }).then(function(d){
       if(d.ok){
         note($('uMsg'), 'وصلت رسمتك. ستظهر في المعرض بعد اعتماد الأستاذ.', true);
-        pickedData = null; pickedUnit = null; markUnit(); $('uFile').value = ''; $('uTitle').value = ''; show($('uPrev'), false);
+        pickedData = null; pickedUnit = null; markUnit(); $('uFile').value = ''; $('uTitle').value = ''; show($('uPrev'), false); show($('uEdit'), false);
         $('dropTxt').textContent = 'اضغط لاختيار صورة الرسمة'; refreshMine();
       } else {
         if(d.error === 'not_subscriber'){ lsDel(SKEY); session = null; show($('logoutBtn'), false); show($('uploadBox'), false); }
@@ -764,16 +827,41 @@ body.light .title,body.light .sec{color:#9a6b00}
   }
 
   // ================= العرض الكبير (للتقديم) =================
+  // أدوات المشاهدة (تدوير/إضاءة/تباين) — تؤثر على عرض هذا المتصفح فقط ولا ترسل شيئًا للسيرفر
+  var LV = { rot:0, br:0, ct:0 };
+  function lbApply(){
+    var im = $('lbImg'), wrap = im.parentNode;
+    im.style.filter = (LV.br || LV.ct) ? 'brightness(' + (1 + LV.br / 100) + ') contrast(' + (1 + LV.ct / 100) + ')' : '';
+    var lw = wrap.offsetWidth, lh = wrap.offsetHeight;
+    if(!LV.rot || !lw || !lh){ wrap.style.transform = ''; wrap.style.margin = ''; return; }
+    var odd = LV.rot % 2 === 1, vw = odd ? lh : lw, vh = odd ? lw : lh;
+    var availW = wrap.parentNode.clientWidth || (window.innerWidth - 40), availH = window.innerHeight * 0.66;
+    var k = odd ? Math.min(1, availW / vw, availH / vh) : 1;
+    wrap.style.transform = 'rotate(' + (LV.rot * 90) + 'deg) scale(' + k + ')';
+    wrap.style.margin = ((vh * k - lh) / 2) + 'px 0';
+  }
+  function lbResetView(){
+    LV.rot = 0; LV.br = 0; LV.ct = 0; $('lbBr').value = 0; $('lbCt').value = 0; lbApply();
+  }
+  $('lbImg').addEventListener('load', lbApply);
+  $('lbRotL').addEventListener('click', function(){ LV.rot = (LV.rot + 3) % 4; lbApply(); });
+  $('lbRotR').addEventListener('click', function(){ LV.rot = (LV.rot + 1) % 4; lbApply(); });
+  $('lbBr').addEventListener('input', function(){ LV.br = Number(this.value) || 0; lbApply(); });
+  $('lbCt').addEventListener('input', function(){ LV.ct = Number(this.value) || 0; lbApply(); });
+  $('lbReset').addEventListener('click', lbResetView);
+  window.addEventListener('resize', function(){ if(!$('lb').classList.contains('hidden')) lbApply(); });
   function drawLb(){
+    lbResetView();
     var it = lbList[lbIndex]; if(!it) return;
     $('lbImg').src = img(it.id, 1600); fillWm($('lbWm')); $('lbImg').alt = it.title || 'رسمة';
     $('lbCap').textContent = '';
     var sm = document.createElement('small'); sm.textContent = metaOf(it);
     $('lbCap').appendChild(document.createTextNode((it.weekly ? '⭐ ' : '') + (it.title || it.studentTitle || 'رسمة'))); $('lbCap').appendChild(sm);
     var many = lbList.length > 1; show($('lbPrev'), many); show($('lbNext'), many);
+    if(teacherPass){ $('lbDl').href = dlUrl(it.id); show($('lbDl'), true); } else { $('lbDl').removeAttribute('href'); show($('lbDl'), false); }
   }
   function openLb(i, list){ lbList = list || shown; lbIndex = i; drawLb(); show($('lb'), true); }
-  function closeLb(){ show($('lb'), false); $('lbImg').src = ''; }
+  function closeLb(){ lbResetView(); show($('lb'), false); $('lbImg').src = ''; $('lbDl').removeAttribute('href'); show($('lbDl'), false); }
   function step(d){ if(!lbList.length) return; lbIndex = (lbIndex + d + lbList.length) % lbList.length; drawLb(); }
   $('lbX').addEventListener('click', closeLb);
   $('lbPrev').addEventListener('click', function(){ step(-1); });
@@ -781,6 +869,7 @@ body.light .title,body.light .sec{color:#9a6b00}
   $('lb').addEventListener('click', function(e){ if(e.target === $('lb')) closeLb(); });
   document.addEventListener('keydown', function(e){
     if($('lb').classList.contains('hidden')){ if(e.key === 'Escape') show($('editModal'), false); return; }
+    if(e.target && e.target.type === 'range' && e.key !== 'Escape') return;
     if(e.key === 'Escape') closeLb();
     else if(e.key === 'ArrowLeft') step(1);     // في الواجهة العربية اليسار = التالية
     else if(e.key === 'ArrowRight') step(-1);
@@ -876,6 +965,7 @@ body.light .title,body.light .sec{color:#9a6b00}
       if(teacherPass){
         var t = document.createElement('div'); t.className = 'tools';
         addOrderTools(t, card, it, idx, shownBoard, 'b');
+        t.appendChild(dlLink(it));
         t.appendChild(toolBtn('✏️ تعديل', '', function(){ openBEdit(it); }));
         t.appendChild(toolBtn('🗑 حذف', 'del', function(){
           if(!confirm('حذف هذه الرسمة من رسومات الأستاذ؟ لا يمكن التراجع.')) return;
@@ -915,9 +1005,9 @@ body.light .title,body.light .sec{color:#9a6b00}
       .then(function(){ $('bESave').disabled = false; });
   });
   $('bFile').addEventListener('change', function(){
-    var f = this.files && this.files[0]; bData = null; show($('bPrev'), false); if(!f) return;
+    var f = this.files && this.files[0]; bData = null; show($('bPrev'), false); show($('bEdit'), false); if(!f) return;
     $('bDrop').textContent = 'جاري تجهيز الصورة...';
-    compress(f).then(function(d){ bData = d; $('bPrev').src = d; show($('bPrev'), true); $('bDrop').textContent = 'اضغط لتغيير الصورة'; note($('bMsg'), ''); })
+    compress(f).then(function(d){ bData = d; $('bPrev').src = d; show($('bPrev'), true); show($('bEdit'), true); $('bDrop').textContent = 'اضغط لتغيير الصورة'; note($('bMsg'), ''); })
       .catch(function(){ $('bDrop').textContent = 'اضغط لاختيار الصورة'; note($('bMsg'), errText('bad_image')); });
   });
   $('bForm').addEventListener('submit', function(e){
@@ -926,7 +1016,7 @@ body.light .title,body.light .sec{color:#9a6b00}
     if(!bData){ note($('bMsg'), 'اختر الصورة أولًا.'); return; }
     $('bBtn').disabled = true; note($('bMsg'), 'جاري الإضافة...', true);
     post({ action:'admin_board_add', pass: teacherPass, title: $('bTitle').value.trim(), unit: bPickedUnit, image: bData }).then(function(d){
-      if(d.ok){ note($('bMsg'), 'تمت الإضافة إلى رسومات الأستاذ.', true); bData = null; bPickedUnit = ''; markBUnit(); $('bFile').value = ''; $('bTitle').value = ''; show($('bPrev'), false); $('bDrop').textContent = 'اضغط لاختيار الصورة'; loadBoard(); }
+      if(d.ok){ note($('bMsg'), 'تمت الإضافة إلى رسومات الأستاذ.', true); bData = null; bPickedUnit = ''; markBUnit(); $('bFile').value = ''; $('bTitle').value = ''; show($('bPrev'), false); show($('bEdit'), false); $('bDrop').textContent = 'اضغط لاختيار الصورة'; loadBoard(); }
       else note($('bMsg'), errText(d.error));
     }).catch(function(){ note($('bMsg'), 'تعذر الإرسال. حاول مرة أخرى.'); })
       .then(function(){ $('bBtn').disabled = false; });
@@ -963,6 +1053,116 @@ body.light .title,body.light .sec{color:#9a6b00}
     reloadTeacher().then(function(d){ if(d && d.ok) toast('تم التحديث من الشيت ✔'); }).catch(function(){ toast('تعذر التحديث.'); });
     loadBoard();
   });
+
+  // ================= محرر الصورة (تدوير / إضاءة / قص) — يعمل داخل المتصفح قبل الرفع فقط =================
+  var ED = { src:null, base:null, rot:0, br:0, ct:0, cw:0, ch:0, crop:null, cb:null };
+  function edRotated(){
+    var im = ED.src, r = ED.rot % 4, sw = im.naturalWidth || im.width, sh = im.naturalHeight || im.height;
+    var c = document.createElement('canvas'), swap = (r % 2 === 1);
+    c.width = swap ? sh : sw; c.height = swap ? sw : sh;
+    var x = c.getContext('2d');
+    x.translate(c.width / 2, c.height / 2); x.rotate(r * Math.PI / 2); x.drawImage(im, -sw / 2, -sh / 2);
+    return c;
+  }
+  function edPaint(){
+    $('edCv').style.filter = (ED.br || ED.ct) ? 'brightness(' + (1 + ED.br / 100) + ') contrast(' + (1 + ED.ct / 100) + ')' : '';
+    var c = ED.crop, b = $('edCrop');
+    b.style.left = c.x + 'px'; b.style.top = c.y + 'px'; b.style.width = c.w + 'px'; b.style.height = c.h + 'px'; show(b, true);
+    $('edBr').value = ED.br; $('edCt').value = ED.ct; $('edBrV').textContent = ED.br; $('edCtV').textContent = ED.ct;
+  }
+  function edBuild(){
+    ED.base = edRotated();
+    var avail = Math.max(200, Math.min(window.innerWidth - 80, 580)), availH = Math.max(180, Math.round(window.innerHeight * 0.40));
+    var k = Math.min(avail / ED.base.width, availH / ED.base.height, 1), cv = $('edCv');
+    cv.width = ED.cw = Math.max(1, Math.round(ED.base.width * k)); cv.height = ED.ch = Math.max(1, Math.round(ED.base.height * k));
+    cv.getContext('2d').drawImage(ED.base, 0, 0, cv.width, cv.height);
+    ED.crop = { x:0, y:0, w:ED.cw, h:ED.ch };
+    edPaint();
+  }
+  function edOpen(dataUrl, cb){
+    var im = new Image();
+    im.onload = function(){ ED.src = im; ED.rot = 0; ED.br = 0; ED.ct = 0; ED.cb = cb; edBuild(); show($('imgEd'), true); };
+    im.onerror = function(){ toast('تعذر فتح الصورة للتعديل.'); };
+    im.src = dataUrl;
+  }
+  function edClose(){ show($('imgEd'), false); ED.src = null; ED.base = null; ED.cb = null; }
+  function edAuto(){
+    var b = ED.base, k = Math.min(1, 200 / Math.max(b.width, b.height)), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(b.width * k)); c.height = Math.max(1, Math.round(b.height * k));
+    var x = c.getContext('2d'); x.drawImage(b, 0, 0, c.width, c.height);
+    var d = x.getImageData(0, 0, c.width, c.height).data, hist = [], n = 0, i, v;
+    for(v = 0; v < 256; v++) hist[v] = 0;
+    for(i = 0; i < d.length; i += 4){ hist[Math.round(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2])]++; n++; }
+    var acc = 0, p5 = 0, p95 = 255, got5 = false;
+    for(v = 0; v < 256; v++){
+      acc += hist[v];
+      if(!got5 && acc >= n * 0.05){ p5 = v; got5 = true; }
+      if(acc >= n * 0.95){ p95 = v; break; }
+    }
+    var g = Math.max(0.85, Math.min(2, 235 / Math.max(p95, 60)));      // رفع لون الورقة الفاتح إلى قرابة الأبيض
+    ED.br = Math.max(-50, Math.min(100, Math.round((g - 1) * 100)));
+    ED.ct = (p95 - p5 < 140) ? 20 : 8;
+    edPaint();
+  }
+  function edExport(){
+    var b = ED.base, kx = b.width / ED.cw, ky = b.height / ED.ch, cr = ED.crop;
+    var sx = Math.min(b.width - 1, Math.max(0, Math.round(cr.x * kx))), sy = Math.min(b.height - 1, Math.max(0, Math.round(cr.y * ky)));
+    var sw = Math.max(1, Math.min(b.width - sx, Math.round(cr.w * kx))), sh = Math.max(1, Math.min(b.height - sy, Math.round(cr.h * ky)));
+    var c = document.createElement('canvas'); c.width = sw; c.height = sh;
+    var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, sw, sh); x.drawImage(b, sx, sy, sw, sh, 0, 0, sw, sh);
+    if(ED.br || ED.ct){
+      var id = x.getImageData(0, 0, sw, sh), d = id.data, bm = 1 + ED.br / 100, cm = 1 + ED.ct / 100, lut = new Uint8ClampedArray(256), v, i;
+      for(v = 0; v < 256; v++) lut[v] = (Math.min(255, v * bm) - 128) * cm + 128;
+      for(i = 0; i < d.length; i += 4){ d[i] = lut[d[i]]; d[i + 1] = lut[d[i + 1]]; d[i + 2] = lut[d[i + 2]]; }
+      x.putImageData(id, 0, 0);
+    }
+    var q = 0.85, out = c.toDataURL('image/jpeg', q);
+    while(out.length * 0.75 > 2300000 && q > 0.4){ q -= 0.1; out = c.toDataURL('image/jpeg', q); }
+    return out;
+  }
+  (function(){
+    var box = $('edCrop'), mode = null, sx = 0, sy = 0, st = null;
+    box.addEventListener('pointerdown', function(e){
+      var h = e.target.getAttribute && e.target.getAttribute('data-h');
+      mode = h || 'move'; sx = e.clientX; sy = e.clientY; st = { x:ED.crop.x, y:ED.crop.y, w:ED.crop.w, h:ED.crop.h };
+      try{ box.setPointerCapture(e.pointerId); }catch(_){}
+      e.preventDefault();
+    });
+    box.addEventListener('pointermove', function(e){
+      if(!mode || !ED.crop) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy, W = ED.cw, H = ED.ch, M = Math.min(40, W / 2, H / 2);
+      var x1 = st.x, y1 = st.y, x2 = st.x + st.w, y2 = st.y + st.h;
+      if(mode === 'move'){
+        x1 = Math.max(0, Math.min(W - st.w, st.x + dx)); y1 = Math.max(0, Math.min(H - st.h, st.y + dy)); x2 = x1 + st.w; y2 = y1 + st.h;
+      } else {
+        if(mode.indexOf('l') > -1) x1 = Math.max(0, Math.min(st.x + st.w - M, st.x + dx));
+        if(mode.indexOf('r') > -1) x2 = Math.min(W, Math.max(st.x + M, st.x + st.w + dx));
+        if(mode.indexOf('t') > -1) y1 = Math.max(0, Math.min(st.y + st.h - M, st.y + dy));
+        if(mode.indexOf('b') > -1) y2 = Math.min(H, Math.max(st.y + M, st.y + st.h + dy));
+      }
+      ED.crop = { x:x1, y:y1, w:x2 - x1, h:y2 - y1 }; edPaint();
+    });
+    function up(){ mode = null; }
+    box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
+  })();
+  $('edRotL').addEventListener('click', function(){ if(ED.src){ ED.rot = (ED.rot + 3) % 4; edBuild(); } });
+  $('edRotR').addEventListener('click', function(){ if(ED.src){ ED.rot = (ED.rot + 1) % 4; edBuild(); } });
+  $('edAuto').addEventListener('click', function(){ if(ED.base) edAuto(); });
+  $('edReset').addEventListener('click', function(){ if(ED.src){ ED.rot = 0; ED.br = 0; ED.ct = 0; edBuild(); } });
+  $('edBr').addEventListener('input', function(){ ED.br = Number(this.value) || 0; edPaint(); });
+  $('edCt').addEventListener('input', function(){ ED.ct = Number(this.value) || 0; edPaint(); });
+  $('edNo').addEventListener('click', edClose);
+  $('edOk').addEventListener('click', function(){
+    if(!ED.base) return;
+    var out = null, cb = ED.cb;
+    try{ out = edExport(); }catch(err){ out = null; }
+    if(out && cb) cb(out); else toast('تعذر تطبيق التعديل، بقيت الصورة كما هي.');
+    edClose();
+  });
+  $('imgEd').addEventListener('click', function(e){ if(e.target === $('imgEd')) edClose(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !$('imgEd').classList.contains('hidden')) edClose(); });
+  $('uEdit').addEventListener('click', function(){ if(pickedData) edOpen(pickedData, function(d){ pickedData = d; $('uPrev').src = d; }); });
+  $('bEdit').addEventListener('click', function(){ if(bData) edOpen(bData, function(d){ bData = d; $('bPrev').src = d; }); });
 
   // ================= البدء =================
   loadPublic();
