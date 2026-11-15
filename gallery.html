@@ -466,8 +466,10 @@ body.light .title,body.light .sec{color:#9a6b00}
     }
   }
   function loadPublic(){
+    if(teacherPass){ reloadTeacher().catch(function(){}); return; }   // المعلم: القائمة الكاملة (فيها حالة الاعتماد) وليس العامة
     fetch(API + '?action=gallery_public').then(function(r){ return r.json(); }).then(function(d){
-      if(d.ok){ allItems = d.items || []; renderGrid(); }
+      if(teacherPass) return;   // دخل المعلم أثناء التحميل: لا نستبدل بياناته
+      if(d.ok){ allItems = (d.items || []).map(function(i){ i.approved = true; return i; }); renderGrid(); }
       else { $('emptyMsg').textContent = errText(d.error); show($('emptyMsg'), true); }
     }).catch(function(){ $('emptyMsg').textContent = 'تعذر تحميل المعرض. تأكد من الإنترنت.'; show($('emptyMsg'), true); });
   }
