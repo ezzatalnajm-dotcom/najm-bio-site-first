@@ -1402,6 +1402,16 @@
             }, 400);
         }
     }, true);
+    // ===== اختبارات الوحدات: تمرير جلسة الطالب للصفحة الجديدة بدون وضع الرقم في الرابط =====
+    document.addEventListener('click', function (ev) {
+        var a = ev.target && ev.target.closest ? ev.target.closest('a[href*="unit-test.html"]') : null;
+        if (!a) return;
+        ev.preventDefault();
+        if (!currentUser) { alert('سجّل دخولك أولاً من صفحة المشتركين ثم افتح الاختبار.'); return; }
+        try { sessionStorage.setItem('najm_unit_sess', JSON.stringify({ s: currentUser.phone, g: currentUser.parent })); } catch (e) {}
+        var w = window.open(a.href, '_blank');
+        if (!w) location.href = a.href;
+    }, true);
     function hidePendingBanner() { const b = document.getElementById('pendingBanner'); if (b) { b.style.display = 'none'; b.innerHTML = ''; } }
     function dismissPending() {
         try { localStorage.setItem('najm_pending_dismiss', new Date().toDateString()); } catch (e) {}
