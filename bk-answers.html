@@ -25,7 +25,7 @@ var GW='https://script.google.com/macros/s/AKfycbxhc-qLlpoiorG0UZ0Bhs-iS-rcW4_cl
 var msg=document.getElementById('msg'),unit=1;
 function say(t){msg.style.display='block';msg.textContent=t}
 function post(o){return fetch(GW,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(function(r){return r.json()})}
-var us=document.getElementById('us');[1,2,3].forEach(function(i){var l=document.createElement('label');l.style.cssText='margin:0 8px;font-size:16px';var r=document.createElement('input');r.type='radio';r.name='u';r.value=i;if(i===1)r.checked=true;l.appendChild(r);l.appendChild(document.createTextNode(' الوحدة '+i));us.appendChild(l)});
+var us=document.getElementById('us');[1,2,3].forEach(function(i){var l=document.createElement('label');l.style.cssText='margin:0 8px;font-size:16px';var r=document.createElement('input');r.type='radio';r.name='u';r.value=i;if(i===(Number(new URLSearchParams(location.search).get('u'))||1))r.checked=true;l.appendChild(r);l.appendChild(document.createTextNode(' الوحدة '+i));us.appendChild(l)});
 ['contextmenu','dragstart','copy','cut'].forEach(function(ev){document.addEventListener(ev,function(e){if(e.target.tagName!=='INPUT')e.preventDefault()})});
 document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if((e.ctrlKey||e.metaKey)&&'spcu'.indexOf(k)>-1||k==='printscreen'||e.key==='F12')e.preventDefault()});
 var busy=false;
