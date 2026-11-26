@@ -888,6 +888,13 @@
 
     let premiumData = {};
 
+    // أقسام خاصة تظهر قبل الوحدة 4 مباشرة. تتغذى من شيت "المحتوى": اكتب اسم القسم في عمود "الوحدة" بالظبط.
+    // القسم الفاضي لا يظهر. نفس قواعد عمود "ظهور" (1 عام+مشترك، 2 مشترك، 3 مميز، 0 قريباً، 00 مخفي).
+    const SPECIAL_SECTIONS = [
+        { key: 'short', name: 'الاختبارات القصيرة', before: 4 },
+        { key: 'comp',  name: 'الاختبارات الشاملة', before: 4 }
+    ];
+
     // ======================== تحميل المحتوى من شيت "المحتوى" ========================
     // بدل ما تعدّل الكود لكل رابط جديد، ضيف صف في شيت "المحتوى" بنفس ملف الإكسيل:
     // الأعمدة: الأيقونة | ظهور | الرابط | العنوان | الوحدة
@@ -914,6 +921,7 @@
     function applyContentRows(rows) {
         const pub = {}, shr = {}, prem = {};
         UNITS.forEach(u => { pub[u.id] = []; shr[u.id] = []; prem[u.id] = []; });
+        SPECIAL_SECTIONS.forEach(sp => { pub[sp.key] = []; shr[sp.key] = []; prem[sp.key] = []; });
         const revItems = {}; // 1..7 -> items[]
         rows.forEach(row => {
             const rawLevel = String(row['ظهور'] ?? row.level ?? '').trim();
@@ -928,9 +936,10 @@
             const title = String(row['العنوان'] ?? row.title ?? '').trim();
             const unitText = String(row['الوحدة'] ?? row.unit ?? '').trim();
             if (!title || !unitText) return;
+            const special = SPECIAL_SECTIONS.find(sp => sp.name === unitText);
             const m = unitText.match(/\d+/);
-            if (!m) return;
-            const num = parseInt(m[0]);
+            if (!m && !special) return;
+            const num = special ? special.key : parseInt(m[0]);
             let link = rawLink;
             if (link && link !== '#' && !/^https?:\/\//i.test(link)) link = 'https://' + link;
             if (!link) link = '#';
@@ -1499,9 +1508,38 @@
         return html;
     }
 
+    function renderSpecialSection(panelId, sp, items) {
+        let html = `<div class="unit-card">
+                <div class="unit-header" onclick="toggleUnit('${panelId}_${sp.key}')">
+                    📝 ${sp.name} <span class="arrow">▼</span>
+                </div>
+                <div class="unit-content" id="content-${panelId}_${sp.key}">
+                    <div class="lesson-grid">`;
+        items.forEach(item => {
+            let isActive = item.link !== "#";
+            let extraClass = isActive ? "" : "coming-soon";
+            const code = examCodeFromLink(item.link);
+            const badge = examStatusBadge(item.link, panelId);
+            html += `<a href="${item.link}" class="resource-link ${extraClass}${badge ? ' has-status' : ''}" target="_blank">
+                    <span>${item.icon}</span>
+                    <div class="resource-text">
+                        <div class="resource-title">${item.title}</div>
+                        ${code ? `<div class="resource-code">${code}</div>` : ''}
+                    </div>
+                    ${badge}
+                </a>`;
+        });
+        html += `</div></div></div>`;
+        return html;
+    }
+
     function renderUnits(panelId, data, showFirstRevision, showSecondRevision) {
         let html = '';
         UNITS.forEach(unit => {
+            SPECIAL_SECTIONS.filter(sp => sp.before === unit.id).forEach(sp => {
+                const spItems = data[sp.key] || [];
+                if (spItems.length) html += renderSpecialSection(panelId, sp, spItems);
+            });
             let items = data[unit.id] || [];
             if (items.length === 0) return;
             html += `<div class="unit-card">
