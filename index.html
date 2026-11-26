@@ -952,6 +952,7 @@
             // "مراجعة الوحدة X" في عمود الوحدة → يروح لقسم المراجعات بدل الوحدة العادية
             if (unitText.includes('مراجعة')) {
                 if (num < 1 || num > 7) return;
+                item.level = level; // مستوى الظهور يُطبَّق لكل تبويب عند العرض
                 if (!revItems[num]) revItems[num] = [];
                 revItems[num].push(item);
                 return;
@@ -1478,6 +1479,14 @@
         if (currentUser && document.getElementById('sharedPanel')) renderSharedPanel();
     }
 
+    // عناصر المراجعة تحترم عمود ظهور: عام = 0/1 فقط، مشترك = 0/1/2، وأي عنصر بدون مستوى (قالب احتياطي) يظهر كما هو
+    function revisionVisible(item, panelId) {
+        if (item.level === undefined) return true;
+        if (panelId === 'public') return item.level === 0 || item.level === 1;
+        if (panelId === 'shared') return item.level !== 3;
+        return false;
+    }
+
     function renderRevision(panelId, revisionData, title, isFirstRevision) {
         let gridClass = isFirstRevision ? "revision-grid-3" : "revision-grid-4";
         let html = `<div class="unit-card">
@@ -1490,7 +1499,7 @@
         revisionData.forEach(unit => {
             html += `<div class="revision-col">
                 <h4>📘 ${unit.name}</h4>`;
-            unit.items.forEach(item => {
+            unit.items.filter(item => revisionVisible(item, panelId)).forEach(item => {
                 let isActive = item.link !== "#";
                 let extraClass = isActive ? "" : "coming-soon";
                 const code = examCodeFromLink(item.link);
@@ -1810,8 +1819,9 @@
         const add = it => { if (it && it.link && it.link !== '#') all.push(it.title); };
         const base = currentUser ? sharedData : publicData;
         Object.values(base).forEach(arr => arr.forEach(add));
-        REVISION_FIRST.forEach(u => u.items.forEach(add));
-        REVISION_SECOND.forEach(u => u.items.forEach(add));
+        const revPanel = currentUser ? 'shared' : 'public';
+        REVISION_FIRST.forEach(u => u.items.filter(it => revisionVisible(it, revPanel)).forEach(add));
+        REVISION_SECOND.forEach(u => u.items.filter(it => revisionVisible(it, revPanel)).forEach(add));
         return Array.from(new Set(all));
     }
     function seenKey() { return currentUser ? 'bio_seen_v2_sub' : 'bio_seen_v2_pub'; }
