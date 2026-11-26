@@ -11,7 +11,8 @@ body{margin:0;font-family:Cairo,Tahoma,sans-serif;background:#0f2a3a;color:#fff}
 #pages img{width:min(100%,900px);display:block;margin:0 auto 6px;pointer-events:none;-webkit-user-drag:none}
 .band{position:fixed;left:0;right:0;z-index:4;background:rgba(40,40,40,.93);pointer-events:none}
 #bt{top:46px;height:24vh}#bb{bottom:0;height:36vh}
-#wm{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden;opacity:.16;font-size:15px;line-height:70px;transform:rotate(-20deg) scale(1.5);white-space:pre;color:#000;text-shadow:0 0 2px #fff;mix-blend-mode:normal}
+#wm{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden;opacity:.16;font-size:15px;line-height:22px;transform:rotate(-20deg) scale(1.5);white-space:nowrap;color:#000;text-shadow:0 0 2px #fff;mix-blend-mode:normal}
+.wr{height:70px;white-space:nowrap}.wt{display:inline-block;text-align:center;margin:0 18px}.wt span{display:block}
 button{font:inherit;padding:10px 22px;border-radius:10px;border:0;background:#1e8a5a;color:#fff;font-size:17px}
 @media print{body{display:none}}
 </style></head><body>
@@ -45,7 +46,7 @@ post({a:'login',s:sess.s,g:sess.g}).then(function(L){
   }
   msg.style.display='none';document.getElementById('top').style.display='flex';document.getElementById('ttl').textContent='إجابة '+u.title;
   ['bt','bb'].forEach(function(i){document.getElementById(i).style.display='block'});
-  var wm=document.getElementById('wm'),line=(L.name+' - '+L.phone+'      ');var s='';for(var r=0;r<40;r++){s+=line.repeat(6)+'\n'}wm.textContent=s;wm.style.display='block';
+  var wm=document.getElementById('wm');wm.textContent='';for(var r=0;r<40;r++){var row=document.createElement('div');row.className='wr';for(var k=0;k<6;k++){var t=document.createElement('span');t.className='wt';var a=document.createElement('span');a.textContent=L.name+' - '+L.phone;var b=document.createElement('span');b.textContent='أستاذ عزت نجم الأحياء';t.appendChild(a);t.appendChild(b);row.appendChild(t)}wm.appendChild(row)}wm.style.display='block';
   var box=document.getElementById('pages');
   (function next(n){if(n>u.pages)return;post({a:'page',t:L.token,u:unit,n:n}).then(function(P){
     if(!P.ok){say('تعذر تحميل صفحة');return}var im=new Image();im.draggable=false;im.src=P.data;box.appendChild(im);next(n+1)})})(1);
