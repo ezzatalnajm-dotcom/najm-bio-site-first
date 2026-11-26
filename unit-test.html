@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="robots" content="noindex"><title>اختبار الوحدة</title>
+<style>
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{margin:0;font-family:Cairo,Tahoma,sans-serif;background:#0f2a3a;color:#fff}
+#msg{padding:40px 20px;text-align:center;font-size:18px;line-height:1.8}
+#top{position:fixed;top:0;left:0;right:0;z-index:5;background:#123a52;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+#pages{padding:60px 0 40vh;text-align:center}
+#pages img{width:min(100%,900px);display:block;margin:0 auto 6px;pointer-events:none;-webkit-user-drag:none}
+.band{position:fixed;left:0;right:0;z-index:4;background:rgba(40,40,40,.93);pointer-events:none}
+#bt{top:46px;height:24vh}#bb{bottom:0;height:36vh}
+#wm{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden;opacity:.16;font-size:15px;line-height:70px;transform:rotate(-20deg) scale(1.5);white-space:pre;color:#000;text-shadow:0 0 2px #fff;mix-blend-mode:normal}
+button{font:inherit;padding:10px 22px;border-radius:10px;border:0;background:#1e8a5a;color:#fff;font-size:17px}
+@media print{body{display:none}}
+</style></head><body>
+<div id="msg">جارٍ التحميل…</div>
+<div id="top" style="display:none"><span id="ttl"></span><span>مرّر لأسفل: تظهر النافذة الوسطى فقط</span></div>
+<div id="pages"></div><div class="band" id="bt" style="display:none"></div><div class="band" id="bb" style="display:none"></div><div id="wm" style="display:none"></div>
+<script>
+(function(){
+var GW='https://script.google.com/macros/s/AKfycbwnyMM9tZX-KOxCzk0-fq2z6BuDzn4RmWTPjlsdXwoPCsl7Qluo1OiJZoiBino2dV4e/exec';
+var q=new URLSearchParams(location.search),unit=Number(q.get('u')),kind=q.get('k')==='a'?'a':'t';
+var msg=document.getElementById('msg');
+function say(t){msg.style.display='block';msg.textContent=t}
+function post(o){return fetch(GW,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(function(r){return r.json()})}
+var sess=null;try{sess=JSON.parse(sessionStorage.getItem('najm_unit_sess')||'null')}catch(e){}
+if(!sess||!sess.s||!sess.g||!(unit>=1&&unit<=3)){say('ادخل من التطبيق بحسابك أولاً ثم افتح الاختبار من صفحة المحتوى.');return}
+['contextmenu','dragstart','copy','cut','selectstart'].forEach(function(ev){document.addEventListener(ev,function(e){e.preventDefault()})});
+document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if((e.ctrlKey||e.metaKey)&&'spcua'.indexOf(k)>-1||k==='printscreen'||e.key==='F12')e.preventDefault()});
+post({a:'login',s:sess.s,g:sess.g}).then(function(L){
+  if(!L.ok){say(L.reason==='locked'?'محاولات كثيرة. حاول لاحقاً.':'البيانات غير مطابقة أو الاشتراك غير مفعّل');return}
+  var u=L.units.filter(function(x){return x.id===unit})[0];if(!u){say('غير متاح');return}
+  if(kind==='t'){
+    say('جارٍ تجهيز الملف…');
+    post({a:'file',t:L.token,u:unit}).then(function(F){
+      if(!F.ok){say('غير متاح');return}
+      var b=atob(F.data),n=b.length,a=new Uint8Array(n);for(var i=0;i<n;i++)a[i]=b.charCodeAt(i);
+      var url=URL.createObjectURL(new Blob([a],{type:'application/pdf'}));
+      msg.innerHTML='';var t=document.createElement('div');t.textContent=u.title;var btn=document.createElement('button');btn.textContent='تحميل الاختبار (PDF)';
+      btn.onclick=function(){var l=document.createElement('a');l.href=url;l.download=F.name;document.body.appendChild(l);l.click();l.remove()};
+      msg.appendChild(t);msg.appendChild(document.createElement('br'));msg.appendChild(btn);
+    });return;
+  }
+  msg.style.display='none';document.getElementById('top').style.display='flex';document.getElementById('ttl').textContent='إجابة '+u.title;
+  ['bt','bb'].forEach(function(i){document.getElementById(i).style.display='block'});
+  var wm=document.getElementById('wm'),line=(L.name+' - '+L.phone+'      ');var s='';for(var r=0;r<40;r++){s+=line.repeat(6)+'\n'}wm.textContent=s;wm.style.display='block';
+  var box=document.getElementById('pages');
+  (function next(n){if(n>u.pages)return;post({a:'page',t:L.token,u:unit,n:n}).then(function(P){
+    if(!P.ok){say('تعذر تحميل صفحة');return}var im=new Image();im.draggable=false;im.src=P.data;box.appendChild(im);next(n+1)})})(1);
+});
+})();
+</script></body></html>
