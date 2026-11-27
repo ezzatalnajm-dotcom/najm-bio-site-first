@@ -685,12 +685,12 @@
 <!-- Telegram bot modal -->
 <div class="modal-overlay" id="tgModal" onclick="if(event.target===this)closeTg()">
     <div class="modal-box">
-        <h3 id="tgTitle">📚 الواجبات</h3>
-        <p style="text-align:center;color:#1e5a7a;font-weight:700;font-size:14px;margin:-8px 0 12px">للدخول إلى قنوات الواجبات والفيديوهات اتبع الخطوات:</p>
+        <h3 id="tgTitle">🎬 الفيديوهات</h3>
+        <p style="text-align:center;color:#1e5a7a;font-weight:700;font-size:14px;margin:-8px 0 12px">للدخول إلى قناة الفيديوهات اتبع الخطوات:</p>
         <ol class="tg-steps">
             <li>اضغط «فتح البوت» ثم اكتب <b dir="ltr">/start</b> وانتظر دقيقة.</li>
             <li>اضغط «شارك رقمي 📱» بالرقم المسجل لدى الأستاذ وانتظر دقيقة.</li>
-            <li>سيصلك رابطان: أحدهما للواجبات والآخر للفيديوهات.</li>
+            <li>سيصلك رابط الفيديوهات.</li>
         </ol>
         <p style="text-align:center;color:#c05621;font-size:13px;font-weight:700;margin:0 0 14px">⚠️ الرابط يعمل لمرة واحدة فقط، فادخل به من حسابك أنت.</p>
         <a class="btn-primary" href="https://t.me/ALNAJM_bio_bot" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">فتح البوت</a>
@@ -1619,7 +1619,6 @@
             <span>👤 مرحباً، ${currentUser.name}</span>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <a class="gallery-btn" href="https://najm-bio-site-first.vercel.app/gallery.html" target="_blank" rel="noopener">🎨 المعرض</a>
-                <button class="tg-btn tg-hw" onclick="openTg('hw')">📚 الواجبات</button>
                 <button class="tg-btn tg-vid" onclick="openTg('vid')">🎬 الفيديوهات</button>
                 <button class="logout-btn" onclick="logout()">خروج</button>
             </div>
