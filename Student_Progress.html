@@ -384,12 +384,14 @@ async function tGo(again){
   }
 }
 /* آخر دخول / آخر حل + تنبيه ولي الأمر (رابط واتساب جاهز، لا يُرسَل شيء إلا بضغطك) */
+const PN_DAYS=7; /* عدد الأيام بدون اختبار لإظهار زر تنبيه ولي الأمر (قابل للتعديل) */
+function dAgo(d){const n=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Qatar'}).format(new Date());return Math.round((Date.parse(n)-Date.parse(d))/864e5)}
 function dtxt(d){return d===0?'اليوم':d===1?'أمس':'منذ '+d+' يوم'}
-function pmsg(s){const t=s.resultDays==null?'لم يحل أي واجب على منصة النجم حتى الآن':'لم يحل أي واجب على منصة النجم منذ '+s.resultDays+' يوم (آخر حل بتاريخ '+s.lastResult+')';
+function pmsg(s){const n=dAgo(s.lastResult),t='لم يحل أي اختبار على المنصة منذ '+n+' يوم (آخر اختبار بتاريخ '+s.lastResult+')';
 return 'السلام عليكم ورحمة الله،\nولي أمر الطالب '+(s.name||'').trim()+'\nهذه رسالة إلكترونية للتنبيه فقط، ولا داعي للرد عليها.\nنود إعلامكم أن الطالب '+t+'.\nنرجو متابعته حتى لا يتأخر عن زملائه.\nأ. عزت نجم الأحياء ⭐'}
-function act(s){const lg=s.loginDays,rs=s.resultDays,c=d=>d>=15?'#ff6b6b':d>=7?'#ffb454':'#7bd88f';
-let h='<small style="margin-top:3px">🔑 آخر دخول: '+(lg==null?'<span style="color:#8a93a5">لم يُسجَّل بعد</span>':'<b style="color:'+c(lg)+'">'+dtxt(lg)+'</b>')+' &nbsp;·&nbsp; ✍️ آخر حل: '+(rs==null?'<b style="color:#ff6b6b">لم يحل أي اختبار</b>':'<b style="color:'+c(rs)+'">'+dtxt(rs)+'</b>')+'</small>';
-if(s.parent&&(rs==null||rs>=7)) h+='<a href="https://wa.me/'+encodeURIComponent(s.parent)+'?text='+encodeURIComponent(pmsg(s))+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;font-size:11px;color:var(--gold);text-decoration:none;border:1px solid var(--gold);border-radius:8px;padding:2px 8px">📲 تنبيه ولي الأمر</a>';
+function act(s){const lg=s.lastLogin?dAgo(s.lastLogin):null,rs=s.lastResult?dAgo(s.lastResult):null,c=d=>d>=15?'#ff6b6b':d>=7?'#ffb454':'#7bd88f';
+let h='<small style="margin-top:3px">🔑 آخر دخول: '+(lg==null?'<span style="color:#8a93a5">لم يُسجَّل بعد</span>':'<b style="color:'+c(lg)+'">'+dtxt(lg)+'</b>')+' &nbsp;·&nbsp; ✍️ آخر حل: '+(rs==null?'<span style="color:#8a93a5">لا يوجد اختبار مسجّل</span>':'<b style="color:'+c(rs)+'">'+dtxt(rs)+'</b>')+'</small>';
+if(s.parent&&rs!=null&&rs>=PN_DAYS) h+='<a href="https://wa.me/'+encodeURIComponent(s.parent)+'?text='+encodeURIComponent(pmsg(s))+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;font-size:11px;color:var(--gold);text-decoration:none;border:1px solid var(--gold);border-radius:8px;padding:2px 8px">📲 تنبيه ولي الأمر</a>';
 return h}
 function tRender(){
   const gs={};TD.forEach(s=>{const g=s.group||'بدون مجموعة';(gs[g]=gs[g]||[]).push(s)});
