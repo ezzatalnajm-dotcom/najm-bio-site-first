@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="robots" content="noindex"><title>إجابات الاختبارات القصيرة</title>
+<style>
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{margin:0;font-family:Cairo,Tahoma,sans-serif;background:#0f2a3a;color:#fff}
+#msg{padding:40px 20px;text-align:center;font-size:18px;line-height:1.8}
+#top{position:fixed;top:0;left:0;right:0;z-index:5;background:#123a52;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+#pages{padding:60px 0 40vh;text-align:center}
+#pages img{width:min(100%,900px);display:block;margin:0 auto 6px;pointer-events:none;-webkit-user-drag:none}
+.band{position:fixed;left:0;right:0;z-index:4;background:rgba(40,40,40,.93);pointer-events:none}
+#bt{top:46px;height:24vh}#bb{bottom:0;height:36vh}
+#wm{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden}
+.wmi{position:absolute;display:flex;flex-direction:column;align-items:center;transform:rotate(-30deg);color:rgba(60,60,60,.30);font-size:13px;line-height:1.25;white-space:nowrap}.wmi i{font-style:normal;font-size:13px}
+button{font:inherit;padding:10px 22px;border-radius:10px;border:0;background:#1e8a5a;color:#fff;font-size:17px}
+@media print{body{display:none}}
+</style></head><body>
+<div id="msg" style="display:none"></div><div id="entry" style="padding:40px 20px;text-align:center"><div style="font-size:20px;margin-bottom:14px">إجابات ملازم النجم</div><div style="font-size:14px;opacity:.85">رقم الطالب</div><input id="ps" type="tel" dir="ltr" inputmode="numeric" value="974" style="width:min(90%,320px);padding:12px;font-size:18px;border-radius:10px;border:0;margin:6px;text-align:left;-webkit-user-select:text;user-select:text"><br><div style="font-size:14px;opacity:.85">رقم ولي الأمر</div><input id="pg" type="tel" dir="ltr" inputmode="numeric" value="974" style="width:min(90%,320px);padding:12px;font-size:18px;border-radius:10px;border:0;margin:6px;text-align:left;-webkit-user-select:text;user-select:text"><br><div id="us" style="margin:10px"></div><div id="err" style="color:#ffb4b4;min-height:24px"></div><button id="go">دخول</button></div>
+<div id="top" style="display:none"><span id="ttl"></span><span>مرّر لأسفل: تظهر النافذة الوسطى فقط</span></div>
+<div id="pages"></div><div class="band" id="bt" style="display:none"></div><div class="band" id="bb" style="display:none"></div><div id="wm" style="display:none"></div>
+<script>
+(function(){
+var SETS={a:{gw:'https://script.google.com/macros/s/AKfycbyEuV0oBMpRGdPy9fXje5c1p1nWLN-7KSBwNodWNAISOuDt7jYhoSTE6gOkMM2lnPDVlA/exec',t:'إجابات الاختبارات القصيرة A'},b:{gw:'https://script.google.com/macros/s/AKfycbz_UqYUgJaTZ3l11ylVhGZuoBqXho095OL8av8STBPDL6om0eCHmB1DKcM0bKwcv9Wn/exec',t:'إجابات الاختبارات القصيرة B'}};var SET=SETS[new URLSearchParams(location.search).get('s')==='b'?'b':'a'];var GW=SET.gw;
+var msg=document.getElementById('msg'),unit=1;
+function say(t){msg.style.display='block';msg.textContent=t}
+function post(o){return fetch(GW,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(function(r){return r.json()})}
+var fixedU=1;var us=document.getElementById('us');if(fixedU>=1&&fixedU<=3){unit=fixedU;document.querySelector('#entry div').textContent=SET.t;us.style.display='none'}[1,2,3].forEach(function(i){var l=document.createElement('label');l.style.cssText='margin:0 8px;font-size:16px';var r=document.createElement('input');r.type='radio';r.name='u';r.value=i;if(i===(Number(new URLSearchParams(location.search).get('u'))||1))r.checked=true;l.appendChild(r);l.appendChild(document.createTextNode(' الوحدة '+i));us.appendChild(l)});
+['contextmenu','dragstart','copy','cut'].forEach(function(ev){document.addEventListener(ev,function(e){if(e.target.tagName!=='INPUT')e.preventDefault()})});
+document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if((e.ctrlKey||e.metaKey)&&'spcu'.indexOf(k)>-1||k==='printscreen'||e.key==='F12')e.preventDefault()});
+var busy=false;
+document.getElementById('go').onclick=function(){if(busy)return;var S=document.getElementById('ps').value.replace(/\D/g,''),G=document.getElementById('pg').value.replace(/\D/g,'');unit=(fixedU>=1&&fixedU<=3)?fixedU:Number(document.querySelector('input[name=u]:checked').value);var er=document.getElementById('err');er.textContent='';
+if(S.length<11||G.length<11){er.textContent='اكتب الرقمين كاملين';return}
+busy=true;run(S,G,er)};
+try{var ss=JSON.parse(sessionStorage.getItem('najm_unit_sess')||'null');var ee=document.getElementById('err');if(ss&&ss.s&&ss.g&&fixedU>=1&&fixedU<=3){busy=true;document.getElementById('entry').style.display='none';say('جارٍ التحميل…');run(String(ss.s).replace(/\D/g,''),String(ss.g).replace(/\D/g,''),ee)}}catch(e){}
+function run(S,G,er){
+post({a:'login',s:S,g:G}).then(function(L){
+  if(!L.ok){busy=false;document.getElementById('entry').style.display='block';msg.style.display='none';er.textContent=(L.reason==='locked'?'محاولات كثيرة. حاول لاحقاً.':L.reason==='denied'?'غير متاح حالياً.':'البيانات غير مطابقة أو الاشتراك غير مفعّل');return}document.getElementById('entry').style.display='none';
+  var u={title:SET.t,pages:L.pages||0};if(!u.pages){say('غير متاح');return}
+  msg.style.display='none';document.getElementById('top').style.display='flex';document.getElementById('ttl').textContent=u.title;
+  ['bt','bb'].forEach(function(i){document.getElementById(i).style.display='block'});
+  var wm=document.getElementById('wm');wm.textContent='';for(var k=0;k<6;k++){var it=document.createElement('div');it.className='wmi';it.style.top=(6+k*17)+'%';it.style.left=(k%2?8:42)+'%';var a=document.createElement('span');a.textContent=L.name;var p=document.createElement('span');p.textContent=L.phone;p.dir='ltr';var c=document.createElement('i');c.textContent='أ. عزت';it.appendChild(a);it.appendChild(p);it.appendChild(c);wm.appendChild(it)}wm.style.display='block';
+  var box=document.getElementById('pages');
+  (function next(n){if(n>u.pages)return;post({a:'page',t:L.token,n:n}).then(function(P){
+    if(!P.ok){say('تعذر تحميل صفحة');return}var im=new Image();im.draggable=false;im.src=P.data;box.appendChild(im);next(n+1)})})(1);
+}).catch(function(){busy=false;document.getElementById('entry').style.display='block';msg.style.display='none';er.textContent='تعذر الاتصال'});}
+})();
+</script></body></html>
+
