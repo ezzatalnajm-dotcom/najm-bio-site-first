@@ -26,7 +26,7 @@ var q=new URLSearchParams(location.search),bk=Number(q.get('n'));
 var msg=document.getElementById('msg');
 function say(t){msg.style.display='block';msg.textContent=t}
 function post(o){return fetch(GW,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(function(r){return r.json()})}
-var u=null;try{u=JSON.parse(localStorage.getItem('najm_shared_user')||sessionStorage.getItem('najm_shared_user')||'null')}catch(e){}
+var u=null;try{var ss=JSON.parse(sessionStorage.getItem('najm_unit_sess')||'null');if(ss&&ss.s&&ss.g)u={phone:ss.s,parent:ss.g};else u=JSON.parse(localStorage.getItem('najm_shared_user')||'null')}catch(e){}
 if(!u||!u.phone||!u.parent||!(bk>=1&&bk<=10)){say('ادخل من التطبيق بحسابك أولاً ثم افتح الإجابة من صفحة المحتوى.');return}
 ['contextmenu','dragstart','copy','cut','selectstart'].forEach(function(ev){document.addEventListener(ev,function(e){e.preventDefault()})});
 document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if((e.ctrlKey||e.metaKey)&&'spcua'.indexOf(k)>-1||k==='printscreen'||e.key==='F12')e.preventDefault()});
