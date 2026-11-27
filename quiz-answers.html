@@ -1,49 +1,205 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta name="robots" content="noindex"><title>إجابات الاختبارات القصيرة</title>
+<html lang="ar" dir="rtl">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>إجابات الاختبارات القصيرة</title>
+<meta charset="utf-8">
 <style>
-*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-body{margin:0;font-family:Cairo,Tahoma,sans-serif;background:#0f2a3a;color:#fff}
-#msg{padding:40px 20px;text-align:center;font-size:18px;line-height:1.8}
-#top{position:fixed;top:0;left:0;right:0;z-index:5;background:#123a52;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:14px}
-#pages{padding:60px 0 40vh;text-align:center}
-#pages img{width:min(100%,900px);display:block;margin:0 auto 6px;pointer-events:none;-webkit-user-drag:none}
-.band{position:fixed;left:0;right:0;z-index:4;background:rgba(40,40,40,.93);pointer-events:none}
-#bt{top:46px;height:24vh}#bb{bottom:0;height:36vh}
-#wm{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden}
-.wmi{position:absolute;display:flex;flex-direction:column;align-items:center;transform:rotate(-30deg);color:rgba(60,60,60,.30);font-size:13px;line-height:1.25;white-space:nowrap}.wmi i{font-style:normal;font-size:13px}
-button{font:inherit;padding:10px 22px;border-radius:10px;border:0;background:#1e8a5a;color:#fff;font-size:17px}
-@media print{body{display:none}}
-</style></head><body>
-<div id="msg" style="display:none"></div><div id="entry" style="padding:40px 20px;text-align:center"><div style="font-size:20px;margin-bottom:14px">إجابات ملازم النجم</div><div style="font-size:14px;opacity:.85">رقم الطالب</div><input id="ps" type="tel" dir="ltr" inputmode="numeric" value="974" style="width:min(90%,320px);padding:12px;font-size:18px;border-radius:10px;border:0;margin:6px;text-align:left;-webkit-user-select:text;user-select:text"><br><div style="font-size:14px;opacity:.85">رقم ولي الأمر</div><input id="pg" type="tel" dir="ltr" inputmode="numeric" value="974" style="width:min(90%,320px);padding:12px;font-size:18px;border-radius:10px;border:0;margin:6px;text-align:left;-webkit-user-select:text;user-select:text"><br><div id="us" style="margin:10px"></div><div id="err" style="color:#ffb4b4;min-height:24px"></div><button id="go">دخول</button></div>
-<div id="top" style="display:none"><span id="ttl"></span><span>مرّر لأسفل: تظهر النافذة الوسطى فقط</span></div>
-<div id="pages"></div><div class="band" id="bt" style="display:none"></div><div class="band" id="bb" style="display:none"></div><div id="wm" style="display:none"></div>
+  :root { --page:#fdfbf9; --ink:#4a3431; --ink2:#7d6a66; --hair:#e4dcd6; }
+  html, body { margin:0; height:100%; background:var(--page); color:var(--ink); font-family: system-ui, "Segoe UI", Tahoma, Arial, sans-serif; -webkit-text-size-adjust:100%; }
+  body { overflow:hidden; }
+  #login { max-width:360px; margin:0 auto; padding:28px 16px; display:flex; flex-direction:column; gap:12px; }
+  #login h1 { font-size:22px; margin:0 0 4px; text-align:center; font-weight:600; }
+  #login label { display:flex; flex-direction:column; gap:4px; font-size:15px; }
+  #login input { font-size:18px; padding:10px 12px; border:1px solid var(--hair); border-radius:10px; background:#fff; color:var(--ink); direction:ltr; }
+  #go { min-height:48px; border-radius:24px; border:0; background:var(--ink); color:var(--page); font-size:17px; cursor:pointer; }
+  #go:disabled { opacity:.6; }
+  #err { min-height:22px; margin:0; color:#a33; text-align:center; font-size:14px; }
+  #app { display:none; height:100%; box-sizing:border-box; padding:4px 0; align-items:center; justify-content:center; gap:6px; flex-direction:column; }
+  #app.land { flex-direction:row; padding:4px 6px; }
+  #ctl { display:flex; align-items:center; justify-content:center; gap:10px; }
+  #app.land #ctl { flex-direction:column; gap:4px; }
+  .btn { min-width:44px; min-height:44px; border-radius:22px; border:1px solid var(--hair); background:var(--page); color:var(--ink); font-size:20px; cursor:pointer; }
+  .btn:disabled { opacity:.4; }
+  #app.land .btn { min-width:40px; min-height:40px; font-size:18px; }
+  #zl { min-width:52px; text-align:center; color:var(--ink2); font-size:14px; }
+  #view { position:relative; background:#fff; overflow:hidden; }
+  #win { position:absolute; inset:0; overflow:auto; touch-action:pan-x pan-y; -webkit-overflow-scrolling:touch; user-select:none; -webkit-user-select:none; }
+  .pg { display:block; background:#f3f1ee; }
+  .pg img { display:block; width:100%; height:auto; pointer-events:none; -webkit-user-drag:none; }
+  .pad { width:1px; }
+  .shade { position:absolute; left:0; background:rgba(226,223,218,.85); pointer-events:none; z-index:2; }
+  #shT { top:0; border-bottom:1px solid rgba(90,90,90,.35); }
+  #shB { bottom:0; border-top:1px solid rgba(90,90,90,.35); }
+  #wm { position:absolute; left:0; top:0; bottom:0; overflow:hidden; pointer-events:none; z-index:1; }
+  .wmi { position:absolute; display:flex; flex-direction:column; align-items:center; transform:rotate(-30deg); color:rgba(60,60,60,.30); font-size:13px; line-height:1.25; white-space:nowrap; }
+  .wmi i { font-style:normal; font-size:10px; }
+</style>
+</head>
+<body>
+<form id="login" style="display:none" onsubmit="return false">
+  <h1 id="ttl">QUIZES ANSWERS</h1>
+  <label>هاتف الطالب<input id="s" inputmode="tel" autocomplete="off" value="974"></label>
+  <label>هاتف ولي الأمر<input id="g" inputmode="tel" autocomplete="off" value="974"></label>
+  <button type="button" id="go">دخول</button>
+  <p id="err" role="alert"></p>
+</form>
+
+<div id="app">
+  <div id="ctl"><button class="btn" id="zo" aria-label="Zoom out">-</button><span id="zl">100%</span><button class="btn" id="zi" aria-label="Zoom in">+</button></div>
+  <div id="view">
+    <div id="win" tabindex="0"></div>
+    <div id="wm"></div>
+    <div class="shade" id="shT"></div><div class="shade" id="shB"></div>
+  </div>
+</div>
+
 <script>
+var MSG = { missing:'اكتب رقم الطالب ورقم ولي الأمر.', no_match:'البيانات غير مطابقة أو الاشتراك غير مفعّل.', locked:'محاولات كثيرة. جرّب بعد ١٥ دقيقة.', denied:'غير متاح حالياً.', bad_request:'حصل خطأ. حاول مرة أخرى.' };
+var $ = function (id) { return document.getElementById(id); };
+var RATIO = 1.415, MINZ = 1, MAXZ = 2.5, STEP = 0.25;
+var S = { tries:{}, token:'', pages:20, zoom:1, W:0, H:0, shade:0, loaded:{}, loading:{}, who:null, pinch:null };
+
+var SETS={a:{gw:'https://script.google.com/macros/s/AKfycbyEuV0oBMpRGdPy9fXje5c1p1nWLN-7KSBwNodWNAISOuDt7jYhoSTE6gOkMM2lnPDVlA/exec',t:'إجابات الاختبارات القصيرة A'},b:{gw:'https://script.google.com/macros/s/AKfycbz_UqYUgJaTZ3l11ylVhGZuoBqXho095OL8av8STBPDL6om0eCHmB1DKcM0bKwcv9Wn/exec',t:'إجابات الاختبارات القصيرة B'}};
+var SET=SETS[(new URLSearchParams(location.search).get('s')||'a').toLowerCase()==='b'?'b':'a'];
+document.getElementById('ttl').textContent=SET===SETS.b?'B QUIZES ANSWERS':'A QUIZES ANSWERS';
+function post(o){return fetch(SET.gw,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(function(r){return r.json()})}
+function run(fn, args, ok, bad) {
+  var p = fn === 'apiLogin' ? post({a:'login', s:String(args[0]).replace(/\D/g,''), g:String(args[1]).replace(/\D/g,'')}) : post({a:'page', t:args[0], n:args[1]});
+  p.then(ok).catch(bad || function () { ok(null); });
+}
+
+$('go').onclick = submit;
+['s', 'g'].forEach(function (id) { $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); }); });
+function submit() {
+  var b = $('go'); if (b.disabled) return;
+  b.disabled = true; b.textContent = '...'; $('err').textContent = '';
+  run('apiLogin', [$('s').value, $('g').value], function (j) {
+    b.disabled = false; b.textContent = 'دخول';
+    if (j && j.ok && j.token) start(j);
+    else $('err').textContent = j ? (MSG[j.reason] || 'تعذّر الدخول.') : 'تعذّر الاتصال. حاول مرة أخرى.';
+  });
+}
+
+function start(j) {
+  S.token = j.token; S.pages = j.pages || 20; S.who = { name: j.name, phone: j.phone };
+  $('login').style.display = 'none'; $('app').style.display = 'flex';
+  $('s').value = ''; $('g').value = '';
+  build(); layout();
+  window.addEventListener('resize', layout);
+  window.addEventListener('orientationchange', layout);
+  $('zi').onclick = function () { setZoom(S.zoom + STEP); };
+  $('zo').onclick = function () { setZoom(S.zoom - STEP); };
+  $('win').addEventListener('scroll', queue, { passive: true });
+  pinchInit();
+  queue();
+}
+
+function build() {
+  var w = $('win'); w.innerHTML = '';
+  var top = document.createElement('div'); top.className = 'pad'; top.id = 'padT'; w.appendChild(top);
+  for (var i = 1; i <= S.pages; i++) { var d = document.createElement('div'); d.className = 'pg'; d.id = 'p' + i; w.appendChild(d); }
+  var bot = document.createElement('div'); bot.className = 'pad'; bot.id = 'padB'; w.appendChild(bot);
+  var wm = $('wm'); wm.innerHTML = '';
+  for (var k = 0; k < 6; k++) {
+    var it = document.createElement('div'); it.className = 'wmi';
+    it.style.top = (6 + k * 17) + '%'; it.style.left = (k % 2 ? 8 : 42) + '%';
+    var a = document.createElement('span'); a.textContent = S.who.name;
+    var b = document.createElement('span'); b.textContent = S.who.phone; b.dir = 'ltr';
+    var c = document.createElement('i'); c.textContent = 'أستاذ عزت نجم الأحياء';
+    it.appendChild(a); it.appendChild(b); it.appendChild(c); wm.appendChild(it);
+  }
+}
+
+
+function layout() {
+  var app = $('app'), iw = window.innerWidth, ih = window.innerHeight;
+  var land = iw > ih * 1.3 && ih < 600;
+  app.className = land ? 'land' : '';
+  var ctlW = land ? 56 : 0, ctlH = land ? 0 : 56;
+  var W = Math.min(iw - ctlW - 12, land ? 2000 : 620);
+  var H, shade;
+  if (land) { H = ih - 8; shade = 24; }
+  else { H = Math.min(Math.round(W * 1.03), ih - ctlH - 8); shade = Math.round(H * 0.238); }
+  var pageH = W * RATIO, band = H - 2 * shade, maxBand = 0.4 * pageH;
+  if (band > maxBand) { band = Math.floor(maxBand); H = band + 2 * shade; }
+  S.W = W; S.H = H; S.shade = shade;
+  var v = $('view'); v.style.width = W + 'px'; v.style.height = H + 'px';
+  $('shT').style.height = shade + 'px'; $('shB').style.height = shade + 'px';
+  $('padT').style.height = shade + 'px'; $('padB').style.height = shade + 'px';
+  $('wm').style.right = (v.offsetWidth - $('win').clientWidth) + 'px';
+  $('shT').style.right = $('shB').style.right = (v.offsetWidth - $('win').clientWidth) + 'px';
+  sizePages();
+}
+function sizePages() {
+  var w = Math.round(S.W * S.zoom);
+  for (var i = 1; i <= S.pages; i++) { var d = $('p' + i); d.style.width = w + 'px'; d.style.height = S.loaded[i] ? 'auto' : Math.round(w * RATIO) + 'px'; }
+  $('zl').textContent = Math.round(S.zoom * 100) + '%';
+  $('zo').disabled = S.zoom <= MINZ; $('zi').disabled = S.zoom >= MAXZ;
+}
+function setZoom(z) {
+  z = Math.min(MAXZ, Math.max(MINZ, z)); var old = S.zoom; if (z === old) return;
+  var el = $('win'); var cx = (el.scrollLeft + el.clientWidth / 2) / old, cy = (el.scrollTop + el.clientHeight / 2) / old;
+  S.zoom = z; sizePages();
+  el.scrollLeft = cx * z - el.clientWidth / 2; el.scrollTop = cy * z - el.clientHeight / 2;
+  var sb = $('view').offsetWidth - el.clientWidth;
+  $('shT').style.right = $('shB').style.right = $('wm').style.right = sb + 'px';
+}
+function pinchInit() {
+  var el = $('win');
+  var dist = function (t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); };
+  el.addEventListener('touchstart', function (e) { if (e.touches.length === 2) S.pinch = { d: dist(e.touches), z: S.zoom }; }, { passive: true });
+  el.addEventListener('touchmove', function (e) { if (e.touches.length === 2 && S.pinch) { e.preventDefault(); setZoom(S.pinch.z * dist(e.touches) / S.pinch.d); } }, { passive: false });
+  el.addEventListener('touchend', function () { S.pinch = null; });
+}
+
+
+function current() {
+  var el = $('win'), ph = Math.round(S.W * S.zoom * RATIO);
+  return Math.min(S.pages, Math.max(1, Math.floor((el.scrollTop - S.shade + el.clientHeight / 2) / ph) + 1));
+}
+function queue() {
+  var c = current(), order = [];
+  for (var d = 0; d < S.pages; d++) { [c + d, c - d].forEach(function (i) { if (i >= 1 && i <= S.pages && order.indexOf(i) < 0) order.push(i); }); }
+  var active = Object.keys(S.loading).length;
+  for (var k = 0; k < order.length && active < 2; k++) {
+    var i = order[k]; if (S.loaded[i] || S.loading[i]) continue;
+    fetchPage(i); active++;
+  }
+}
+function fetchPage(i) {
+  S.loading[i] = true;
+  run('apiPage', [S.token, i], function (r) {
+    delete S.loading[i];
+    if (r && r.ok) {
+      var im = new Image(); im.alt = 'Page ' + i; im.draggable = false;
+      im.onload = function () { var d = $('p' + i); d.innerHTML = ''; d.appendChild(im); S.loaded[i] = true; sizePages(); queue(); };
+      im.src = r.data;
+    } else if (r && r.reason === 'denied') {
+      expire();
+    } else { retry(i); }
+  }, function () { delete S.loading[i]; retry(i); });
+}
+function retry(i) {
+  S.tries[i] = (S.tries[i] || 0) + 1;
+  if (S.tries[i] <= 3) setTimeout(queue, 3000); else S.loaded[i] = S.loaded[i] || false;
+}
+function expire() {
+  S.token = ''; $('app').style.display = 'none'; $('login').style.display = 'flex';
+  $('err').textContent = 'انتهت الجلسة أو الاشتراك غير مفعّل. ادخل من جديد.';
+  S.loaded = {}; S.loading = {};
+}
 (function(){
-var SETS={a:{gw:'https://script.google.com/macros/s/AKfycbyEuV0oBMpRGdPy9fXje5c1p1nWLN-7KSBwNodWNAISOuDt7jYhoSTE6gOkMM2lnPDVlA/exec',t:'إجابات الاختبارات القصيرة A'},b:{gw:'https://script.google.com/macros/s/AKfycbz_UqYUgJaTZ3l11ylVhGZuoBqXho095OL8av8STBPDL6om0eCHmB1DKcM0bKwcv9Wn/exec',t:'إجابات الاختبارات القصيرة B'}};var SET=SETS[new URLSearchParams(location.search).get('s')==='b'?'b':'a'];var GW=SET.gw;
-var msg=document.getElementById('msg'),unit=1;
-function say(t){msg.style.display='block';msg.textContent=t}
-function post(o){return fetch(GW,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(function(r){return r.json()})}
-var fixedU=1;var us=document.getElementById('us');if(fixedU>=1&&fixedU<=3){unit=fixedU;document.querySelector('#entry div').textContent=SET.t;us.style.display='none'}[1,2,3].forEach(function(i){var l=document.createElement('label');l.style.cssText='margin:0 8px;font-size:16px';var r=document.createElement('input');r.type='radio';r.name='u';r.value=i;if(i===(Number(new URLSearchParams(location.search).get('u'))||1))r.checked=true;l.appendChild(r);l.appendChild(document.createTextNode(' الوحدة '+i));us.appendChild(l)});
-['contextmenu','dragstart','copy','cut'].forEach(function(ev){document.addEventListener(ev,function(e){if(e.target.tagName!=='INPUT')e.preventDefault()})});
-document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if((e.ctrlKey||e.metaKey)&&'spcu'.indexOf(k)>-1||k==='printscreen'||e.key==='F12')e.preventDefault()});
-var busy=false;
-document.getElementById('go').onclick=function(){if(busy)return;var S=document.getElementById('ps').value.replace(/\D/g,''),G=document.getElementById('pg').value.replace(/\D/g,'');unit=(fixedU>=1&&fixedU<=3)?fixedU:Number(document.querySelector('input[name=u]:checked').value);var er=document.getElementById('err');er.textContent='';
-if(S.length<11||G.length<11){er.textContent='اكتب الرقمين كاملين';return}
-busy=true;run(S,G,er)};
-try{var ss=JSON.parse(sessionStorage.getItem('najm_unit_sess')||'null');var ee=document.getElementById('err');if(ss&&ss.s&&ss.g&&fixedU>=1&&fixedU<=3){busy=true;document.getElementById('entry').style.display='none';say('جارٍ التحميل…');run(String(ss.s).replace(/\D/g,''),String(ss.g).replace(/\D/g,''),ee)}}catch(e){}
-function run(S,G,er){
-post({a:'login',s:S,g:G}).then(function(L){
-  if(!L.ok){busy=false;document.getElementById('entry').style.display='block';msg.style.display='none';er.textContent=(L.reason==='locked'?'محاولات كثيرة. حاول لاحقاً.':L.reason==='denied'?'غير متاح حالياً.':'البيانات غير مطابقة أو الاشتراك غير مفعّل');return}document.getElementById('entry').style.display='none';
-  var u={title:SET.t,pages:L.pages||0};if(!u.pages){say('غير متاح');return}
-  msg.style.display='none';document.getElementById('top').style.display='flex';document.getElementById('ttl').textContent=u.title;
-  ['bt','bb'].forEach(function(i){document.getElementById(i).style.display='block'});
-  var wm=document.getElementById('wm');wm.textContent='';for(var k=0;k<6;k++){var it=document.createElement('div');it.className='wmi';it.style.top=(6+k*17)+'%';it.style.left=(k%2?8:42)+'%';var a=document.createElement('span');a.textContent=L.name;var p=document.createElement('span');p.textContent=L.phone;p.dir='ltr';var c=document.createElement('i');c.textContent='أ. عزت';it.appendChild(a);it.appendChild(p);it.appendChild(c);wm.appendChild(it)}wm.style.display='block';
-  var box=document.getElementById('pages');
-  (function next(n){if(n>u.pages)return;post({a:'page',t:L.token,n:n}).then(function(P){
-    if(!P.ok){say('تعذر تحميل صفحة');return}var im=new Image();im.draggable=false;im.src=P.data;box.appendChild(im);next(n+1)})})(1);
-}).catch(function(){busy=false;document.getElementById('entry').style.display='block';msg.style.display='none';er.textContent='تعذر الاتصال'});}
+  var ss=null; try{ss=JSON.parse(sessionStorage.getItem('najm_unit_sess')||'null')}catch(e){}
+  if(ss&&ss.s&&ss.g&&String(ss.s).length>=8&&String(ss.g).length>=8){
+    run('apiLogin',[ss.s,ss.g],function(j){
+      if(j&&j.ok&&j.token){start(j)}
+      else{$('login').style.display='flex';$('err').textContent=j?(MSG[j.reason]||'تعذّر الدخول.'):'تعذّر الاتصال. حاول مرة أخرى.'}
+    });
+  } else { $('login').style.display='flex'; }
 })();
-</script></body></html>
+document.addEventListener('contextmenu', function (e) { if ($('app').style.display !== 'none') e.preventDefault(); });
+</script>
+</body>
+</html>
 
