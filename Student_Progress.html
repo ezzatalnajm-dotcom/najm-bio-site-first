@@ -383,6 +383,14 @@ async function tGo(again){
     if(again){alert(m)}else{e.textContent=m;e.style.display='block'}
   }
 }
+/* آخر دخول / آخر حل + تنبيه ولي الأمر (رابط واتساب جاهز، لا يُرسَل شيء إلا بضغطك) */
+function dtxt(d){return d===0?'اليوم':d===1?'أمس':'منذ '+d+' يوم'}
+function pmsg(s){const t=s.resultDays==null?'لم يحل أي واجب على منصة النجم حتى الآن':'لم يحل أي واجب على منصة النجم منذ '+s.resultDays+' يوم (آخر حل بتاريخ '+s.lastResult+')';
+return 'السلام عليكم ورحمة الله،\nولي أمر الطالب '+(s.name||'').trim()+'\nهذه رسالة إلكترونية للتنبيه فقط، ولا داعي للرد عليها.\nنود إعلامكم أن الطالب '+t+'.\nنرجو متابعته حتى لا يتأخر عن زملائه.\nأ. عزت نجم الأحياء ⭐'}
+function act(s){const lg=s.loginDays,rs=s.resultDays,c=d=>d>=15?'#ff6b6b':d>=7?'#ffb454':'#7bd88f';
+let h='<small style="margin-top:3px">🔑 آخر دخول: '+(lg==null?'<span style="color:#8a93a5">لم يُسجَّل بعد</span>':'<b style="color:'+c(lg)+'">'+dtxt(lg)+'</b>')+' &nbsp;·&nbsp; ✍️ آخر حل: '+(rs==null?'<b style="color:#ff6b6b">لم يحل أي اختبار</b>':'<b style="color:'+c(rs)+'">'+dtxt(rs)+'</b>')+'</small>';
+if(s.parent&&(rs==null||rs>=7)) h+='<a href="https://wa.me/'+encodeURIComponent(s.parent)+'?text='+encodeURIComponent(pmsg(s))+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;font-size:11px;color:var(--gold);text-decoration:none;border:1px solid var(--gold);border-radius:8px;padding:2px 8px">📲 تنبيه ولي الأمر</a>';
+return h}
 function tRender(){
   const gs={};TD.forEach(s=>{const g=s.group||'بدون مجموعة';(gs[g]=gs[g]||[]).push(s)});
   const names=Object.keys(gs).sort((a,b)=>a.localeCompare(b,'ar'));
@@ -392,7 +400,7 @@ function tRender(){
   const list=TG===''?TD:gs[TG];
   const has=list.filter(s=>s.overall!=null),no=list.filter(s=>s.overall==null);
   $('tsum').textContent=BANDS.map(b=>b[1]+': '+has.filter(s=>b[2](+s.overall)).length).join(' · ')+(no.length?' · بدون نتائج: '+no.length:'');
-  const row=s=>'<div class="st"><div>'+esc(s.name||'—')+'<small>'+(TG===''&&s.group?esc(s.group)+' · ':'')+(s.taken||0)+(TT?' من '+TT:'')+' اختبار</small></div><div style="display:flex;gap:8px;align-items:center">'+(eligT(s)?'<button class="cb" data-i="'+TD.indexOf(s)+'" onclick="tCert(+this.dataset.i)">🎓</button>':'')+'<i>'+(s.overall==null?'—':(+s.overall).toFixed(1)+'%')+'</i></div></div>';
+  const row=s=>'<div class="st"><div>'+esc(s.name||'—')+'<small>'+(TG===''&&s.group?esc(s.group)+' · ':'')+(s.taken||0)+(TT?' من '+TT:'')+' اختبار</small>'+act(s)+'</div><div style="display:flex;gap:8px;align-items:center">'+(eligT(s)?'<button class="cb" data-i="'+TD.indexOf(s)+'" onclick="tCert(+this.dataset.i)">🎓</button>':'')+'<i>'+(s.overall==null?'—':(+s.overall).toFixed(1)+'%')+'</i></div></div>';
   const nCert=TG===''?0:list.filter(eligT).length;
   $('tcertall').innerHTML=nCert?'<button class="sec" onclick="tCertAll()" style="color:var(--gold);border-color:var(--gold)">📤 شهادات المجموعة ('+nCert+')</button>':'';
   const top=has.filter(s=>(s.taken||0)>=needT()).sort((x,y)=>(y.overall-x.overall)||((y.taken||0)-(x.taken||0))).slice(0,3),med=['🥇','🥈','🥉'];
