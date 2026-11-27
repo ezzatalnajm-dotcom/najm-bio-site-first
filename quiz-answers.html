@@ -33,7 +33,7 @@
   #shB { bottom:0; border-top:1px solid rgba(90,90,90,.35); }
   #wm { position:absolute; left:0; top:0; bottom:0; overflow:hidden; pointer-events:none; z-index:1; }
   .wmi { position:absolute; display:flex; flex-direction:column; align-items:center; transform:rotate(-30deg); color:rgba(60,60,60,.30); font-size:13px; line-height:1.25; white-space:nowrap; }
-  .wmi i { font-style:normal; font-size:10px; }
+  .wmi i { font-style:normal; font-size:13px; }
 </style>
 </head>
 <body>
@@ -106,7 +106,7 @@ function build() {
     it.style.top = (6 + k * 17) + '%'; it.style.left = (k % 2 ? 8 : 42) + '%';
     var a = document.createElement('span'); a.textContent = S.who.name;
     var b = document.createElement('span'); b.textContent = S.who.phone; b.dir = 'ltr';
-    var c = document.createElement('i'); c.textContent = 'أستاذ عزت نجم الأحياء';
+    var c = document.createElement('i'); c.textContent = 'أ. عزت نجم الأحياء';
     it.appendChild(a); it.appendChild(b); it.appendChild(c); wm.appendChild(it);
   }
 }
@@ -202,4 +202,5 @@ document.addEventListener('contextmenu', function (e) { if ($('app').style.displ
 </script>
 </body>
 </html>
+
 
