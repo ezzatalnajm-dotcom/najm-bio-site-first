@@ -1404,7 +1404,7 @@
     }, true);
     // ===== اختبارات الوحدات: تمرير جلسة الطالب للصفحة الجديدة بدون وضع الرقم في الرابط =====
     document.addEventListener('click', function (ev) {
-        var a = ev.target && ev.target.closest ? ev.target.closest('a[href*="unit-test.html"], a[href*="homework.html"], a[href*="bk-answers.html"]') : null;
+        var a = ev.target && ev.target.closest ? ev.target.closest('a[href*="unit-test.html"], a[href*="homework.html"], a[href*="bk-answers.html"], a[href*="quiz-answers.html"]') : null;
         if (!a) return;
         ev.preventDefault();
         if (!currentUser) { alert('سجّل دخولك أولاً من صفحة المشتركين ثم افتح الاختبار.'); return; }
