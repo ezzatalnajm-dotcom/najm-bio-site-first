@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="robots" content="noindex"><title>إجابة الواجب</title>
+<style>
+:root{--band:rgba(40,40,40,.72)} /* band colour: single value to change */
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{margin:0;font-family:Cairo,Tahoma,sans-serif;background:#0f2a3a;color:#fff}
+#msg{padding:40px 20px;text-align:center;font-size:18px;line-height:1.8}
+#top{position:fixed;top:0;left:0;right:0;z-index:5;background:#123a52;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+#pages{padding:60px 0 40vh;text-align:center}
+#pages img{width:min(100%,900px);display:block;margin:0 auto 6px;pointer-events:none;-webkit-user-drag:none}
+.band{position:fixed;left:0;right:0;z-index:4;background:var(--band);pointer-events:none}
+#bt{top:46px;height:24vh}#bb{bottom:0;height:36vh}
+#wm{position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden;opacity:.2;font-size:13px;font-weight:700;line-height:18px;transform:rotate(-20deg) scale(1.2);white-space:nowrap;color:#000;text-shadow:0 0 2px #fff}
+.wr{height:100px;white-space:nowrap;text-align:center}.wt{display:inline-block;text-align:center;margin:0 16px;width:170px;overflow:hidden;text-overflow:ellipsis}.wt span{display:block}
+@media print{body{display:none}}
+</style></head><body>
+<div id="msg">جارٍ التحميل…</div>
+<div id="top" style="display:none"><span id="ttl"></span><span>مرّر لأسفل: تظهر النافذة الوسطى فقط</span></div>
+<div id="pages"></div><div class="band" id="bt" style="display:none"></div><div class="band" id="bb" style="display:none"></div><div id="wm" style="display:none"></div>
+<script>
+(function(){
+var GW='https://script.google.com/macros/s/AKfycbz2WnMCxG2ee36t00ryIEDc3zAbbCi4AAc1CBFDf-CPN6dUYQbSEimaFeiiJC0j1PBesQ/exec';
+var q=new URLSearchParams(location.search),bk=Number(q.get('n'));
+var msg=document.getElementById('msg');
+function say(t){msg.style.display='block';msg.textContent=t}
+function post(o){return fetch(GW,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).then(function(r){return r.json()})}
+var u=null;try{u=JSON.parse(localStorage.getItem('najm_shared_user')||sessionStorage.getItem('najm_shared_user')||'null')}catch(e){}
+if(!u||!u.phone||!u.parent||!(bk>=1&&bk<=10)){say('ادخل من التطبيق بحسابك أولاً ثم افتح الإجابة من صفحة المحتوى.');return}
+['contextmenu','dragstart','copy','cut','selectstart'].forEach(function(ev){document.addEventListener(ev,function(e){e.preventDefault()})});
+document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if((e.ctrlKey||e.metaKey)&&'spcua'.indexOf(k)>-1||k==='printscreen'||e.key==='F12')e.preventDefault()});
+post({a:'login',s:u.phone,g:u.parent}).then(function(L){
+  if(!L.ok){say(L.reason==='locked'?'محاولات كثيرة. حاول لاحقاً.':'البيانات غير مطابقة أو الاشتراك غير مفعّل');return}
+  var b=L.books.filter(function(x){return x.id===bk})[0];if(!b){say('غير متاح');return}
+  msg.style.display='none';document.getElementById('top').style.display='flex';document.getElementById('ttl').textContent='إجابة واجب ملزمة '+bk;
+  ['bt','bb'].forEach(function(i){document.getElementById(i).style.display='block'});
+  var wm=document.getElementById('wm');wm.textContent='';
+  for(var r=0;r<40;r++){var row=document.createElement('div');row.className='wr';for(var k=0;k<5;k++){var t=document.createElement('span');t.className='wt';
+    [L.name,L.phone,'أ. عزت نجم الأحياء'].forEach(function(x){var s=document.createElement('span');s.textContent=x;t.appendChild(s)});row.appendChild(t)}wm.appendChild(row)}
+  wm.style.display='block';
+  var box=document.getElementById('pages');
+  (function next(n){if(n>b.pages)return;post({a:'page',t:L.token,b:bk,n:n}).then(function(P){
+    if(!P.ok){say('تعذر تحميل صفحة');return}var im=new Image();im.draggable=false;im.src=P.data;box.appendChild(im);next(n+1)})})(1);
+});
+})();
+</script></body></html>
