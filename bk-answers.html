@@ -32,9 +32,10 @@ var busy=false;
 document.getElementById('go').onclick=function(){if(busy)return;var S=document.getElementById('ps').value.replace(/\D/g,''),G=document.getElementById('pg').value.replace(/\D/g,'');unit=(fixedU>=1&&fixedU<=3)?fixedU:Number(document.querySelector('input[name=u]:checked').value);var er=document.getElementById('err');er.textContent='';
 if(S.length<11||G.length<11){er.textContent='اكتب الرقمين كاملين';return}
 busy=true;run(S,G,er)};
+try{var ss=JSON.parse(sessionStorage.getItem('najm_unit_sess')||'null');var ee=document.getElementById('err');if(ss&&ss.s&&ss.g&&fixedU>=1&&fixedU<=3){busy=true;document.getElementById('entry').style.display='none';say('جارٍ التحميل…');run(String(ss.s).replace(/\D/g,''),String(ss.g).replace(/\D/g,''),ee)}}catch(e){}
 function run(S,G,er){
 post({a:'login',s:S,g:G}).then(function(L){
-  if(!L.ok){busy=false;er.textContent=(L.reason==='locked'?'محاولات كثيرة. حاول لاحقاً.':'البيانات غير مطابقة أو الاشتراك غير مفعّل');return}document.getElementById('entry').style.display='none';
+  if(!L.ok){busy=false;document.getElementById('entry').style.display='block';msg.style.display='none';er.textContent=(L.reason==='locked'?'محاولات كثيرة. حاول لاحقاً.':'البيانات غير مطابقة أو الاشتراك غير مفعّل');return}document.getElementById('entry').style.display='none';
   var u=L.units.filter(function(x){return x.id===unit})[0];if(!u){say('غير متاح');return}
   msg.style.display='none';document.getElementById('top').style.display='flex';document.getElementById('ttl').textContent='إجابة '+u.title;
   ['bt','bb'].forEach(function(i){document.getElementById(i).style.display='block'});
@@ -42,6 +43,7 @@ post({a:'login',s:S,g:G}).then(function(L){
   var box=document.getElementById('pages');
   (function next(n){if(n>u.pages)return;post({a:'page',t:L.token,u:unit,n:n}).then(function(P){
     if(!P.ok){say('تعذر تحميل صفحة');return}var im=new Image();im.draggable=false;im.src=P.data;box.appendChild(im);next(n+1)})})(1);
-}).catch(function(){busy=false;er.textContent='تعذر الاتصال'});}
+}).catch(function(){busy=false;document.getElementById('entry').style.display='block';msg.style.display='none';er.textContent='تعذر الاتصال'});}
 })();
 </script></body></html>
+
