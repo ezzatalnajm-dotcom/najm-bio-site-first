@@ -30,8 +30,9 @@ var u=null;try{var ss=JSON.parse(sessionStorage.getItem('najm_unit_sess')||'null
 if(!u||!u.phone||!u.parent||!(bk>=1&&bk<=10)){say('ادخل من التطبيق بحسابك أولاً ثم افتح الإجابة من صفحة المحتوى.');return}
 ['contextmenu','dragstart','copy','cut','selectstart'].forEach(function(ev){document.addEventListener(ev,function(e){e.preventDefault()})});
 document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if((e.ctrlKey||e.metaKey)&&'spcua'.indexOf(k)>-1||k==='printscreen'||e.key==='F12')e.preventDefault()});
-post({a:'login',s:u.phone,g:u.parent}).then(function(L){
-  if(!L.ok){say(L.reason==='locked'?'محاولات كثيرة. حاول لاحقاً.':'البيانات غير مطابقة أو الاشتراك غير مفعّل');return}
+function login(n){return post({a:'login',s:u.phone,g:u.parent}).then(function(L){if(!L.ok&&L.reason==='unavailable'&&n<3)return new Promise(function(r){setTimeout(r,1500*n)}).then(function(){return login(n+1)});return L}).catch(function(){return n<3?login(n+1):{ok:false,reason:'unavailable'}})}
+login(1).then(function(L){
+  if(!L.ok){say(L.reason==='locked'?'محاولات كثيرة. حاول لاحقاً.':L.reason==='unavailable'?'الخدمة غير متاحة الآن، حاول بعد قليل.':'البيانات غير مطابقة أو الاشتراك غير مفعّل');return}
   var b=L.books.filter(function(x){return x.id===bk})[0];if(!b){say('غير متاح');return}
   msg.style.display='none';document.getElementById('top').style.display='flex';document.getElementById('ttl').textContent='إجابة واجب ملزمة '+bk;
   ['bt','bb'].forEach(function(i){document.getElementById(i).style.display='block'});
