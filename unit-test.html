@@ -46,10 +46,11 @@ post({a:'login',s:sess.s,g:sess.g}).then(function(L){
   }
   msg.style.display='none';document.getElementById('top').style.display='flex';document.getElementById('ttl').textContent='إجابة '+u.title;
   ['bt','bb'].forEach(function(i){document.getElementById(i).style.display='block'});
-  var wm=document.getElementById('wm');wm.textContent='';for(var r=0;r<40;r++){var row=document.createElement('div');row.className='wr';for(var k=0;k<6;k++){var t=document.createElement('span');t.className='wt';var a=document.createElement('span');a.textContent=L.name+' - '+L.phone;var b=document.createElement('span');b.textContent='أستاذ عزت نجم الأحياء';t.appendChild(a);t.appendChild(b);row.appendChild(t)}wm.appendChild(row)}wm.style.display='block';
+  var wm=document.getElementById('wm');wm.textContent='';for(var r=0;r<40;r++){var row=document.createElement('div');row.className='wr';for(var k=0;k<6;k++){var t=document.createElement('span');t.className='wt';[L.name,L.phone,'أ. عزت نجم الأحياء'].forEach(function(x){var s=document.createElement('span');s.textContent=x;t.appendChild(s)});row.appendChild(t)}wm.appendChild(row)}wm.style.display='block';
   var box=document.getElementById('pages');
   (function next(n){if(n>u.pages)return;post({a:'page',t:L.token,u:unit,n:n}).then(function(P){
     if(!P.ok){say('تعذر تحميل صفحة');return}var im=new Image();im.draggable=false;im.src=P.data;box.appendChild(im);next(n+1)})})(1);
 });
 })();
 </script></body></html>
+
